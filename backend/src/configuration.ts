@@ -1,7 +1,6 @@
 import { Configuration, App } from '@midwayjs/core';
 import * as koa from '@midwayjs/koa';
 import * as validate from '@midwayjs/validate';
-import * as typeorm from '@midwayjs/typeorm';
 import * as jwt from '@midwayjs/jwt';
 import * as cors from '@koa/cors';
 import * as info from '@midwayjs/info';
@@ -18,7 +17,6 @@ import { ReportMiddleware } from './middleware/report.middleware';
   imports: [
     koa,           // Koa Web框架
     validate,      // 数据验证组件
-    typeorm,       // TypeORM数据库ORM组件
     jwt,           // JWT认证组件
     {
       component: info,

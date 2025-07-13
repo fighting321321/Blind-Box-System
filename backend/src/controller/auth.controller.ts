@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Inject, Get, Headers } from '@midwayjs/core';
 import { Validate } from '@midwayjs/validate';
 import { IsNotEmpty, IsEmail, MinLength } from 'class-validator';
-import { UserService, RegisterUserDto, LoginUserDto } from '../service/user.service';
+import { SqliteUserService, RegisterUserDto, LoginUserDto } from '../service/sqlite-user.service';
 
 /**
  * 用户注册验证DTO
@@ -40,10 +40,10 @@ class LoginDto {
 export class AuthController {
 
   /**
-   * 注入用户服务
+   * 注入SQLite用户服务
    */
   @Inject()
-  userService: UserService;
+  userService: SqliteUserService;
 
   /**
    * 用户注册接口
@@ -81,12 +81,22 @@ export class AuthController {
   @Validate()
   async login(@Body() loginData: LoginDto) {
     try {
-      const result = await this.userService.login(loginData as LoginUserDto);
+      const user = await this.userService.login(loginData as LoginUserDto);
+      
+      // 生成JWT token
+      const token = await this.userService.generateToken({
+        userId: user.id,
+        username: user.username,
+        email: user.email,
+      });
       
       return {
         success: true,
         message: '登录成功',
-        data: result
+        data: {
+          user,
+          token
+        }
       };
     } catch (error) {
       return {

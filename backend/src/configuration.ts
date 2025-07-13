@@ -1,31 +1,52 @@
 import { Configuration, App } from '@midwayjs/core';
 import * as koa from '@midwayjs/koa';
 import * as validate from '@midwayjs/validate';
+import * as typeorm from '@midwayjs/typeorm';
+import * as jwt from '@midwayjs/jwt';
+import * as cors from '@koa/cors';
 import * as info from '@midwayjs/info';
 import { join } from 'path';
 // import { DefaultErrorFilter } from './filter/default.filter';
 // import { NotFoundFilter } from './filter/notfound.filter';
 import { ReportMiddleware } from './middleware/report.middleware';
 
+/**
+ * 盲盒系统主配置类
+ * 负责配置和初始化所有必要的中间件、组件和过滤器
+ */
 @Configuration({
   imports: [
-    koa,
-    validate,
+    koa,           // Koa Web框架
+    validate,      // 数据验证组件
+    typeorm,       // TypeORM数据库ORM组件
+    jwt,           // JWT认证组件
     {
       component: info,
-      enabledEnvironment: ['local'],
+      enabledEnvironment: ['local'], // 仅在开发环境启用info组件
     },
   ],
-  importConfigs: [join(__dirname, './config')],
+  importConfigs: [join(__dirname, './config')], // 导入配置文件
 })
 export class MainConfiguration {
   @App('koa')
   app: koa.Application;
 
+  /**
+   * 应用准备就绪时的回调函数
+   * 在这里配置中间件和过滤器
+   */
   async onReady() {
-    // add middleware
+    // 配置CORS跨域中间件
+    this.app.use(cors({
+      origin: '*', // 开发环境允许所有域名访问
+      allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowHeaders: ['Content-Type', 'Authorization'],
+    }));
+
+    // 添加报告中间件用于请求日志记录
     this.app.useMiddleware([ReportMiddleware]);
-    // add filter
+    
+    // 添加异常过滤器（暂时注释，后续可根据需要启用）
     // this.app.useFilter([NotFoundFilter, DefaultErrorFilter]);
   }
 }

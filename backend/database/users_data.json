@@ -8,7 +8,7 @@
       "balance": 1000,
       "status": 1,
       "createdAt": "2025-07-13T12:26:48.374Z",
-      "updatedAt": "2025-07-13T12:34:04.445Z"
+      "updatedAt": "2025-07-14T09:38:02.904Z"
     },
     {
       "id": 2,
@@ -19,28 +19,8 @@
       "status": 1,
       "createdAt": "2025-07-13T12:29:58.062Z",
       "updatedAt": "2025-07-13T12:30:05.154Z"
-    },
-    {
-      "id": 3,
-      "username": "qwerty",
-      "email": "qwerty@qq.com",
-      "password": "$2a$10$sfYj1DvCTbTRnbtl6UL4r.EXakfcn9SUbKIP7qnJVfyUgqtqSMQvy",
-      "balance": 0,
-      "status": 1,
-      "createdAt": "2025-07-13T12:31:18.418Z",
-      "updatedAt": "2025-07-13T12:32:32.809Z"
-    },
-    {
-      "id": 4,
-      "username": "asdfgh",
-      "email": "qwer@qq.com",
-      "password": "$2a$10$6W1JSPxfHRL27r/l6PUUJu2lTj8r6k2e9cETT4dqCbmUcBOQ40OC6",
-      "balance": 0,
-      "status": 1,
-      "createdAt": "2025-07-13T12:33:02.580Z",
-      "updatedAt": "2025-07-13T12:33:09.027Z"
     }
   ],
-  "nextId": 5,
-  "lastUpdate": "2025-07-13T12:34:04.445Z"
+  "nextId": 3,
+  "lastUpdate": "2025-07-14T09:38:02.904Z"
 }

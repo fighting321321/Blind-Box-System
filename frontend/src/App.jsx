@@ -2,6 +2,7 @@ import { useState } from 'react'
 import LoginForm from './components/LoginForm'
 import RegisterForm from './components/RegisterForm'
 import UserInfo from './components/UserInfo'
+import HomePage from './components/HomePage'
 
 /**
  * 盲盒系统主应用组件
@@ -22,7 +23,7 @@ function App() {
     setUser(userData)
     setToken(userToken)
     localStorage.setItem('token', userToken)
-    setCurrentView('user')
+    setCurrentView('home')
   }
 
   /**
@@ -45,53 +46,63 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">盲盒系统</h1>
-          <p className="text-gray-600">用户认证系统</p>
-        </div>
+    <>
+      {/* 登录/注册界面 */}
+      {currentView !== 'home' && (
+        <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">盲盒系统</h1>
+              <p className="text-gray-600">用户认证系统</p>
+            </div>
 
-        {/* 导航按钮 */}
-        {!user && (
-          <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
-            <button
-              className={`flex-1 py-2 px-4 rounded-md transition-colors ${
-                currentView === 'login'
-                  ? 'bg-white text-purple-600 shadow-sm'
-                  : 'text-gray-600 hover:text-purple-600'
-              }`}
-              onClick={() => setCurrentView('login')}
-            >
-              登录
-            </button>
-            <button
-              className={`flex-1 py-2 px-4 rounded-md transition-colors ${
-                currentView === 'register'
-                  ? 'bg-white text-purple-600 shadow-sm'
-                  : 'text-gray-600 hover:text-purple-600'
-              }`}
-              onClick={() => setCurrentView('register')}
-            >
-              注册
-            </button>
+            {/* 导航按钮 */}
+            {!user && (
+              <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
+                <button
+                  className={`flex-1 py-2 px-4 rounded-md transition-colors ${
+                    currentView === 'login'
+                      ? 'bg-white text-purple-600 shadow-sm'
+                      : 'text-gray-600 hover:text-purple-600'
+                  }`}
+                  onClick={() => setCurrentView('login')}
+                >
+                  登录
+                </button>
+                <button
+                  className={`flex-1 py-2 px-4 rounded-md transition-colors ${
+                    currentView === 'register'
+                      ? 'bg-white text-purple-600 shadow-sm'
+                      : 'text-gray-600 hover:text-purple-600'
+                  }`}
+                  onClick={() => setCurrentView('register')}
+                >
+                  注册
+                </button>
+              </div>
+            )}
+
+            {/* 内容区域 */}
+            {currentView === 'login' && (
+              <LoginForm onSuccess={handleLoginSuccess} />
+            )}
+            
+            {currentView === 'register' && (
+              <RegisterForm onSuccess={handleRegisterSuccess} />
+            )}
+            
+            {currentView === 'user' && user && (
+              <UserInfo user={user} onLogout={handleLogout} />
+            )}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* 内容区域 */}
-        {currentView === 'login' && (
-          <LoginForm onSuccess={handleLoginSuccess} />
-        )}
-        
-        {currentView === 'register' && (
-          <RegisterForm onSuccess={handleRegisterSuccess} />
-        )}
-        
-        {currentView === 'user' && user && (
-          <UserInfo user={user} onLogout={handleLogout} />
-        )}
-      </div>
-    </div>
+      {/* 主页界面 */}
+      {currentView === 'home' && user && (
+        <HomePage user={user} onLogout={handleLogout} />
+      )}
+    </>
   )
 }
 

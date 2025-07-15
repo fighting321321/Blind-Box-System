@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Search, Plus, Edit, Trash2, Package, Gift, BarChart3, Settings, LogOut } from 'lucide-react'
+import { useToast } from './Toast'
+import ConfirmDialog from './ConfirmDialog'
 
 const AdminDashboard = ({ user, onLogout }) => {
+  const { toasts, toast, removeToast, ToastContainer } = useToast()
   const [activeTab, setActiveTab] = useState('dashboard')
   const [blindBoxes, setBlindBoxes] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -13,6 +16,14 @@ const AdminDashboard = ({ user, onLogout }) => {
   const [editingItem, setEditingItem] = useState(null)
   const [selectedBlindBox, setSelectedBlindBox] = useState(null)
   const [prizes, setPrizes] = useState([])
+  
+  // 确认对话框状态
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  })
 
   // 获取授权头
   const getAuthHeaders = () => {
@@ -70,11 +81,13 @@ const AdminDashboard = ({ user, onLogout }) => {
       if (response.data.success) {
         setShowCreateModal(false)
         fetchBlindBoxes()
-        alert('盲盒创建成功！')
+        toast.success('盲盒创建成功！')
+      } else {
+        toast.error(response.data.message || '创建失败')
       }
     } catch (error) {
       console.error('创建盲盒失败:', error)
-      alert('创建失败，请重试')
+      toast.error('创建失败，请重试')
     }
   }
 
@@ -86,44 +99,60 @@ const AdminDashboard = ({ user, onLogout }) => {
         setShowEditModal(false)
         setEditingItem(null)
         fetchBlindBoxes()
-        alert('盲盒更新成功！')
+        toast.success('盲盒更新成功！')
+      } else {
+        toast.error(response.data.message || '更新失败')
       }
     } catch (error) {
       console.error('更新盲盒失败:', error)
-      alert('更新失败，请重试')
+      toast.error('更新失败，请重试')
     }
   }
 
   // 删除盲盒
   const deleteBlindBox = async (id) => {
-    if (window.confirm('确定要删除这个盲盒吗？')) {
-      try {
-        const response = await axios.delete(`http://localhost:7001/api/admin/blindboxes/${id}`, getAuthHeaders())
-        if (response.data.success) {
-          fetchBlindBoxes()
-          alert('盲盒删除成功！')
+    setConfirmDialog({
+      isOpen: true,
+      title: '确认删除',
+      message: '确定要删除这个盲盒吗？此操作不可恢复。',
+      onConfirm: async () => {
+        try {
+          const response = await axios.delete(`http://localhost:7001/api/admin/blindboxes/${id}`, getAuthHeaders())
+          if (response.data.success) {
+            fetchBlindBoxes()
+            toast.success('盲盒删除成功！')
+          } else {
+            toast.error(response.data.message || '删除失败')
+          }
+        } catch (error) {
+          console.error('删除盲盒失败:', error)
+          toast.error('删除失败，请重试')
         }
-      } catch (error) {
-        console.error('删除盲盒失败:', error)
-        alert('删除失败，请重试')
       }
-    }
+    })
   }
 
   // 删除奖品
   const deletePrize = async (id) => {
-    if (window.confirm('确定要删除这个奖品吗？')) {
-      try {
-        const response = await axios.delete(`http://localhost:7001/api/admin/prizes/${id}`, getAuthHeaders())
-        if (response.data.success) {
-          fetchPrizes(selectedBlindBox.id)
-          alert('奖品删除成功！')
+    setConfirmDialog({
+      isOpen: true,
+      title: '确认删除',
+      message: '确定要删除这个奖品吗？此操作不可恢复。',
+      onConfirm: async () => {
+        try {
+          const response = await axios.delete(`http://localhost:7001/api/admin/prizes/${id}`, getAuthHeaders())
+          if (response.data.success) {
+            fetchPrizes(selectedBlindBox.id)
+            toast.success('奖品删除成功！')
+          } else {
+            toast.error(response.data.message || '删除失败')
+          }
+        } catch (error) {
+          console.error('删除奖品失败:', error)
+          toast.error('删除失败，请重试')
         }
-      } catch (error) {
-        console.error('删除奖品失败:', error)
-        alert('删除失败，请重试')
       }
-    }
+    })
   }
 
   // 创建奖品
@@ -133,11 +162,13 @@ const AdminDashboard = ({ user, onLogout }) => {
       if (response.data.success) {
         setShowCreateModal(false)
         fetchPrizes(selectedBlindBox.id)
-        alert('奖品创建成功！')
+        toast.success('奖品创建成功！')
+      } else {
+        toast.error(response.data.message || '创建失败')
       }
     } catch (error) {
       console.error('创建奖品失败:', error)
-      alert('创建失败，请重试')
+      toast.error('创建失败，请重试')
     }
   }
 
@@ -149,11 +180,13 @@ const AdminDashboard = ({ user, onLogout }) => {
         setShowEditModal(false)
         setEditingItem(null)
         fetchPrizes(selectedBlindBox.id)
-        alert('奖品更新成功！')
+        toast.success('奖品更新成功！')
+      } else {
+        toast.error(response.data.message || '更新失败')
       }
     } catch (error) {
       console.error('更新奖品失败:', error)
-      alert('更新失败，请重试')
+      toast.error('更新失败，请重试')
     }
   }
 
@@ -487,7 +520,10 @@ const AdminDashboard = ({ user, onLogout }) => {
         </div>
         <div className="flex space-x-3">
           <button
-            onClick={() => setActiveTab('blindboxes')}
+            onClick={() => {
+              setActiveTab('blindboxes')
+              setSelectedBlindBox(null)
+            }}
             className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors"
           >
             返回盲盒列表
@@ -585,15 +621,6 @@ const AdminDashboard = ({ user, onLogout }) => {
                 <Package className="w-4 h-4" />
                 <span>盲盒管理</span>
               </button>
-              <button
-                onClick={() => setActiveTab('prizes')}
-                className={`w-full flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
-                  activeTab === 'prizes' ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <Gift className="w-4 h-4" />
-                <span>奖品管理</span>
-              </button>
             </div>
           </div>
         </nav>
@@ -602,7 +629,7 @@ const AdminDashboard = ({ user, onLogout }) => {
         <main className="flex-1 p-8">
           {activeTab === 'dashboard' && <StatsPanel />}
           {activeTab === 'blindboxes' && <BlindBoxPanel />}
-          {activeTab === 'prizes' && <PrizePanel />}
+          {activeTab === 'prizes' && selectedBlindBox && <PrizePanel />}
         </main>
       </div>
 
@@ -646,6 +673,18 @@ const AdminDashboard = ({ user, onLogout }) => {
           )}
         </>
       )}
+      
+      {/* 确认对话框 */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        onConfirm={confirmDialog.onConfirm}
+        onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+      />
+      
+      {/* Toast 通知容器 */}
+      <ToastContainer />
     </div>
   )
 }

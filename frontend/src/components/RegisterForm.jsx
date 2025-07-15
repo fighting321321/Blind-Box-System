@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import axios from 'axios'
+import { useToast } from './Toast'
 
 /**
  * 注册表单组件
  * 提供用户注册功能
  */
 function RegisterForm({ onSuccess }) {
+  const { toast } = useToast()
   // 表单状态
   const [formData, setFormData] = useState({
     username: '',
@@ -36,29 +38,29 @@ function RegisterForm({ onSuccess }) {
    */
   const validateForm = () => {
     if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword) {
-      setError('请填写所有字段')
+      toast.error('请填写所有字段')
       return false
     }
 
     if (formData.username.length < 3) {
-      setError('用户名长度至少3个字符')
+      toast.error('用户名长度至少3个字符')
       return false
     }
 
     // 简单的邮箱格式验证
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(formData.email)) {
-      setError('请输入有效的邮箱地址')
+      toast.error('请输入有效的邮箱地址')
       return false
     }
 
     if (formData.password.length < 6) {
-      setError('密码长度至少6个字符')
+      toast.error('密码长度至少6个字符')
       return false
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('两次输入的密码不一致')
+      toast.error('两次输入的密码不一致')
       return false
     }
 
@@ -89,20 +91,21 @@ function RegisterForm({ onSuccess }) {
       
       if (response.data.success) {
         // 注册成功
+        toast.success('注册成功！请登录')
         onSuccess(response.data.data)
       } else {
         // 注册失败
-        setError(response.data.message || '注册失败')
+        toast.error(response.data.message || '注册失败')
       }
     } catch (error) {
       // 网络错误或服务器错误
       console.error('注册错误:', error)
       if (error.response) {
-        setError(error.response.data?.message || '注册失败')
+        toast.error(error.response.data?.message || '注册失败')
       } else if (error.request) {
-        setError('无法连接到服务器，请检查网络')
+        toast.error('无法连接到服务器，请检查网络')
       } else {
-        setError('注册失败，请重试')
+        toast.error('注册失败，请重试')
       }
     } finally {
       setLoading(false)

@@ -4,12 +4,14 @@ import RegisterForm from './components/RegisterForm'
 import UserInfo from './components/UserInfo'
 import HomePage from './components/HomePage'
 import AdminDashboard from './components/AdminDashboard'
+import { useToast } from './components/Toast'
 
 /**
  * 盲盒系统主应用组件
  * 包含用户认证功能（登录、注册、用户信息展示）
  */
 function App() {
+  const { ToastContainer } = useToast()
   // 应用状态管理
   const [currentView, setCurrentView] = useState('login') // 'login' | 'register' | 'user'
   const [user, setUser] = useState(null) // 当前登录用户
@@ -33,7 +35,7 @@ function App() {
    */
   const handleRegisterSuccess = (userData) => {
     setCurrentView('login')
-    alert('注册成功，请登录')
+    // 移除 alert，让组件内部的toast处理通知
   }
 
   /**
@@ -109,6 +111,9 @@ function App() {
           )}
         </>
       )}
+      
+      {/* Toast通知容器 */}
+      <ToastContainer />
     </>
   )
 }

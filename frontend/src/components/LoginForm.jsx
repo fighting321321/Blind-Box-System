@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import axios from 'axios'
+import { useToast } from './Toast'
 
 /**
  * 登录表单组件
  * 提供用户登录功能
  */
 function LoginForm({ onSuccess }) {
+  const { toast } = useToast()
   // 表单状态
   const [formData, setFormData] = useState({
     usernameOrEmail: '',
@@ -37,7 +39,7 @@ function LoginForm({ onSuccess }) {
     
     // 基本验证
     if (!formData.usernameOrEmail || !formData.password) {
-      setError('请填写所有字段')
+      toast.error('请填写所有字段')
       return
     }
 
@@ -50,20 +52,21 @@ function LoginForm({ onSuccess }) {
       
       if (response.data.success) {
         // 登录成功
+        toast.success('登录成功！')
         onSuccess(response.data.data.user, response.data.data.token)
       } else {
         // 登录失败
-        setError(response.data.message || '登录失败')
+        toast.error(response.data.message || '登录失败')
       }
     } catch (error) {
       // 网络错误或服务器错误
       console.error('登录错误:', error)
       if (error.response) {
-        setError(error.response.data?.message || '登录失败')
+        toast.error(error.response.data?.message || '登录失败')
       } else if (error.request) {
-        setError('无法连接到服务器，请检查网络')
+        toast.error('无法连接到服务器，请检查网络')
       } else {
-        setError('登录失败，请重试')
+        toast.error('登录失败，请重试')
       }
     } finally {
       setLoading(false)

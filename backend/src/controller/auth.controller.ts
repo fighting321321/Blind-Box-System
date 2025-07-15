@@ -162,6 +162,59 @@ export class AuthController {
   }
 
   /**
+   * 验证token有效性接口
+   * POST /api/auth/validate
+   * 用于页面刷新时验证token并恢复用户状态
+   * @param authorization 请求头中的Authorization字段
+   * @returns 验证结果和用户信息
+   */
+  @Post('/validate')
+  async validateToken(@Headers('authorization') authorization: string) {
+    try {
+      // 检查authorization头是否存在
+      if (!authorization) {
+        return {
+          success: false,
+          message: '请提供访问令牌',
+          data: null
+        };
+      }
+
+      // 提取token（去掉"Bearer "前缀）
+      const token = authorization.replace('Bearer ', '');
+      if (!token) {
+        return {
+          success: false,
+          message: '无效的访问令牌格式',
+          data: null
+        };
+      }
+
+      // 验证token并获取用户信息
+      const user = await this.userService.verifyToken(token);
+      if (!user) {
+        return {
+          success: false,
+          message: '访问令牌无效或已过期',
+          data: null
+        };
+      }
+
+      return {
+        success: true,
+        message: 'Token验证成功',
+        data: { user }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Token验证失败',
+        data: null
+      };
+    }
+  }
+
+  /**
    * 用户登出接口（可选实现）
    * POST /api/auth/logout
    * 注意：JWT token是无状态的，真正的登出需要前端删除token

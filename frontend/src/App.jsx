@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import LoginForm from './components/LoginForm'
 import RegisterForm from './components/RegisterForm'
 import UserInfo from './components/UserInfo'
@@ -16,6 +16,7 @@ function App() {
   const [currentView, setCurrentView] = useState('login') // 'login' | 'register' | 'user'
   const [user, setUser] = useState(null) // 当前登录用户
   const [token, setToken] = useState(localStorage.getItem('token')) // JWT令牌
+  const [isLoading, setIsLoading] = useState(true) // 页面加载状态
 
   /**
    * 处理用户登录成功
@@ -39,6 +40,53 @@ function App() {
   }
 
   /**
+   * 验证token并恢复用户状态
+   */
+  const validateTokenAndRestoreUser = async () => {
+    const storedToken = localStorage.getItem('token')
+    if (!storedToken) {
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      // 调用后端API验证token并获取用户信息
+      const response = await fetch('http://localhost:7001/api/auth/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${storedToken}`
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          // token有效，恢复用户状态
+          setUser(data.data.user)
+          setToken(storedToken)
+          setCurrentView('home')
+        } else {
+          // token无效，清除存储的token
+          localStorage.removeItem('token')
+          setToken(null)
+        }
+      } else {
+        // 请求失败，清除存储的token
+        localStorage.removeItem('token')
+        setToken(null)
+      }
+    } catch (error) {
+      console.error('Token validation failed:', error)
+      // 验证失败，清除存储的token
+      localStorage.removeItem('token')
+      setToken(null)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  /**
    * 处理用户登出
    */
   const handleLogout = () => {
@@ -48,10 +96,25 @@ function App() {
     setCurrentView('login')
   }
 
+  // 组件加载时验证token并恢复用户状态
+  useEffect(() => {
+    validateTokenAndRestoreUser()
+  }, [])
+
   return (
     <>
+      {/* 加载状态 */}
+      {isLoading && (
+        <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
+          <div className="bg-white rounded-lg shadow-xl p-8 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">正在验证用户状态...</p>
+          </div>
+        </div>
+      )}
+
       {/* 登录/注册界面 */}
-      {currentView !== 'home' && (
+      {!isLoading && currentView !== 'home' && (
         <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
             <div className="text-center mb-8">
@@ -102,7 +165,7 @@ function App() {
       )}
 
       {/* 主页界面 */}
-      {currentView === 'home' && user && (
+      {!isLoading && currentView === 'home' && user && (
         <>
           {user.role === 'admin' ? (
             <AdminDashboard user={user} onLogout={handleLogout} />

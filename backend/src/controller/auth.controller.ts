@@ -88,6 +88,7 @@ export class AuthController {
         userId: user.id,
         username: user.username,
         email: user.email,
+        role: user.role,  // 添加角色信息
       });
       
       return {

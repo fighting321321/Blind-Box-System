@@ -58,6 +58,12 @@ export class User {
   status: number;
 
   /**
+   * 用户角色 - admin:管理员 user:普通用户
+   */
+  @Column({ type: 'varchar', length: 20, default: 'user' })
+  role: string;
+
+  /**
    * 记录创建时间
    */
   @CreateDateColumn()

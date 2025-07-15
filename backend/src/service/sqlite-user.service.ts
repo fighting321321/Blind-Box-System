@@ -32,6 +32,7 @@ export interface User {
   avatar?: string;
   balance: number;
   status: number;
+  role: string;  // 添加角色字段
   createdAt: string;
   updatedAt: string;
 }
@@ -121,6 +122,7 @@ export class SqliteUserService {
       password: demoPassword,
       balance: 1000,
       status: 1,
+      role: 'user',  // 添加角色字段
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }];
@@ -176,6 +178,7 @@ export class SqliteUserService {
       password: hashedPassword,
       balance: 0,
       status: 1,
+      role: 'user',  // 默认角色为普通用户
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };

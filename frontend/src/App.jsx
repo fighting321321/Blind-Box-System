@@ -3,6 +3,7 @@ import LoginForm from './components/LoginForm'
 import RegisterForm from './components/RegisterForm'
 import UserInfo from './components/UserInfo'
 import HomePage from './components/HomePage'
+import AdminDashboard from './components/AdminDashboard'
 
 /**
  * 盲盒系统主应用组件
@@ -100,7 +101,13 @@ function App() {
 
       {/* 主页界面 */}
       {currentView === 'home' && user && (
-        <HomePage user={user} onLogout={handleLogout} />
+        <>
+          {user.role === 'admin' ? (
+            <AdminDashboard user={user} onLogout={handleLogout} />
+          ) : (
+            <HomePage user={user} onLogout={handleLogout} />
+          )}
+        </>
       )}
     </>
   )

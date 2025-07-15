@@ -1,14 +1,26 @@
 {
   "users": [
     {
+      "id": 0,
+      "username": "admin",
+      "email": "admin@blindbox.com",
+      "password": "$2a$10$BvAvomearebBQKOl6GwsY.vAQkJqMj8OLEvOyklN05q47d3ePAp7C",
+      "balance": 999999,
+      "status": 1,
+      "role": "admin",
+      "createdAt": "2025-07-15T00:00:00.000Z",
+      "updatedAt": "2025-07-15T17:03:07.153Z"
+    },
+    {
       "id": 1,
       "username": "demo",
       "email": "demo@example.com",
       "password": "$2a$10$ard/T34zd6suutg7fDZhOuDQEgx3B4LgUe9WPHzlsSqAwI/I62g8W",
       "balance": 1000,
       "status": 1,
+      "role": "user",
       "createdAt": "2025-07-13T12:26:48.374Z",
-      "updatedAt": "2025-07-14T09:38:02.904Z"
+      "updatedAt": "2025-07-15T17:02:11.575Z"
     },
     {
       "id": 2,
@@ -17,10 +29,11 @@
       "password": "$2a$10$RwcIUzPjvPot.uGn68/2x.ao6XHUCNEEB8bhzNyw0Vy1zGLMNH2Va",
       "balance": 0,
       "status": 1,
+      "role": "user",
       "createdAt": "2025-07-13T12:29:58.062Z",
       "updatedAt": "2025-07-13T12:30:05.154Z"
     }
   ],
   "nextId": 3,
-  "lastUpdate": "2025-07-14T09:38:02.904Z"
+  "lastUpdate": "2025-07-15T17:03:07.153Z"
 }

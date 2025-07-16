@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import BlindBoxManagement from './BlindBoxManagement'
 import BlindBoxDraw from './BlindBoxDraw'
 import OrderManagement from './OrderManagement'
@@ -6,45 +6,316 @@ import BlindBoxList from './BlindBoxList'
 import BlindBoxDetail from './BlindBoxDetail'
 import PlayerShowcase from './PlayerShowcase'
 import BlindBoxSearch from './BlindBoxSearch'
+import Toast from './Toast'
+import { blindBoxAPI } from '../services/api'
 
 /**
  * 盲盒系统主页组件
- * 类似小红书和淘宝的主页布局
+ * 普通用户主页：展示所有盲盒，支持添加到库，库管理，订单管理
  */
 function HomePage({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('home')
   const [selectedBlindBox, setSelectedBlindBox] = useState(null)
+  const [viewMode, setViewMode] = useState('grid') // 'grid' 或 'list'
+  const [userLibrary, setUserLibrary] = useState([]) // 用户盲盒库
+  const [allBlindBoxes, setAllBlindBoxes] = useState([]) // 所有可用盲盒
+  const [userOrders, setUserOrders] = useState([]) // 用户订单
+  const [loading, setLoading] = useState(false)
+  const [toast, setToast] = useState(null)
 
-  // 主页轮播图数据
-  const bannerImages = [
-    { id: 1, color: 'bg-gradient-to-r from-pink-400 to-purple-600', title: '限定盲盒', subtitle: '新品上市' },
-    { id: 2, color: 'bg-gradient-to-r from-blue-400 to-cyan-600', title: '热门盲盒', subtitle: '火爆抢购' },
-    { id: 3, color: 'bg-gradient-to-r from-orange-400 to-red-600', title: '精选盲盒', subtitle: '品质保证' }
-  ]
+  // 从后端获取盲盒数据
+  useEffect(() => {
+    const loadBlindBoxes = async () => {
+      try {
+        setLoading(true)
+        const response = await blindBoxAPI.getAllBlindBoxes()
+        if (response.success) {
+          // 将后端数据转换为前端格式
+          const formattedBoxes = response.data.map(box => ({
+            id: box.id,
+            name: box.name,
+            description: box.description,
+            price: box.price,
+            originalPrice: box.price * 1.2, // 模拟原价
+            color: getRandomColor(),
+            stock: box.stock,
+            sales: 0, // 后端暂时没有销量数据
+            rating: 4.5, // 模拟评分
+            isNew: Math.random() > 0.7,
+            isHot: Math.random() > 0.6,
+            tags: getRandomTags(),
+            category: 'general',
+            items: [] // 后续可以从奖品数据中获取
+          }))
+          setAllBlindBoxes(formattedBoxes)
+        } else {
+          showToast(response.message || '获取盲盒数据失败', 'error')
+        }
+      } catch (error) {
+        console.error('加载盲盒数据失败:', error)
+        showToast('网络错误，请稍后重试', 'error')
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  // 功能模块数据
-  const features = [
-    { id: 'management', icon: '📦', title: '盲盒管理', description: '管理您的盲盒收藏' },
-    { id: 'draw', icon: '🎲', title: '盲盒抽取', description: '体验抽取的乐趣' },
-    { id: 'orders', icon: '📋', title: '订单管理', description: '查看订单记录' },
-    { id: 'list', icon: '📝', title: '盲盒列表', description: '浏览所有盲盒' },
-    { id: 'showcase', icon: '✨', title: '玩家秀', description: '展示您的收藏' },
-    { id: 'search', icon: '🔍', title: '盲盒搜索', description: '快速找到心仪盲盒' }
-  ]
+    loadBlindBoxes()
+  }, [])
 
-  // 热门盲盒数据（使用纯色图片代替）
-  const hotBlindBoxes = [
-    { id: 1, name: '可爱动物系列', price: 59, color: 'bg-pink-300', sales: 1234 },
-    { id: 2, name: '动漫角色系列', price: 79, color: 'bg-blue-300', sales: 987 },
-    { id: 3, name: '卡通宠物系列', price: 49, color: 'bg-green-300', sales: 756 },
-    { id: 4, name: '梦幻公主系列', price: 89, color: 'bg-purple-300', sales: 654 },
-    { id: 5, name: '科幻机甲系列', price: 99, color: 'bg-gray-300', sales: 543 },
-    { id: 6, name: '古风仙侠系列', price: 69, color: 'bg-yellow-300', sales: 432 }
-  ]
+  // 获取随机颜色
+  const getRandomColor = () => {
+    const colors = [
+      'bg-pink-300',
+      'bg-blue-300',
+      'bg-green-300',
+      'bg-purple-300',
+      'bg-yellow-300',
+      'bg-red-300',
+      'bg-indigo-300',
+      'bg-gray-300'
+    ]
+    return colors[Math.floor(Math.random() * colors.length)]
+  }
+
+  // 获取随机标签
+  const getRandomTags = () => {
+    const tagsList = ['热门', '新品', '限量', '经典', '精选', '推荐']
+    const count = Math.floor(Math.random() * 3) + 1
+    const shuffled = tagsList.sort(() => 0.5 - Math.random())
+    return shuffled.slice(0, count)
+  }
+
+  // 获取用户订单
+  const loadUserOrders = async () => {
+    try {
+      const response = await blindBoxAPI.getUserOrders(user.id)
+      if (response.success) {
+        setUserOrders(response.data)
+      }
+    } catch (error) {
+      console.error('获取订单失败:', error)
+    }
+  }
+
+  // 加载用户订单
+  useEffect(() => {
+    if (user?.id) {
+      loadUserOrders()
+    }
+  }, [user])
+
+  // 添加盲盒到用户库
+  const addToLibrary = (blindBox) => {
+    const existingItem = userLibrary.find(item => item.id === blindBox.id)
+    if (existingItem) {
+      setUserLibrary(prev => 
+        prev.map(item => 
+          item.id === blindBox.id 
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      )
+    } else {
+      setUserLibrary(prev => [...prev, { ...blindBox, quantity: 1, addedTime: new Date() }])
+    }
+    showToast(`${blindBox.name} 已添加到库中`, 'success')
+  }
+
+  // 从用户库移除盲盒
+  const removeFromLibrary = (blindBoxId) => {
+    setUserLibrary(prev => prev.filter(item => item.id !== blindBoxId))
+    showToast('已从库中移除', 'success')
+  }
+
+  // 抽取盲盒
+  const drawBlindBox = async (blindBoxId) => {
+    try {
+      setLoading(true)
+      const response = await blindBoxAPI.drawBlindBox(user.id, blindBoxId)
+      if (response.success) {
+        showToast('抽取成功！', 'success')
+        // 更新用户订单
+        loadUserOrders()
+        // 重新加载盲盒数据（更新库存）
+        const blindBoxResponse = await blindBoxAPI.getAllBlindBoxes()
+        if (blindBoxResponse.success) {
+          const formattedBoxes = blindBoxResponse.data.map(box => ({
+            id: box.id,
+            name: box.name,
+            description: box.description,
+            price: box.price,
+            originalPrice: box.price * 1.2,
+            color: getRandomColor(),
+            stock: box.stock,
+            sales: 0,
+            rating: 4.5,
+            isNew: Math.random() > 0.7,
+            isHot: Math.random() > 0.6,
+            tags: getRandomTags(),
+            category: 'general',
+            items: []
+          }))
+          setAllBlindBoxes(formattedBoxes)
+        }
+        return response.data
+      } else {
+        showToast(response.message || '抽取失败', 'error')
+        return null
+      }
+    } catch (error) {
+      console.error('抽取盲盒失败:', error)
+      showToast('网络错误，请稍后重试', 'error')
+      return null
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 显示提示消息
+  const showToast = (message, type = 'info') => {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 3000)
+  }
 
   const handleBlindBoxClick = (blindBox) => {
     setSelectedBlindBox(blindBox)
     setActiveTab('detail')
+  }
+
+  // 渲染盲盒卡片
+  const renderBlindBoxCard = (blindBox, showAddButton = true) => {
+    const isInLibrary = userLibrary.some(item => item.id === blindBox.id)
+    
+    return (
+      <div key={blindBox.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+        <div 
+          className={`${blindBox.color} h-32 rounded-t-lg mb-3 cursor-pointer relative`}
+          onClick={() => handleBlindBoxClick(blindBox)}
+        >
+          {blindBox.isNew && (
+            <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">新品</span>
+          )}
+          {blindBox.isHot && (
+            <span className="absolute top-2 right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">热门</span>
+          )}
+        </div>
+        <div className="p-4">
+          <h3 className="font-medium text-gray-800 mb-2 truncate">{blindBox.name}</h3>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center space-x-2">
+              <span className="text-lg font-bold text-purple-600">¥{blindBox.price}</span>
+              {blindBox.originalPrice > blindBox.price && (
+                <span className="text-sm text-gray-400 line-through">¥{blindBox.originalPrice}</span>
+              )}
+            </div>
+            <div className="flex items-center space-x-1">
+              <span className="text-yellow-400">★</span>
+              <span className="text-sm text-gray-600">{blindBox.rating}</span>
+            </div>
+          </div>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm text-gray-500">剩余: {blindBox.stock}个</span>
+            <span className="text-sm text-gray-500">已售: {blindBox.sales}</span>
+          </div>
+          <div className="flex flex-wrap gap-1 mb-3">
+            {blindBox.tags.map(tag => (
+              <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                {tag}
+              </span>
+            ))}
+          </div>
+          {showAddButton && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                addToLibrary(blindBox)
+              }}
+              disabled={isInLibrary}
+              className={`w-full py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+                isInLibrary 
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                  : 'bg-purple-600 text-white hover:bg-purple-700'
+              }`}
+            >
+              {isInLibrary ? '已添加到库' : '添加到库'}
+            </button>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // 渲染盲盒列表视图
+  const renderBlindBoxList = (blindBoxes, showAddButton = true) => {
+    return (
+      <div className="space-y-4">
+        {blindBoxes.map(blindBox => {
+          const isInLibrary = userLibrary.some(item => item.id === blindBox.id)
+          return (
+            <div key={blindBox.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4">
+              <div className="flex items-start space-x-4">
+                <div 
+                  className={`${blindBox.color} w-20 h-20 rounded-lg cursor-pointer flex-shrink-0 relative`}
+                  onClick={() => handleBlindBoxClick(blindBox)}
+                >
+                  {blindBox.isNew && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 py-0.5 rounded">新</span>
+                  )}
+                  {blindBox.isHot && (
+                    <span className="absolute -top-1 -left-1 bg-orange-500 text-white text-xs px-1 py-0.5 rounded">热</span>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-medium text-gray-800 text-lg">{blindBox.name}</h3>
+                    <div className="flex items-center space-x-1">
+                      <span className="text-yellow-400">★</span>
+                      <span className="text-sm text-gray-600">{blindBox.rating}</span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-2">{blindBox.description}</p>
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {blindBox.tags.map(tag => (
+                      <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-lg font-bold text-purple-600">¥{blindBox.price}</span>
+                        {blindBox.originalPrice > blindBox.price && (
+                          <span className="text-sm text-gray-400 line-through">¥{blindBox.originalPrice}</span>
+                        )}
+                      </div>
+                      <span className="text-sm text-gray-500">剩余: {blindBox.stock}个</span>
+                      <span className="text-sm text-gray-500">已售: {blindBox.sales}</span>
+                    </div>
+                    {showAddButton && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          addToLibrary(blindBox)
+                        }}
+                        disabled={isInLibrary}
+                        className={`py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+                          isInLibrary 
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                            : 'bg-purple-600 text-white hover:bg-purple-700'
+                        }`}
+                      >
+                        {isInLibrary ? '已添加到库' : '添加到库'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    )
   }
 
   const renderMainContent = () => {
@@ -52,7 +323,7 @@ function HomePage({ user, onLogout }) {
       case 'management':
         return <BlindBoxManagement user={user} />
       case 'draw':
-        return <BlindBoxDraw user={user} />
+        return <BlindBoxDraw user={user} selectedBlindBox={selectedBlindBox} />
       case 'orders':
         return <OrderManagement user={user} />
       case 'list':
@@ -63,89 +334,158 @@ function HomePage({ user, onLogout }) {
         return <PlayerShowcase user={user} />
       case 'search':
         return <BlindBoxSearch onBlindBoxClick={handleBlindBoxClick} />
+      case 'library':
+        return (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-800">📦 我的盲盒库</h2>
+                <span className="text-sm text-gray-500">共 {userLibrary.length} 种盲盒</span>
+              </div>
+              {userLibrary.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="text-gray-400 text-4xl mb-4">📦</div>
+                  <h3 className="text-lg font-medium text-gray-800 mb-2">库中暂无盲盒</h3>
+                  <p className="text-gray-600 mb-4">快去首页添加喜欢的盲盒吧！</p>
+                  <button
+                    onClick={() => setActiveTab('home')}
+                    className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                  >
+                    去首页看看
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {userLibrary.map(blindBox => (
+                    <div key={blindBox.id} className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex items-start space-x-4">
+                        <div className={`${blindBox.color} w-16 h-16 rounded-lg flex-shrink-0`}></div>
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between mb-2">
+                            <h3 className="font-medium text-gray-800">{blindBox.name}</h3>
+                            <button
+                              onClick={() => removeFromLibrary(blindBox.id)}
+                              className="text-red-500 hover:text-red-700 text-sm"
+                            >
+                              移除
+                            </button>
+                          </div>
+                          <div className="flex items-center space-x-4 mb-3">
+                            <span className="text-sm text-gray-600">价格: ¥{blindBox.price}</span>
+                            <span className="text-sm text-gray-600">数量: {blindBox.quantity}</span>
+                            <span className="text-sm text-gray-600">剩余: {blindBox.stock}个</span>
+                          </div>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => handleBlindBoxClick(blindBox)}
+                              className="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition-colors"
+                            >
+                              查看详情
+                            </button>
+                            <button
+                              onClick={async () => {
+                                const result = await drawBlindBox(blindBox.id)
+                                if (result) {
+                                  showToast(`恭喜获得: ${result.result?.name || '神秘奖品'}`, 'success')
+                                }
+                              }}
+                              disabled={loading}
+                              className={`bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700 transition-colors ${
+                                loading ? 'opacity-50 cursor-not-allowed' : ''
+                              }`}
+                            >
+                              {loading ? '抽取中...' : '立即抽取'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )
       default:
         return (
           <div className="space-y-6">
-            {/* 轮播图区域 */}
-            <div className="relative h-48 rounded-lg overflow-hidden">
-              <div className={`w-full h-full ${bannerImages[0].color} flex items-center justify-center text-white`}>
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold mb-2">{bannerImages[0].title}</h2>
-                  <p className="text-lg opacity-90">{bannerImages[0].subtitle}</p>
+            {/* 欢迎横幅 */}
+            <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-6 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">欢迎回来，{user.username}！</h2>
+                  <p className="text-purple-100">发现更多精彩盲盒，开始你的收藏之旅</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-purple-100">当前余额</p>
+                  <p className="text-2xl font-bold">¥{user.balance}</p>
                 </div>
               </div>
             </div>
 
-            {/* 功能模块网格 */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {features.map((feature) => (
-                <div
-                  key={feature.id}
-                  className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100"
-                  onClick={() => setActiveTab(feature.id)}
-                >
-                  <div className="text-center">
-                    <div className="text-3xl mb-2">{feature.icon}</div>
-                    <h3 className="font-medium text-gray-800 mb-1">{feature.title}</h3>
-                    <p className="text-sm text-gray-500">{feature.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* 热门盲盒区域 */}
+            {/* 用户库快速访问 */}
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-800">🔥 热门盲盒</h2>
-                <button 
+                <h2 className="text-xl font-bold text-gray-800">� 我的盲盒库</h2>
+                <button
+                  onClick={() => setActiveTab('library')}
                   className="text-purple-600 text-sm hover:text-purple-700"
-                  onClick={() => setActiveTab('list')}
                 >
-                  查看更多 →
+                  查看全部 →
                 </button>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                {hotBlindBoxes.map((box) => (
-                  <div
-                    key={box.id}
-                    className="cursor-pointer group"
-                    onClick={() => handleBlindBoxClick(box)}
-                  >
-                    <div className={`${box.color} h-24 rounded-lg mb-2 group-hover:scale-105 transition-transform`}></div>
-                    <h3 className="text-sm font-medium text-gray-800 mb-1 truncate">{box.name}</h3>
-                    <p className="text-sm text-purple-600 font-bold">¥{box.price}</p>
-                    <p className="text-xs text-gray-500">已售 {box.sales}</p>
-                  </div>
-                ))}
-              </div>
+              {userLibrary.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="text-gray-400 text-3xl mb-2">📦</div>
+                  <p className="text-gray-600">还没有添加任何盲盒，快去下面挑选吧！</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {userLibrary.slice(0, 4).map(blindBox => (
+                    <div key={blindBox.id} className="text-center">
+                      <div className={`${blindBox.color} h-16 rounded-lg mb-2`}></div>
+                      <h3 className="text-sm font-medium text-gray-800 truncate">{blindBox.name}</h3>
+                      <p className="text-xs text-gray-500">数量: {blindBox.quantity}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* 最新动态区域 */}
+            {/* 所有盲盒展示 */}
             <div className="bg-white rounded-lg p-6 shadow-sm">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">📢 最新动态</h2>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-10 h-10 bg-purple-300 rounded-full"></div>
-                  <div>
-                    <p className="text-sm text-gray-800">用户 <span className="font-medium">小明</span> 抽到了稀有款</p>
-                    <p className="text-xs text-gray-500">2分钟前</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-10 h-10 bg-pink-300 rounded-full"></div>
-                  <div>
-                    <p className="text-sm text-gray-800">新品 <span className="font-medium">梦幻独角兽</span> 系列上架</p>
-                    <p className="text-xs text-gray-500">1小时前</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-10 h-10 bg-blue-300 rounded-full"></div>
-                  <div>
-                    <p className="text-sm text-gray-800">限时活动：充值送盲盒</p>
-                    <p className="text-xs text-gray-500">3小时前</p>
-                  </div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-800">🎲 所有盲盒</h2>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`p-2 rounded-lg transition-colors ${
+                      viewMode === 'grid' 
+                        ? 'bg-purple-600 text-white' 
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    <span className="text-sm">⋮⋮</span>
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`p-2 rounded-lg transition-colors ${
+                      viewMode === 'list' 
+                        ? 'bg-purple-600 text-white' 
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    <span className="text-sm">☰</span>
+                  </button>
                 </div>
               </div>
+              {viewMode === 'grid' ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {allBlindBoxes.map(blindBox => renderBlindBoxCard(blindBox))}
+                </div>
+              ) : (
+                renderBlindBoxList(allBlindBoxes)
+              )}
             </div>
           </div>
         )
@@ -160,7 +500,7 @@ function HomePage({ user, onLogout }) {
           <div className="flex items-center justify-between h-16">
             {/* Logo和标题 */}
             <div className="flex items-center space-x-4">
-              <div 
+              <div
                 className="cursor-pointer flex items-center space-x-2"
                 onClick={() => setActiveTab('home')}
               >
@@ -196,38 +536,42 @@ function HomePage({ user, onLogout }) {
 
       {/* 底部导航栏（移动端） */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-        <div className="grid grid-cols-4 h-16">
+        <div className="grid grid-cols-5 h-16">
           <button
-            className={`flex flex-col items-center justify-center space-y-1 ${
-              activeTab === 'home' ? 'text-purple-600' : 'text-gray-500'
-            }`}
+            className={`flex flex-col items-center justify-center space-y-1 ${activeTab === 'home' ? 'text-purple-600' : 'text-gray-500'
+              }`}
             onClick={() => setActiveTab('home')}
           >
             <span className="text-lg">🏠</span>
             <span className="text-xs">首页</span>
           </button>
           <button
-            className={`flex flex-col items-center justify-center space-y-1 ${
-              activeTab === 'list' ? 'text-purple-600' : 'text-gray-500'
-            }`}
-            onClick={() => setActiveTab('list')}
+            className={`flex flex-col items-center justify-center space-y-1 ${activeTab === 'library' ? 'text-purple-600' : 'text-gray-500'
+              }`}
+            onClick={() => setActiveTab('library')}
           >
-            <span className="text-lg">📝</span>
-            <span className="text-xs">盲盒</span>
+            <span className="text-lg">�</span>
+            <span className="text-xs">我的库</span>
           </button>
           <button
-            className={`flex flex-col items-center justify-center space-y-1 ${
-              activeTab === 'draw' ? 'text-purple-600' : 'text-gray-500'
-            }`}
+            className={`flex flex-col items-center justify-center space-y-1 ${activeTab === 'draw' ? 'text-purple-600' : 'text-gray-500'
+              }`}
             onClick={() => setActiveTab('draw')}
           >
             <span className="text-lg">🎲</span>
             <span className="text-xs">抽取</span>
           </button>
           <button
-            className={`flex flex-col items-center justify-center space-y-1 ${
-              activeTab === 'management' ? 'text-purple-600' : 'text-gray-500'
-            }`}
+            className={`flex flex-col items-center justify-center space-y-1 ${activeTab === 'orders' ? 'text-purple-600' : 'text-gray-500'
+              }`}
+            onClick={() => setActiveTab('orders')}
+          >
+            <span className="text-lg">📋</span>
+            <span className="text-xs">订单</span>
+          </button>
+          <button
+            className={`flex flex-col items-center justify-center space-y-1 ${activeTab === 'management' ? 'text-purple-600' : 'text-gray-500'
+              }`}
             onClick={() => setActiveTab('management')}
           >
             <span className="text-lg">👤</span>
@@ -235,6 +579,15 @@ function HomePage({ user, onLogout }) {
           </button>
         </div>
       </nav>
+
+      {/* Toast 消息提示 */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   )
 }

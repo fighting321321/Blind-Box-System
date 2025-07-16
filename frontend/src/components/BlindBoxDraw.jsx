@@ -1,68 +1,36 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { blindBoxAPI } from '../services/api'
 
 /**
  * 盲盒抽取组件
  */
-function BlindBoxDraw({ user }) {
+function BlindBoxDraw({ user, selectedBlindBox, onDrawSuccess }) {
   const [isDrawing, setIsDrawing] = useState(false)
   const [drawResult, setDrawResult] = useState(null)
   const [selectedBox, setSelectedBox] = useState(null)
+  const [availableBoxes, setAvailableBoxes] = useState([])
 
-  // 可抽取的盲盒系列
-  const availableBoxes = [
-    { 
-      id: 1, 
-      name: '可爱动物系列', 
-      price: 59, 
-      color: 'bg-pink-300',
-      description: '包含各种可爱的小动物手办',
-      probability: {
-        '普通': 70,
-        '稀有': 25,
-        '超稀有': 4,
-        '传说': 1
-      }
-    },
-    { 
-      id: 2, 
-      name: '动漫角色系列', 
-      price: 79, 
-      color: 'bg-blue-300',
-      description: '热门动漫角色限定款',
-      probability: {
-        '普通': 60,
-        '稀有': 30,
-        '超稀有': 8,
-        '传说': 2
-      }
-    },
-    { 
-      id: 3, 
-      name: '梦幻公主系列', 
-      price: 89, 
-      color: 'bg-purple-300',
-      description: '精美公主主题收藏品',
-      probability: {
-        '普通': 50,
-        '稀有': 35,
-        '超稀有': 12,
-        '传说': 3
-      }
-    },
-    { 
-      id: 4, 
-      name: '科幻机甲系列', 
-      price: 99, 
-      color: 'bg-gray-300',
-      description: '未来科技风格机甲模型',
-      probability: {
-        '普通': 45,
-        '稀有': 40,
-        '超稀有': 12,
-        '传说': 3
+  // 如果有传入选中的盲盒，则自动设置为选中状态
+  useEffect(() => {
+    if (selectedBlindBox) {
+      setSelectedBox(selectedBlindBox)
+    }
+  }, [selectedBlindBox])
+
+  // 加载可用盲盒数据
+  useEffect(() => {
+    const loadAvailableBoxes = async () => {
+      try {
+        const response = await blindBoxAPI.getAllBlindBoxes()
+        if (response.success) {
+          setAvailableBoxes(response.data)
+        }
+      } catch (error) {
+        console.error('加载盲盒数据失败:', error)
       }
     }
-  ]
+    loadAvailableBoxes()
+  }, [])
 
   const getRarityColor = (rarity) => {
     switch (rarity) {
@@ -74,50 +42,47 @@ function BlindBoxDraw({ user }) {
     }
   }
 
-  const simulateDraw = () => {
+  const simulateDraw = async () => {
     if (!selectedBox || user.balance < selectedBox.price) return
 
     setIsDrawing(true)
     setDrawResult(null)
 
-    // 模拟抽取过程
-    setTimeout(() => {
-      const random = Math.random() * 100
-      let rarity = '普通'
-      let cumulativeProb = 0
-
-      for (const [rarityLevel, prob] of Object.entries(selectedBox.probability)) {
-        cumulativeProb += prob
-        if (random <= cumulativeProb) {
-          rarity = rarityLevel
-          break
+    try {
+      // 调用后端API进行抽取
+      const response = await blindBoxAPI.drawBlindBox(user.id, selectedBox.id)
+      
+      if (response.success) {
+        setDrawResult({
+          name: response.data.result?.name || '神秘奖品',
+          rarity: response.data.result?.rarity || '普通',
+          series: selectedBox.name,
+          color: selectedBox.color || 'bg-gray-300',
+          order: response.data
+        })
+        
+        // 通知父组件抽取成功
+        if (onDrawSuccess) {
+          onDrawSuccess(response.data)
         }
+      } else {
+        alert(response.message || '抽取失败')
       }
-
-      // 生成随机奖品
-      const prizes = {
-        '普通': ['小熊玩偶', '猫咪摆件', '兔子手办', '小狗模型'],
-        '稀有': ['限定版小熊', '发光猫咪', '彩虹兔子', '黄金小狗'],
-        '超稀有': ['钻石小熊', '星空猫咪', '独角兽兔子', '机械小狗'],
-        '传说': ['神话小熊', '宇宙猫咪', '时空兔子', '传说小狗']
-      }
-
-      const prizeList = prizes[rarity] || prizes['普通']
-      const prizeName = prizeList[Math.floor(Math.random() * prizeList.length)]
-
-      setDrawResult({
-        name: prizeName,
-        rarity: rarity,
-        series: selectedBox.name,
-        color: selectedBox.color
-      })
-
+    } catch (error) {
+      console.error('抽取失败:', error)
+      alert('网络错误，请稍后重试')
+    } finally {
       setIsDrawing(false)
-    }, 3000)
+    }
   }
 
   const handleBoxSelect = (box) => {
     setSelectedBox(box)
+    setDrawResult(null)
+  }
+
+  const clearSelection = () => {
+    setSelectedBox(null)
     setDrawResult(null)
   }
 
@@ -134,7 +99,32 @@ function BlindBoxDraw({ user }) {
 
       {/* 盲盒选择区域 */}
       <div className="bg-white rounded-lg p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">选择盲盒系列</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-800">选择盲盒系列</h2>
+          {selectedBox && (
+            <button
+              onClick={clearSelection}
+              className="text-sm text-gray-600 hover:text-gray-800"
+            >
+              清除选择
+            </button>
+          )}
+        </div>
+        
+        {/* 如果有传入的选中盲盒，优先显示 */}
+        {selectedBlindBox && (
+          <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-600 mb-2">从用户库选择的盲盒：</p>
+            <div className="flex items-center space-x-3">
+              <div className={`${selectedBlindBox.color} w-12 h-12 rounded-lg`}></div>
+              <div>
+                <h3 className="font-medium text-gray-800">{selectedBlindBox.name}</h3>
+                <p className="text-sm text-gray-600">价格: ¥{selectedBlindBox.price}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {availableBoxes.map((box) => (
             <div
@@ -146,20 +136,12 @@ function BlindBoxDraw({ user }) {
               }`}
               onClick={() => handleBoxSelect(box)}
             >
-              <div className={`${box.color} h-24 rounded-lg mb-3`}></div>
+              <div className="bg-gradient-to-br from-purple-400 to-blue-500 h-24 rounded-lg mb-3"></div>
               <h3 className="font-medium text-gray-800 mb-1">{box.name}</h3>
               <p className="text-sm text-gray-600 mb-2">{box.description}</p>
               <div className="flex items-center justify-between">
                 <span className="font-bold text-purple-600">¥{box.price}</span>
-                <button
-                  className="text-xs text-purple-600 hover:text-purple-700"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    // 显示概率详情的逻辑可以在这里添加
-                  }}
-                >
-                  查看概率
-                </button>
+                <span className="text-sm text-gray-500">库存: {box.stock}</span>
               </div>
             </div>
           ))}
@@ -172,15 +154,9 @@ function BlindBoxDraw({ user }) {
           <h3 className="text-lg font-semibold text-gray-800 mb-4">
             {selectedBox.name} - 掉落概率
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {Object.entries(selectedBox.probability).map(([rarity, prob]) => (
-              <div key={rarity} className="text-center p-3 bg-gray-50 rounded-lg">
-                <div className={`text-lg font-bold ${getRarityColor(rarity)}`}>
-                  {prob}%
-                </div>
-                <div className="text-sm text-gray-600">{rarity}</div>
-              </div>
-            ))}
+          <div className="text-center py-6">
+            <div className="text-gray-400 text-4xl mb-4">🎲</div>
+            <p className="text-gray-600">该盲盒的详细概率信息正在加载中...</p>
           </div>
         </div>
       )}

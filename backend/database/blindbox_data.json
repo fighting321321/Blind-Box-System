@@ -183,7 +183,9 @@
       "updatedAt": "2025-07-15T16:43:43.394Z"
     }
   ],
-  "nextBlindBoxId": 11,
-  "nextPrizeId": 16,
-  "lastUpdate": "2025-07-16T11:58:47.573Z"
+  "orders": [],
+  "nextBlindBoxId": 12,
+  "nextPrizeId": 18,
+  "nextOrderId": 1,
+  "lastUpdate": "2025-07-16T16:01:15.388Z"
 }

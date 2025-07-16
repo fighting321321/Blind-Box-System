@@ -368,4 +368,138 @@ export class AdminController {
       };
     }
   }
+
+  /**
+   * 获取用户列表
+   * GET /api/admin/users
+   */
+  @Get('/users')
+  async getUsers(@Headers('authorization') authorization: string, @Query('search') search?: string) {
+    try {
+      await this.verifyAdmin(authorization);
+      
+      const users = await this.userService.getAllUsers(search);
+
+      return {
+        success: true,
+        message: '获取用户列表成功',
+        data: users
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || '获取用户列表失败',
+        data: null
+      };
+    }
+  }
+
+  /**
+   * 更新用户状态
+   * PUT /api/admin/users/:id/status
+   */
+  @Put('/users/:id/status')
+  async updateUserStatus(
+    @Headers('authorization') authorization: string, 
+    @Param('id') id: string, 
+    @Body() body: { status: number }
+  ) {
+    try {
+      await this.verifyAdmin(authorization);
+      
+      const success = await this.userService.updateUserStatus(parseInt(id), body.status);
+      
+      if (!success) {
+        return {
+          success: false,
+          message: '用户不存在',
+          data: null
+        };
+      }
+
+      return {
+        success: true,
+        message: '更新用户状态成功',
+        data: null
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || '更新用户状态失败',
+        data: null
+      };
+    }
+  }
+
+  /**
+   * 获取所有订单
+   */
+  @Get('/orders')
+  async getOrders(@Headers('authorization') token: string) {
+    try {
+      // 验证管理员权限
+      const isAdmin = await this.userService.verifyAdmin(token);
+      if (!isAdmin) {
+        return { success: false, message: '无权限访问' };
+      }
+
+      const orders = await this.blindBoxService.getAllOrders();
+      return { success: true, data: orders };
+    } catch (error) {
+      console.error('获取订单列表失败:', error);
+      return { success: false, message: '获取订单列表失败' };
+    }
+  }
+
+  /**
+   * 根据ID获取订单详情
+   */
+  @Get('/orders/:id')
+  async getOrderById(@Param('id') id: string, @Headers('authorization') token: string) {
+    try {
+      // 验证管理员权限
+      const isAdmin = await this.userService.verifyAdmin(token);
+      if (!isAdmin) {
+        return { success: false, message: '无权限访问' };
+      }
+
+      const order = await this.blindBoxService.getOrderById(id);
+      if (!order) {
+        return { success: false, message: '订单不存在' };
+      }
+
+      return { success: true, data: order };
+    } catch (error) {
+      console.error('获取订单详情失败:', error);
+      return { success: false, message: '获取订单详情失败' };
+    }
+  }
+
+  /**
+   * 更新订单状态
+   */
+  @Put('/orders/:id/status')
+  async updateOrderStatus(
+    @Param('id') id: string,
+    @Body() body: { status: string },
+    @Headers('authorization') token: string
+  ) {
+    try {
+      // 验证管理员权限
+      const isAdmin = await this.userService.verifyAdmin(token);
+      if (!isAdmin) {
+        return { success: false, message: '无权限访问' };
+      }
+
+      const result = await this.blindBoxService.updateOrderStatus(id, body.status);
+      if (!result) {
+        return { success: false, message: '更新订单状态失败' };
+      }
+
+      return { success: true, message: '订单状态更新成功' };
+    } catch (error) {
+      console.error('更新订单状态失败:', error);
+      return { success: false, message: '更新订单状态失败' };
+    }
+  }
 }

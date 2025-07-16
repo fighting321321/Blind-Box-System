@@ -237,6 +237,66 @@ export class SqliteUserService {
   }
 
   /**
+   * 获取所有用户列表（管理员使用）
+   * @param search 搜索关键字（可选）
+   * @returns 用户列表
+   */
+  async getAllUsers(search?: string): Promise<Partial<User>[]> {
+    try {
+      let filteredUsers = this.users;
+      
+      // 如果有搜索关键字，过滤用户
+      if (search) {
+        const keyword = search.toLowerCase();
+        filteredUsers = this.users.filter(user => 
+          user.username.toLowerCase().includes(keyword) || 
+          user.email.toLowerCase().includes(keyword)
+        );
+      }
+      
+      // 返回用户信息，排除密码字段
+      return filteredUsers.map(user => ({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        avatar: user.avatar,
+        balance: user.balance,
+        status: user.status,
+        role: user.role,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      }));
+    } catch (error) {
+      console.error('获取用户列表失败:', error);
+      throw new Error('获取用户列表失败');
+    }
+  }
+
+  /**
+   * 更新用户状态（管理员使用）
+   * @param userId 用户ID
+   * @param status 新状态
+   * @returns 更新结果
+   */
+  async updateUserStatus(userId: number, status: number): Promise<boolean> {
+    try {
+      const userIndex = this.users.findIndex(u => u.id === userId);
+      if (userIndex === -1) {
+        return false;
+      }
+      
+      this.users[userIndex].status = status;
+      this.users[userIndex].updatedAt = new Date().toISOString();
+      
+      await this.saveUsersData();
+      return true;
+    } catch (error) {
+      console.error('更新用户状态失败:', error);
+      throw new Error('更新用户状态失败');
+    }
+  }
+
+  /**
    * 更新用户余额
    */
   async updateUserBalance(userId: number, amount: number): Promise<Partial<User>> {
@@ -310,5 +370,31 @@ export class SqliteUserService {
    */
   async generateToken(payload: any): Promise<string> {
     return jwt.sign(payload, this.jwtSecret, { expiresIn: '24h' });
+  }
+
+  /**
+   * 验证管理员权限
+   */
+  async verifyAdmin(token: string): Promise<boolean> {
+    try {
+      if (!token) {
+        return false;
+      }
+
+      // 移除 Bearer 前缀
+      const jwtToken = token.replace('Bearer ', '');
+      
+      // 验证JWT令牌
+      const decoded = jwt.verify(jwtToken, 'your-secret-key') as any;
+      
+      // 查找用户
+      const user = this.users.find(u => u.id === decoded.id);
+      
+      // 验证用户是否存在且为管理员
+      return user && user.role === 'admin';
+    } catch (error) {
+      console.error('验证管理员权限失败:', error);
+      return false;
+    }
   }
 }

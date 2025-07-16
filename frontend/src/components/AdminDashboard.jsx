@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import axios from 'axios'
-import { Search, Plus, Edit, Trash2, Package, Gift, BarChart3, Settings, LogOut } from 'lucide-react'
+import { Plus, Edit, Trash2, Package, Gift, BarChart3, Settings, LogOut, Users, Ban, CheckCircle, FileText } from 'lucide-react'
 import { useToast } from './Toast'
 import ConfirmDialog from './ConfirmDialog'
 
@@ -8,7 +8,7 @@ const AdminDashboard = ({ user, onLogout }) => {
   const { toasts, toast, removeToast, ToastContainer } = useToast()
   const [activeTab, setActiveTab] = useState('dashboard')
   const [blindBoxes, setBlindBoxes] = useState([])
-  const [searchTerm, setSearchTerm] = useState('')
+
   const [stats, setStats] = useState({})
   const [loading, setLoading] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -16,24 +16,26 @@ const AdminDashboard = ({ user, onLogout }) => {
   const [editingItem, setEditingItem] = useState(null)
   const [selectedBlindBox, setSelectedBlindBox] = useState(null)
   const [prizes, setPrizes] = useState([])
-  
+  const [users, setUsers] = useState([])
+  const [orders, setOrders] = useState([])
+
   // 确认对话框状态
   const [confirmDialog, setConfirmDialog] = useState({
     isOpen: false,
     title: '',
     message: '',
-    onConfirm: () => {}
+    onConfirm: () => { }
   })
 
   // 获取授权头
-  const getAuthHeaders = () => {
+  const getAuthHeaders = useCallback(() => {
     const token = localStorage.getItem('token')
     return {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     }
-  }
+  }, [])
 
   // 获取统计数据
   const fetchStats = async () => {
@@ -51,12 +53,42 @@ const AdminDashboard = ({ user, onLogout }) => {
   const fetchBlindBoxes = async () => {
     try {
       setLoading(true)
-      const response = await axios.get(`http://localhost:7001/api/admin/blindboxes?search=${searchTerm}`, getAuthHeaders())
+      const response = await axios.get('http://localhost:7001/api/admin/blindboxes', getAuthHeaders())
       if (response.data.success) {
         setBlindBoxes(response.data.data)
       }
     } catch (error) {
       console.error('获取盲盒列表失败:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 获取用户列表
+  const fetchUsers = async () => {
+    try {
+      setLoading(true)
+      const response = await axios.get('http://localhost:7001/api/admin/users', getAuthHeaders())
+      if (response.data.success) {
+        setUsers(response.data.data)
+      }
+    } catch (error) {
+      console.error('获取用户列表失败:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 获取订单列表
+  const fetchOrders = async () => {
+    try {
+      setLoading(true)
+      const response = await axios.get('http://localhost:7001/api/admin/orders', getAuthHeaders())
+      if (response.data.success) {
+        setOrders(response.data.data)
+      }
+    } catch (error) {
+      console.error('获取订单列表失败:', error)
     } finally {
       setLoading(false)
     }
@@ -190,18 +222,36 @@ const AdminDashboard = ({ user, onLogout }) => {
     }
   }
 
+  // 更新用户状态
+  const updateUserStatus = async (id, status) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: '确认操作',
+      message: `确定要${status === 0 ? '禁用' : '启用'}这个用户吗？`,
+      onConfirm: async () => {
+        try {
+          const response = await axios.put(`http://localhost:7001/api/admin/users/${id}/status`, { status }, getAuthHeaders())
+          if (response.data.success) {
+            fetchUsers()
+            toast.success(`用户状态更新成功！`)
+          } else {
+            toast.error(response.data.message || '更新失败')
+          }
+        } catch (error) {
+          console.error('更新用户状态失败:', error)
+          toast.error('更新失败，请重试')
+        }
+      }
+    })
+  }
+
   // 页面初始化
   useEffect(() => {
     fetchStats()
     fetchBlindBoxes()
+    fetchUsers()
+    fetchOrders()
   }, [])
-
-  // 搜索功能
-  useEffect(() => {
-    if (activeTab === 'blindboxes') {
-      fetchBlindBoxes()
-    }
-  }, [searchTerm, activeTab])
 
   // 统计面板组件
   const StatsPanel = () => (
@@ -272,7 +322,7 @@ const AdminDashboard = ({ user, onLogout }) => {
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -281,7 +331,7 @@ const AdminDashboard = ({ user, onLogout }) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">描述</label>
               <textarea
                 value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 rows="3"
               />
@@ -292,7 +342,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 type="number"
                 step="0.01"
                 value={formData.price}
-                onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value) || 0})}
+                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -302,7 +352,7 @@ const AdminDashboard = ({ user, onLogout }) => {
               <input
                 type="number"
                 value={formData.stock}
-                onChange={(e) => setFormData({...formData, stock: parseInt(e.target.value) || 0})}
+                onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -312,7 +362,7 @@ const AdminDashboard = ({ user, onLogout }) => {
               <input
                 type="url"
                 value={formData.imageUrl}
-                onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -365,7 +415,7 @@ const AdminDashboard = ({ user, onLogout }) => {
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -374,7 +424,7 @@ const AdminDashboard = ({ user, onLogout }) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">描述</label>
               <textarea
                 value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 rows="3"
               />
@@ -387,7 +437,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 min="0"
                 max="1"
                 value={formData.probability}
-                onChange={(e) => setFormData({...formData, probability: parseFloat(e.target.value) || 0})}
+                onChange={(e) => setFormData({ ...formData, probability: parseFloat(e.target.value) || 0 })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -399,7 +449,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 step="0.01"
                 min="0"
                 value={formData.value}
-                onChange={(e) => setFormData({...formData, value: parseFloat(e.target.value) || 0})}
+                onChange={(e) => setFormData({ ...formData, value: parseFloat(e.target.value) || 0 })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -408,7 +458,7 @@ const AdminDashboard = ({ user, onLogout }) => {
               <input
                 type="url"
                 value={formData.imageUrl}
-                onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -447,62 +497,72 @@ const AdminDashboard = ({ user, onLogout }) => {
         </button>
       </div>
 
-      <div className="flex items-center space-x-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <input
-            type="text"
-            placeholder="搜索盲盒名称或描述..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-      </div>
-
       {loading ? (
-        <div className="text-center py-8">加载中...</div>
+        <div className="bg-white rounded-lg shadow-md p-8 text-center">
+          <div className="text-gray-500">加载中...</div>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {blindBoxes.map((box) => (
             <div key={box.id} className="bg-white rounded-lg shadow-md p-6">
               <div className="flex justify-between items-start mb-4">
-                <h3 className="text-lg font-semibold">{box.name}</h3>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">{box.name}</h3>
+                  <p className="text-gray-600 text-sm mb-2">{box.description}</p>
+                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                    <span>价格: ¥{box.price}</span>
+                    <span>库存: {box.stock}</span>
+                  </div>
+                </div>
                 <div className="flex space-x-2">
                   <button
                     onClick={() => {
                       setEditingItem(box)
                       setShowEditModal(true)
                     }}
-                    className="text-blue-600 hover:text-blue-800"
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                   >
                     <Edit className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => deleteBlindBox(box.id)}
-                    className="text-red-600 hover:text-red-800"
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
-              <p className="text-gray-600 mb-2">{box.description}</p>
               <div className="flex justify-between items-center">
-                <span className="text-lg font-bold text-blue-600">¥{box.price}</span>
-                <span className="text-sm text-gray-500">库存: {box.stock}</span>
+                <button
+                  onClick={() => {
+                    setSelectedBlindBox(box)
+                    setActiveTab('prizes')
+                    fetchPrizes(box.id)
+                  }}
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                >
+                  管理奖品
+                </button>
+                <span className="text-xs text-gray-400">
+                  创建时间: {new Date(box.createdAt || Date.now()).toLocaleDateString()}
+                </span>
               </div>
-              <button
-                onClick={() => {
-                  setSelectedBlindBox(box)
-                  setActiveTab('prizes')
-                  fetchPrizes(box.id)
-                }}
-                className="mt-4 w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
-              >
-                管理奖品
-              </button>
             </div>
           ))}
+        </div>
+      )}
+
+      {blindBoxes.length === 0 && !loading && (
+        <div className="bg-white rounded-lg shadow-md p-8 text-center">
+          <div className="text-gray-400 text-4xl mb-4">📦</div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">暂无盲盒</h3>
+          <p className="text-gray-600 mb-4">开始创建您的第一个盲盒吧！</p>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
+          >
+            创建盲盒
+          </button>
         </div>
       )}
     </div>
@@ -542,26 +602,32 @@ const AdminDashboard = ({ user, onLogout }) => {
         {prizes.map((prize) => (
           <div key={prize.id} className="bg-white rounded-lg shadow-md p-6">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-semibold">{prize.name}</h3>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">{prize.name}</h3>
+                <p className="text-gray-600 text-sm mb-2">{prize.description}</p>
+                <div className="flex items-center space-x-4 text-sm text-gray-500">
+                  <span>价值: ¥{prize.value || 0}</span>
+                  <span>概率: {(prize.probability * 100).toFixed(1)}%</span>
+                </div>
+              </div>
               <div className="flex space-x-2">
                 <button
                   onClick={() => {
                     setEditingItem(prize)
                     setShowEditModal(true)
                   }}
-                  className="text-blue-600 hover:text-blue-800"
+                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                 >
                   <Edit className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => deletePrize(prize.id)}
-                  className="text-red-600 hover:text-red-800"
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>
-            <p className="text-gray-600 mb-2">{prize.description}</p>
             <div className="flex justify-between items-center">
               <span className="text-lg font-bold text-green-600">
                 {(prize.probability * 100).toFixed(1)}%
@@ -570,6 +636,246 @@ const AdminDashboard = ({ user, onLogout }) => {
             </div>
           </div>
         ))}
+      </div>
+
+      {prizes.length === 0 && (
+        <div className="bg-white rounded-lg shadow-md p-8 text-center">
+          <div className="text-gray-400 text-4xl mb-4">🎁</div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">暂无奖品</h3>
+          <p className="text-gray-600 mb-4">为这个盲盒添加一些奖品吧！</p>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
+          >
+            添加奖品
+          </button>
+        </div>
+      )}
+    </div>
+  )
+
+  // 用户管理面板
+  const UserPanel = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">用户管理</h2>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                用户信息
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                邮箱
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                余额
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                角色
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                状态
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                注册时间
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                操作
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {loading ? (
+              <tr>
+                <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
+                  加载中...
+                </td>
+              </tr>
+            ) : users.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
+                  暂无用户数据
+                </td>
+              </tr>
+            ) : (
+              users.map((user) => (
+                <tr key={user.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-10 w-10">
+                        <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                          <span className="text-sm font-medium text-gray-700">
+                            {user.username.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">{user.username}</div>
+                        <div className="text-sm text-gray-500">ID: {user.id}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{user.email}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">¥{user.balance}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      user.role === 'admin' 
+                        ? 'bg-purple-100 text-purple-800' 
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {user.role === 'admin' ? '管理员' : '普通用户'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      user.status === 1 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {user.status === 1 ? '正常' : '禁用'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(user.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    {user.role !== 'admin' && (
+                      <button
+                        onClick={() => updateUserStatus(user.id, user.status === 1 ? 0 : 1)}
+                        className={`inline-flex items-center px-3 py-1 rounded-md text-sm font-medium ${
+                          user.status === 1
+                            ? 'bg-red-100 text-red-800 hover:bg-red-200'
+                            : 'bg-green-100 text-green-800 hover:bg-green-200'
+                        }`}
+                      >
+                        {user.status === 1 ? (
+                          <>
+                            <Ban className="w-4 h-4 mr-1" />
+                            禁用
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            启用
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+
+  // 订单详情面板
+  const OrderPanel = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">订单详情</h2>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                订单编号
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                用户信息
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                购买盲盒
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                数量
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                总金额
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                订单状态
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                购买时间
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {loading ? (
+              <tr>
+                <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
+                  加载中...
+                </td>
+              </tr>
+            ) : orders.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
+                  暂无订单数据
+                </td>
+              </tr>
+            ) : (
+              orders.map((order) => (
+                <tr key={order.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">#{order.id}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-10 w-10">
+                        <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                          <span className="text-sm font-medium text-gray-700">
+                            {order.username ? order.username.charAt(0).toUpperCase() : 'U'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">{order.username || '未知用户'}</div>
+                        <div className="text-sm text-gray-500">ID: {order.userId}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{order.blindBoxName}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{order.quantity}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">¥{order.totalAmount}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      order.status === 'completed' 
+                        ? 'bg-green-100 text-green-800' 
+                        : order.status === 'pending'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {order.status === 'completed' ? '已完成' : 
+                       order.status === 'pending' ? '进行中' : '已取消'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(order.createdAt).toLocaleString()}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )
@@ -605,21 +911,35 @@ const AdminDashboard = ({ user, onLogout }) => {
             <div className="space-y-2">
               <button
                 onClick={() => setActiveTab('dashboard')}
-                className={`w-full flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
-                  activeTab === 'dashboard' ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-gray-100'
-                }`}
+                className={`w-full flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${activeTab === 'dashboard' ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-gray-100'
+                  }`}
               >
                 <BarChart3 className="w-4 h-4" />
                 <span>数据统计</span>
               </button>
               <button
                 onClick={() => setActiveTab('blindboxes')}
-                className={`w-full flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
-                  activeTab === 'blindboxes' ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-gray-100'
-                }`}
+                className={`w-full flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${activeTab === 'blindboxes' ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-gray-100'
+                  }`}
               >
                 <Package className="w-4 h-4" />
                 <span>盲盒管理</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('users')}
+                className={`w-full flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${activeTab === 'users' ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+              >
+                <Users className="w-4 h-4" />
+                <span>用户管理</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('orders')}
+                className={`w-full flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${activeTab === 'orders' ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+              >
+                <FileText className="w-4 h-4" />
+                <span>订单详情</span>
               </button>
             </div>
           </div>
@@ -630,6 +950,8 @@ const AdminDashboard = ({ user, onLogout }) => {
           {activeTab === 'dashboard' && <StatsPanel />}
           {activeTab === 'blindboxes' && <BlindBoxPanel />}
           {activeTab === 'prizes' && selectedBlindBox && <PrizePanel />}
+          {activeTab === 'users' && <UserPanel />}
+          {activeTab === 'orders' && <OrderPanel />}
         </main>
       </div>
 
@@ -673,7 +995,7 @@ const AdminDashboard = ({ user, onLogout }) => {
           )}
         </>
       )}
-      
+
       {/* 确认对话框 */}
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}
@@ -682,7 +1004,7 @@ const AdminDashboard = ({ user, onLogout }) => {
         onConfirm={confirmDialog.onConfirm}
         onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
       />
-      
+
       {/* Toast 通知容器 */}
       <ToastContainer />
     </div>

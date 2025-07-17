@@ -57,6 +57,27 @@ export const blindBoxAPI = {
   getUserOrders: (userId) => api.get(`/orders?userId=${userId}`),
 }
 
+// 用户盲盒库相关API
+export const userLibraryAPI = {
+  // 添加盲盒到用户库
+  addToLibrary: (userId, blindBoxId, quantity = 1, note = '') =>
+    api.post('/library', { userId, blindBoxId, quantity, note }),
+  
+  // 获取用户的盲盒库
+  getUserLibrary: (userId) => api.get(`/library?userId=${userId}`),
+  
+  // 更新库项目
+  updateLibraryItem: (itemId, updateData) =>
+    api.put(`/library/${itemId}`, updateData),
+  
+  // 从用户库中移除盲盒
+  removeFromLibrary: (itemId, userId) =>
+    api.delete(`/library/${itemId}?userId=${userId}`),
+  
+  // 获取用户库统计信息
+  getUserLibraryStats: (userId) => api.get(`/library/stats?userId=${userId}`),
+}
+
 // 用户相关API
 export const userAPI = {
   // 获取用户信息

@@ -7,7 +7,8 @@ import BlindBoxDetail from './BlindBoxDetail'
 import PlayerShowcase from './PlayerShowcase'
 import BlindBoxSearch from './BlindBoxSearch'
 import Toast from './Toast'
-import { blindBoxAPI } from '../services/api'
+import BlindBoxImage from './BlindBoxImage'
+import { blindBoxAPI, userLibraryAPI } from '../services/api'
 
 /**
  * 盲盒系统主页组件
@@ -98,34 +99,69 @@ function HomePage({ user, onLogout }) {
     }
   }
 
-  // 加载用户订单
+  // 获取用户盲盒库
+  const loadUserLibrary = async () => {
+    try {
+      const response = await userLibraryAPI.getUserLibrary(user.id)
+      if (response.success) {
+        // 转换数据格式以兼容现有的前端逻辑
+        const formattedLibrary = response.data.map(item => ({
+          ...item.blindBox,
+          quantity: item.quantity,
+          addedTime: new Date(item.createdAt),
+          libraryItemId: item.id, // 保存库项目ID用于后续操作
+          blindBoxId: item.blindBoxId, // 保存原始盲盒ID
+          // 使用库项目ID作为React key，避免冲突
+          id: item.id
+        }))
+        setUserLibrary(formattedLibrary)
+      }
+    } catch (error) {
+      console.error('获取用户库失败:', error)
+      showToast('获取用户库失败', 'error')
+    }
+  }
+
+  // 加载用户订单和用户库
   useEffect(() => {
     if (user?.id) {
       loadUserOrders()
+      loadUserLibrary()
     }
   }, [user])
 
   // 添加盲盒到用户库
-  const addToLibrary = (blindBox) => {
-    const existingItem = userLibrary.find(item => item.id === blindBox.id)
-    if (existingItem) {
-      setUserLibrary(prev => 
-        prev.map(item => 
-          item.id === blindBox.id 
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      )
-    } else {
-      setUserLibrary(prev => [...prev, { ...blindBox, quantity: 1, addedTime: new Date() }])
+  const addToLibrary = async (blindBox) => {
+    try {
+      const response = await userLibraryAPI.addToLibrary(user.id, blindBox.id, 1)
+      if (response.success) {
+        showToast(`${blindBox.name} 已添加到库中`, 'success')
+        // 重新加载用户库
+        loadUserLibrary()
+      } else {
+        showToast(response.message || '添加失败', 'error')
+      }
+    } catch (error) {
+      console.error('添加到库失败:', error)
+      showToast('添加到库失败', 'error')
     }
-    showToast(`${blindBox.name} 已添加到库中`, 'success')
   }
 
   // 从用户库移除盲盒
-  const removeFromLibrary = (blindBoxId) => {
-    setUserLibrary(prev => prev.filter(item => item.id !== blindBoxId))
-    showToast('已从库中移除', 'success')
+  const removeFromLibrary = async (libraryItemId) => {
+    try {
+      const response = await userLibraryAPI.removeFromLibrary(libraryItemId, user.id)
+      if (response.success) {
+        showToast('已从库中移除', 'success')
+        // 重新加载用户库
+        loadUserLibrary()
+      } else {
+        showToast(response.message || '移除失败', 'error')
+      }
+    } catch (error) {
+      console.error('从库中移除失败:', error)
+      showToast('移除失败', 'error')
+    }
   }
 
   // 抽取盲盒
@@ -186,14 +222,19 @@ function HomePage({ user, onLogout }) {
 
   // 渲染盲盒卡片
   const renderBlindBoxCard = (blindBox, showAddButton = true) => {
-    const isInLibrary = userLibrary.some(item => item.id === blindBox.id)
+    const isInLibrary = userLibrary.some(item => item.blindBoxId === blindBox.id)
     
     return (
       <div key={blindBox.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-        <div 
-          className={`${blindBox.color} h-32 rounded-t-lg mb-3 cursor-pointer relative`}
-          onClick={() => handleBlindBoxClick(blindBox)}
-        >
+        <div className="relative">
+          <BlindBoxImage
+            blindBoxId={blindBox.id}
+            name={blindBox.name}
+            width={300}
+            height={128}
+            className="rounded-t-lg cursor-pointer"
+            onClick={() => handleBlindBoxClick(blindBox)}
+          />
           {blindBox.isNew && (
             <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">新品</span>
           )}
@@ -256,10 +297,15 @@ function HomePage({ user, onLogout }) {
           return (
             <div key={blindBox.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4">
               <div className="flex items-start space-x-4">
-                <div 
-                  className={`${blindBox.color} w-20 h-20 rounded-lg cursor-pointer flex-shrink-0 relative`}
-                  onClick={() => handleBlindBoxClick(blindBox)}
-                >
+                <div className="relative">
+                  <BlindBoxImage
+                    blindBoxId={blindBox.id}
+                    name={blindBox.name}
+                    width={80}
+                    height={80}
+                    className="rounded-lg cursor-pointer"
+                    onClick={() => handleBlindBoxClick(blindBox)}
+                  />
                   {blindBox.isNew && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 py-0.5 rounded">新</span>
                   )}
@@ -370,7 +416,13 @@ function HomePage({ user, onLogout }) {
                   {userLibrary.map(blindBox => (
                     <div key={blindBox.id} className="bg-gray-50 rounded-lg p-4">
                       <div className="flex items-start space-x-4">
-                        <div className={`${blindBox.color} w-16 h-16 rounded-lg flex-shrink-0`}></div>
+                        <BlindBoxImage
+                          blindBoxId={blindBox.blindBoxId}
+                          name={blindBox.name}
+                          width={64}
+                          height={64}
+                          className="rounded-lg flex-shrink-0"
+                        />
                         <div className="flex-1">
                           <div className="flex items-start justify-between mb-2">
                             <h3 className="font-medium text-gray-800">{blindBox.name}</h3>
@@ -453,7 +505,13 @@ function HomePage({ user, onLogout }) {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {userLibrary.slice(0, 4).map(blindBox => (
                     <div key={blindBox.id} className="text-center">
-                      <div className={`${blindBox.color} h-16 rounded-lg mb-2`}></div>
+                      <BlindBoxImage
+                        blindBoxId={blindBox.blindBoxId}
+                        name={blindBox.name}
+                        width={64}
+                        height={64}
+                        className="rounded-lg mb-2 mx-auto"
+                      />
                       <h3 className="text-sm font-medium text-gray-800 truncate">{blindBox.name}</h3>
                     </div>
                   ))}

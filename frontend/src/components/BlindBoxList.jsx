@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import BlindBoxImage from './BlindBoxImage'
 
 /**
  * 盲盒列表组件
@@ -242,7 +243,13 @@ function BlindBoxList({ onBlindBoxClick }) {
           >
             {/* 盲盒图片和标签 */}
             <div className="relative">
-              <div className={`${box.color} h-48 rounded-t-lg group-hover:scale-105 transition-transform`}></div>
+              <BlindBoxImage
+                blindBoxId={box.id}
+                name={box.name}
+                width={300}
+                height={192}
+                className="rounded-t-lg group-hover:scale-105 transition-transform"
+              />
               
               {/* 标签 */}
               <div className="absolute top-2 left-2 flex space-x-1">

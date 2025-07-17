@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import BlindBoxImage from './BlindBoxImage'
 
 /**
  * 盲盒详情组件
@@ -275,10 +276,24 @@ function BlindBoxDetail({ blindBox, onBack }) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* 左侧：商品图片 */}
           <div>
-            <div className={`${blindBox.color} h-64 lg:h-80 rounded-lg mb-4`}></div>
+            <BlindBoxImage
+              blindBoxId={blindBox.id}
+              name={blindBox.name}
+              width={320}
+              height={320}
+              className="rounded-lg mb-4 w-full"
+              showName={true}
+            />
             <div className="grid grid-cols-4 gap-2">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className={`${blindBox.color} h-16 rounded-lg opacity-60 hover:opacity-100 cursor-pointer transition-opacity`}></div>
+                <BlindBoxImage
+                  key={i}
+                  blindBoxId={blindBox.id}
+                  name={blindBox.name}
+                  width={64}
+                  height={64}
+                  className="rounded-lg opacity-60 hover:opacity-100 cursor-pointer transition-opacity"
+                />
               ))}
             </div>
           </div>

@@ -1,7 +1,8 @@
-import { Inject, Controller, Get, Query, Post, Body } from '@midwayjs/core';
+import { Inject, Controller, Get, Query, Post, Body, Put, Del, Param } from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
 import { UserService } from '../service/user.service';
 import { BlindBoxService } from '../service/blindbox.service';
+import { UserLibraryService } from '../service/user-library.service';
 
 /**
  * API控制器
@@ -17,6 +18,9 @@ export class APIController {
 
   @Inject()
   blindBoxService: BlindBoxService;
+
+  @Inject()
+  userLibraryService: UserLibraryService;
 
   /**
    * 获取用户信息接口（向后兼容）
@@ -162,6 +166,112 @@ export class APIController {
       return { success: true, message: 'OK', data: userOrders };
     } catch (error) {
       return { success: false, message: error.message || '获取订单失败', data: null };
+    }
+  }
+
+  /**
+   * 添加盲盒到用户库
+   * POST /api/library
+   */
+  @Post('/library')
+  async addToLibrary(@Body() body: { userId: number; blindBoxId: number; quantity?: number; note?: string }) {
+    try {
+      // 获取盲盒信息以获取当前价格
+      const blindBox = await this.blindBoxService.getBlindBoxById(body.blindBoxId);
+      if (!blindBox) {
+        return { success: false, message: '盲盒不存在', data: null };
+      }
+
+      const libraryItem = await this.userLibraryService.addToLibrary(body, blindBox.price);
+      return { success: true, message: '添加到盲盒库成功', data: libraryItem };
+    } catch (error) {
+      return { success: false, message: error.message || '添加到盲盒库失败', data: null };
+    }
+  }
+
+  /**
+   * 获取用户的盲盒库
+   * GET /api/library?userId=1
+   */
+  @Get('/library')
+  async getUserLibrary(@Query('userId') userId: number) {
+    try {
+      if (!userId) {
+        return { success: false, message: '用户ID不能为空', data: null };
+      }
+
+      const libraryItems = await this.userLibraryService.getUserLibrary(userId);
+      
+      // 获取盲盒详细信息
+      const libraryWithDetails = await Promise.all(
+        libraryItems.map(async (item) => {
+          const blindBox = await this.blindBoxService.getBlindBoxById(item.blindBoxId);
+          return {
+            ...item,
+            blindBox: blindBox
+          };
+        })
+      );
+
+      return { success: true, message: 'OK', data: libraryWithDetails };
+    } catch (error) {
+      return { success: false, message: error.message || '获取盲盒库失败', data: null };
+    }
+  }
+
+  /**
+   * 更新盲盒库项目
+   * PUT /api/library/:itemId
+   */
+  @Put('/library/:itemId')
+  async updateLibraryItem(@Param('itemId') itemId: number, @Body() body: { quantity?: number; note?: string; isPurchased?: boolean }) {
+    try {
+      const updatedItem = await this.userLibraryService.updateLibraryItem(itemId, body);
+      if (!updatedItem) {
+        return { success: false, message: '库项目不存在', data: null };
+      }
+      return { success: true, message: '更新成功', data: updatedItem };
+    } catch (error) {
+      return { success: false, message: error.message || '更新失败', data: null };
+    }
+  }
+
+  /**
+   * 从用户库中移除盲盒
+   * DELETE /api/library/:itemId
+   */
+  @Del('/library/:itemId')
+  async removeFromLibrary(@Param('itemId') itemId: number, @Query('userId') userId: number) {
+    try {
+      if (!userId) {
+        return { success: false, message: '用户ID不能为空', data: null };
+      }
+
+      const success = await this.userLibraryService.removeFromLibrary(itemId, userId);
+      if (!success) {
+        return { success: false, message: '移除失败，项目不存在', data: null };
+      }
+      return { success: true, message: '移除成功', data: null };
+    } catch (error) {
+      return { success: false, message: error.message || '移除失败', data: null };
+    }
+  }
+
+  /**
+   * 获取用户库统计信息
+   * GET /api/library/stats?userId=1
+   */
+  @Get('/library/stats')
+  async getUserLibraryStats(@Query('userId') userId: number) {
+    try {
+      if (!userId) {
+        return { success: false, message: '用户ID不能为空', data: null };
+      }
+
+      const stats = await this.userLibraryService.getUserLibraryStats(userId);
+      return { success: true, message: 'OK', data: stats };
+    } catch (error) {
+      return { success: false, message: error.message || '获取统计信息失败', data: null };
     }
   }
 }

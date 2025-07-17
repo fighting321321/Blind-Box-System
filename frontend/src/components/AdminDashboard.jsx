@@ -287,7 +287,7 @@ const AdminDashboard = ({ user, onLogout }) => {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-600">总收入</p>
-            <p className="text-2xl font-bold text-orange-600">¥{stats.totalRevenue || 0}</p>
+            <p className="text-2xl font-bold text-orange-600">¥{(stats.totalRevenue || 0).toFixed(2)}</p>
           </div>
           <BarChart3 className="w-8 h-8 text-orange-500" />
         </div>
@@ -510,7 +510,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                   <h3 className="text-lg font-semibold text-gray-800 mb-2">{box.name}</h3>
                   <p className="text-gray-600 text-sm mb-2">{box.description}</p>
                   <div className="flex items-center space-x-4 text-sm text-gray-500">
-                    <span>价格: ¥{box.price}</span>
+                    <span>价格: ¥{box.price.toFixed(2)}</span>
                     <span>库存: {box.stock}</span>
                   </div>
                 </div>
@@ -606,7 +606,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">{prize.name}</h3>
                 <p className="text-gray-600 text-sm mb-2">{prize.description}</p>
                 <div className="flex items-center space-x-4 text-sm text-gray-500">
-                  <span>价值: ¥{prize.value || 0}</span>
+                  <span>价值: ¥{(prize.value || 0).toFixed(2)}</span>
                   <span>概率: {(prize.probability * 100).toFixed(1)}%</span>
                 </div>
               </div>
@@ -723,7 +723,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                     <div className="text-sm text-gray-900">{user.email}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">¥{user.balance}</div>
+                    <div className="text-sm text-gray-900">¥{user.balance.toFixed(2)}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -854,7 +854,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                     <div className="text-sm text-gray-900">{order.quantity}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">¥{order.totalAmount}</div>
+                    <div className="text-sm font-medium text-gray-900">¥{order.totalAmount.toFixed(2)}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${

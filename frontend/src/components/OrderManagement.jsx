@@ -130,7 +130,7 @@ function OrderManagement({ user }) {
           <div className="text-sm text-gray-600">处理中</div>
         </div>
         <div className="bg-white rounded-lg p-4 shadow-sm text-center">
-          <div className="text-2xl font-bold text-blue-600">¥{stats.totalAmount}</div>
+          <div className="text-2xl font-bold text-blue-600">¥{stats.totalAmount.toFixed(2)}</div>
           <div className="text-sm text-gray-600">总消费</div>
         </div>
       </div>
@@ -218,7 +218,7 @@ function OrderManagement({ user }) {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium text-gray-800">¥{item.price}</p>
+                      <p className="font-medium text-gray-800">¥{item.price.toFixed(2)}</p>
                       <p className="text-sm text-gray-600">单价</p>
                     </div>
                   </div>
@@ -235,7 +235,7 @@ function OrderManagement({ user }) {
                 <div className="flex items-center space-x-4">
                   <div className="text-right">
                     <p className="text-sm text-gray-600">订单总额</p>
-                    <p className="text-lg font-bold text-purple-600">¥{order.total}</p>
+                    <p className="text-lg font-bold text-purple-600">¥{order.total.toFixed(2)}</p>
                   </div>
                   <div className="flex space-x-2">
                     <button className="px-4 py-2 text-sm text-purple-600 border border-purple-600 rounded-lg hover:bg-purple-50 transition-colors">

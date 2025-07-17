@@ -386,9 +386,9 @@ function BlindBoxSearch({ onBlindBoxClick }) {
                   {/* 价格 */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <span className="text-lg font-bold text-purple-600">¥{box.price}</span>
+                      <span className="text-lg font-bold text-purple-600">¥{box.price.toFixed(2)}</span>
                       {box.originalPrice > box.price && (
-                        <span className="text-sm text-gray-500 line-through">¥{box.originalPrice}</span>
+                        <span className="text-sm text-gray-500 line-through">¥{box.originalPrice.toFixed(2)}</span>
                       )}
                     </div>
                     <button

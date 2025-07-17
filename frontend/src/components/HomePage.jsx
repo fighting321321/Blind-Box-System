@@ -16,6 +16,7 @@ import { blindBoxAPI } from '../services/api'
 function HomePage({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('home')
   const [selectedBlindBox, setSelectedBlindBox] = useState(null)
+  const [previousTab, setPreviousTab] = useState('home') // 记录进入详情页前的页面
   const [viewMode, setViewMode] = useState('grid') // 'grid' 或 'list'
   const [userLibrary, setUserLibrary] = useState([]) // 用户盲盒库
   const [allBlindBoxes, setAllBlindBoxes] = useState([]) // 所有可用盲盒
@@ -179,6 +180,7 @@ function HomePage({ user, onLogout }) {
 
   const handleBlindBoxClick = (blindBox) => {
     setSelectedBlindBox(blindBox)
+    setPreviousTab(activeTab) // 记录当前页面作为来源页面
     setActiveTab('detail')
   }
 
@@ -203,9 +205,9 @@ function HomePage({ user, onLogout }) {
           <h3 className="font-medium text-gray-800 mb-2 truncate">{blindBox.name}</h3>
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-2">
-              <span className="text-lg font-bold text-purple-600">¥{blindBox.price}</span>
+              <span className="text-lg font-bold text-purple-600">¥{blindBox.price.toFixed(2)}</span>
               {blindBox.originalPrice > blindBox.price && (
-                <span className="text-sm text-gray-400 line-through">¥{blindBox.originalPrice}</span>
+                <span className="text-sm text-gray-400 line-through">¥{blindBox.originalPrice.toFixed(2)}</span>
               )}
             </div>
             <div className="flex items-center space-x-1">
@@ -284,9 +286,9 @@ function HomePage({ user, onLogout }) {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center space-x-2">
-                        <span className="text-lg font-bold text-purple-600">¥{blindBox.price}</span>
+                        <span className="text-lg font-bold text-purple-600">¥{blindBox.price.toFixed(2)}</span>
                         {blindBox.originalPrice > blindBox.price && (
-                          <span className="text-sm text-gray-400 line-through">¥{blindBox.originalPrice}</span>
+                          <span className="text-sm text-gray-400 line-through">¥{blindBox.originalPrice.toFixed(2)}</span>
                         )}
                       </div>
                       <span className="text-sm text-gray-500">剩余: {blindBox.stock}个</span>
@@ -329,7 +331,7 @@ function HomePage({ user, onLogout }) {
       case 'list':
         return <BlindBoxList onBlindBoxClick={handleBlindBoxClick} />
       case 'detail':
-        return <BlindBoxDetail blindBox={selectedBlindBox} onBack={() => setActiveTab('home')} />
+        return <BlindBoxDetail blindBox={selectedBlindBox} onBack={() => setActiveTab(previousTab)} />
       case 'showcase':
         return <PlayerShowcase user={user} />
       case 'search':
@@ -337,6 +339,15 @@ function HomePage({ user, onLogout }) {
       case 'library':
         return (
           <div className="space-y-6">
+            {/* 返回主页按钮 */}
+            <button
+              onClick={() => setActiveTab('home')}
+              className="flex items-center space-x-2 text-purple-600 hover:text-purple-700 transition-colors"
+            >
+              <span>←</span>
+              <span>返回主页</span>
+            </button>
+            
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-800">📦 我的盲盒库</h2>
@@ -371,8 +382,7 @@ function HomePage({ user, onLogout }) {
                             </button>
                           </div>
                           <div className="flex items-center space-x-4 mb-3">
-                            <span className="text-sm text-gray-600">价格: ¥{blindBox.price}</span>
-                            <span className="text-sm text-gray-600">数量: {blindBox.quantity}</span>
+                            <span className="text-sm text-gray-600">价格: ¥{blindBox.price.toFixed(2)}</span>
                             <span className="text-sm text-gray-600">剩余: {blindBox.stock}个</span>
                           </div>
                           <div className="flex space-x-2">
@@ -418,7 +428,7 @@ function HomePage({ user, onLogout }) {
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-purple-100">当前余额</p>
-                  <p className="text-2xl font-bold">¥{user.balance}</p>
+                  <p className="text-2xl font-bold">¥{user.balance.toFixed(2)}</p>
                 </div>
               </div>
             </div>
@@ -426,7 +436,7 @@ function HomePage({ user, onLogout }) {
             {/* 用户库快速访问 */}
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-800">� 我的盲盒库</h2>
+                <h2 className="text-xl font-bold text-gray-800">📦 我的盲盒库</h2>
                 <button
                   onClick={() => setActiveTab('library')}
                   className="text-purple-600 text-sm hover:text-purple-700"
@@ -445,7 +455,6 @@ function HomePage({ user, onLogout }) {
                     <div key={blindBox.id} className="text-center">
                       <div className={`${blindBox.color} h-16 rounded-lg mb-2`}></div>
                       <h3 className="text-sm font-medium text-gray-800 truncate">{blindBox.name}</h3>
-                      <p className="text-xs text-gray-500">数量: {blindBox.quantity}</p>
                     </div>
                   ))}
                 </div>
@@ -515,7 +524,7 @@ function HomePage({ user, onLogout }) {
                 <div className="w-8 h-8 bg-purple-300 rounded-full"></div>
                 <div className="hidden md:block">
                   <p className="text-sm font-medium text-gray-800">{user.username}</p>
-                  <p className="text-xs text-gray-500">余额: ¥{user.balance}</p>
+                  <p className="text-xs text-gray-500">余额: ¥{user.balance.toFixed(2)}</p>
                 </div>
               </div>
               <button
@@ -550,7 +559,7 @@ function HomePage({ user, onLogout }) {
               }`}
             onClick={() => setActiveTab('library')}
           >
-            <span className="text-lg">�</span>
+            <span className="text-lg">📦</span>
             <span className="text-xs">我的库</span>
           </button>
           <button

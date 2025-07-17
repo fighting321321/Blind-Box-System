@@ -93,7 +93,7 @@ function BlindBoxDraw({ user, selectedBlindBox, onDrawSuccess }) {
         <h1 className="text-2xl font-bold text-gray-800">盲盒抽取</h1>
         <div className="flex items-center space-x-2 text-sm">
           <span className="text-gray-600">余额:</span>
-          <span className="font-bold text-purple-600">¥{user.balance}</span>
+          <span className="font-bold text-purple-600">¥{user.balance.toFixed(2)}</span>
         </div>
       </div>
 
@@ -119,7 +119,7 @@ function BlindBoxDraw({ user, selectedBlindBox, onDrawSuccess }) {
               <div className={`${selectedBlindBox.color} w-12 h-12 rounded-lg`}></div>
               <div>
                 <h3 className="font-medium text-gray-800">{selectedBlindBox.name}</h3>
-                <p className="text-sm text-gray-600">价格: ¥{selectedBlindBox.price}</p>
+                <p className="text-sm text-gray-600">价格: ¥{selectedBlindBox.price.toFixed(2)}</p>
               </div>
             </div>
           </div>
@@ -140,7 +140,7 @@ function BlindBoxDraw({ user, selectedBlindBox, onDrawSuccess }) {
               <h3 className="font-medium text-gray-800 mb-1">{box.name}</h3>
               <p className="text-sm text-gray-600 mb-2">{box.description}</p>
               <div className="flex items-center justify-between">
-                <span className="font-bold text-purple-600">¥{box.price}</span>
+                <span className="font-bold text-purple-600">¥{box.price.toFixed(2)}</span>
                 <span className="text-sm text-gray-500">库存: {box.stock}</span>
               </div>
             </div>
@@ -179,7 +179,7 @@ function BlindBoxDraw({ user, selectedBlindBox, onDrawSuccess }) {
                 disabled={user.balance < selectedBox.price || isDrawing}
               >
                 {user.balance >= selectedBox.price
-                  ? `抽取 (¥${selectedBox.price})`
+                  ? `抽取 (¥${selectedBox.price.toFixed(2)})`
                   : '余额不足'
                 }
               </button>

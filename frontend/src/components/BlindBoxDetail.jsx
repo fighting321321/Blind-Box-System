@@ -119,7 +119,7 @@ function BlindBoxDetail({ blindBox, onBack }) {
           </div>
           <div>
             <p className="text-sm text-gray-600 mb-2">商品价格</p>
-            <p className="font-medium text-purple-600">¥{blindBox.price}</p>
+            <p className="font-medium text-purple-600">¥{blindBox.price.toFixed(2)}</p>
           </div>
           <div>
             <p className="text-sm text-gray-600 mb-2">销售数量</p>
@@ -197,8 +197,8 @@ function BlindBoxDetail({ blindBox, onBack }) {
               .reduce((sum, item) => sum + item.probability, 0)
             
             return (
-              <div key={rarity} className="flex items-center justify-between">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getRarityColor(rarity)}`}>
+              <div key={rarity} className="flex items-center">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium w-20 text-center ${getRarityColor(rarity)}`}>
                   {rarity}
                 </span>
                 <div className="flex-1 mx-4 bg-gray-200 rounded-full h-2">
@@ -211,7 +211,7 @@ function BlindBoxDetail({ blindBox, onBack }) {
                     style={{ width: `${totalProb}%` }}
                   ></div>
                 </div>
-                <span className="text-sm text-gray-600">{totalProb}%</span>
+                <span className="text-sm text-gray-600 w-12 text-right">{totalProb}%</span>
               </div>
             )
           })}
@@ -267,7 +267,7 @@ function BlindBoxDetail({ blindBox, onBack }) {
         className="flex items-center space-x-2 text-purple-600 hover:text-purple-700 transition-colors"
       >
         <span>←</span>
-        <span>返回列表</span>
+        <span>返回</span>
       </button>
 
       {/* 商品主要信息 */}
@@ -303,10 +303,14 @@ function BlindBoxDetail({ blindBox, onBack }) {
 
             <div className="space-y-2">
               <div className="flex items-center space-x-3">
-                <span className="text-3xl font-bold text-purple-600">¥{blindBox.price}</span>
+                <span className="text-3xl font-bold text-purple-600">¥{blindBox.price.toFixed(2)}</span>
                 {blindBox.originalPrice > blindBox.price && (
-                  <span className="text-lg text-gray-500 line-through">¥{blindBox.originalPrice}</span>
+                  <span className="text-lg text-gray-500 line-through">¥{blindBox.originalPrice.toFixed(2)}</span>
                 )}
+              </div>
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="text-sm text-gray-600">剩余库存:</span>
+                <span className="text-sm font-medium text-orange-600">{blindBox.stock} 个</span>
               </div>
               <p className="text-gray-600">{blindBox.description}</p>
             </div>
@@ -334,7 +338,7 @@ function BlindBoxDetail({ blindBox, onBack }) {
 
               <div className="flex space-x-4">
                 <button className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">
-                  立即抽取 (¥{blindBox.price * quantity})
+                  立即抽取 (¥{(blindBox.price * quantity).toFixed(2)})
                 </button>
                 <button className="px-6 py-3 border border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors">
                   ♡ 收藏

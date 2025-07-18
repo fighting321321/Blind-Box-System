@@ -1,6 +1,6 @@
 import { Inject, Controller, Get, Query, Post, Body, Put, Del, Param } from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
-import { UserService } from '../service/user.service';
+import { MemoryUserService } from '../service/memory-user.service';
 import { BlindBoxService } from '../service/blindbox.service';
 import { UserLibraryService } from '../service/user-library.service';
 
@@ -14,7 +14,7 @@ export class APIController {
   ctx: Context;
 
   @Inject()
-  userService: UserService;
+  userService: MemoryUserService;
 
   @Inject()
   blindBoxService: BlindBoxService;
@@ -166,6 +166,47 @@ export class APIController {
       return { success: true, message: 'OK', data: userOrders };
     } catch (error) {
       return { success: false, message: error.message || '获取订单失败', data: null };
+    }
+  }
+
+  /**
+   * 购买盲盒
+   * POST /api/purchase
+   */
+  @Post('/purchase')
+  async purchaseBlindBox(@Body() body: { userId: number; blindBoxId: number; quantity?: number }) {
+    try {
+      if (!body.userId || !body.blindBoxId) {
+        return { success: false, message: '参数不完整' };
+      }
+
+      const quantity = body.quantity || 1;
+      if (quantity < 1 || quantity > 10) {
+        return { success: false, message: '购买数量必须在1-10之间' };
+      }
+
+      const result = await this.blindBoxService.purchaseBlindBox(body.userId, body.blindBoxId, quantity);
+      return result;
+    } catch (error) {
+      console.error('购买接口错误:', error);
+      return { success: false, message: error.message || '购买失败，请重试' };
+    }
+  }
+
+  /**
+   * 获取用户余额
+   * GET /api/user/:id/balance
+   */
+  @Get('/user/:id/balance')
+  async getUserBalance(@Param('id') userId: number) {
+    try {
+      const user = await this.userService.getUserById(userId);
+      if (!user) {
+        return { success: false, message: '用户不存在' };
+      }
+      return { success: true, data: { balance: user.balance } };
+    } catch (error) {
+      return { success: false, message: error.message || '获取余额失败' };
     }
   }
 

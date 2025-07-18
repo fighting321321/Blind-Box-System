@@ -1,12 +1,51 @@
 import { useState } from 'react'
 import BlindBoxImage from './BlindBoxImage'
+import axios from 'axios'
 
 /**
  * 盲盒详情组件
  */
-function BlindBoxDetail({ blindBox, onBack }) {
+function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }) {
   const [activeTab, setActiveTab] = useState('detail')
   const [quantity, setQuantity] = useState(1)
+  const [purchasing, setPurchasing] = useState(false)
+
+  // 购买盲盒的处理函数
+  const handlePurchase = async () => {
+    if (!user) {
+      showToast('请先登录', 'error')
+      return
+    }
+
+    if (purchasing) return
+
+    setPurchasing(true)
+    try {
+      const response = await axios.post('http://localhost:7001/api/purchase', {
+        userId: user.id,
+        blindBoxId: blindBox.id,
+        quantity: quantity
+      })
+
+      if (response.data.success) {
+        showToast(response.data.message || '购买成功！', 'success')
+        // 调用成功回调
+        if (onPurchaseSuccess) {
+          onPurchaseSuccess()
+        }
+        if (response.data.order) {
+          console.log('订单信息:', response.data.order)
+        }
+      } else {
+        showToast(response.data.message || '购买失败', 'error')
+      }
+    } catch (error) {
+      console.error('购买失败:', error)
+      showToast(error.response?.data?.message || '购买失败，请重试', 'error')
+    } finally {
+      setPurchasing(false)
+    }
+  }
 
   if (!blindBox) {
     return (
@@ -375,8 +414,23 @@ function BlindBoxDetail({ blindBox, onBack }) {
               </div>
 
               <div className="flex space-x-4">
-                <button className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">
-                  立即抽取 (¥{(blindBox.price * quantity).toFixed(2)})
+                <button 
+                  onClick={handlePurchase}
+                  disabled={purchasing || !user}
+                  className={`flex-1 px-6 py-3 text-white rounded-lg font-medium transition-colors ${
+                    purchasing 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : !user 
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-purple-600 hover:bg-purple-700'
+                  }`}
+                >
+                  {purchasing 
+                    ? '购买中...' 
+                    : !user 
+                      ? '请先登录' 
+                      : `立即购买 (¥${(blindBox.price * quantity).toFixed(2)})`
+                  }
                 </button>
                 <button className="px-6 py-3 border border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors">
                   ♡ 收藏

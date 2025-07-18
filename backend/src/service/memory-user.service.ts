@@ -1,4 +1,4 @@
-import { Provide, Init } from '@midwayjs/core';
+import { Provide, Init, Scope, ScopeEnum } from '@midwayjs/core';
 import * as bcrypt from 'bcryptjs';
 
 /**
@@ -46,6 +46,7 @@ export interface LoginResponse {
  * 临时替代数据库，用于演示前后端连接
  */
 @Provide()
+@Scope(ScopeEnum.Singleton)
 export class MemoryUserService {
   
   private users: User[] = [];
@@ -197,6 +198,13 @@ export class MemoryUserService {
    */
   async getUserCount(): Promise<number> {
     return this.users.length;
+  }
+
+  /**
+   * 获取所有用户
+   */
+  async getAllUsers(): Promise<Partial<User>[]> {
+    return this.users.map(user => this.toSafeObject(user));
   }
 
   /**

@@ -81,7 +81,21 @@ const AdminDashboard = ({ user, onLogout }) => {
       setLoading(true)
       const response = await axios.get('http://localhost:7001/api/admin/users', getAuthHeaders())
       if (response.data.success) {
-        setUsers(response.data.data)
+        // 获取用户列表后，为每个用户获取最新余额
+        const usersWithUpdatedBalance = await Promise.all(
+          response.data.data.map(async (user) => {
+            try {
+              const balanceResponse = await axios.get(`http://localhost:7001/api/user/${user.id}/balance`)
+              if (balanceResponse.data.success) {
+                return { ...user, balance: balanceResponse.data.data.balance }
+              }
+            } catch (error) {
+              console.error(`获取用户${user.id}余额失败:`, error)
+            }
+            return user // 如果获取余额失败，返回原用户数据
+          })
+        )
+        setUsers(usersWithUpdatedBalance)
       }
     } catch (error) {
       console.error('获取用户列表失败:', error)

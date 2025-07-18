@@ -24,6 +24,7 @@ function HomePage({ user, onLogout }) {
   const [userOrders, setUserOrders] = useState([]) // 用户订单
   const [loading, setLoading] = useState(false)
   const [toast, setToast] = useState(null)
+  const [userBalance, setUserBalance] = useState(0) // 用户余额状态
 
   // 从后端获取盲盒数据
   useEffect(() => {
@@ -122,11 +123,26 @@ function HomePage({ user, onLogout }) {
     }
   }
 
-  // 加载用户订单和用户库
+  // 获取用户余额
+  const loadUserBalance = async () => {
+    if (!user?.id) return
+    try {
+      const response = await fetch(`http://localhost:7001/api/user/${user.id}/balance`)
+      const data = await response.json()
+      if (data.success) {
+        setUserBalance(data.data.balance)
+      }
+    } catch (error) {
+      console.error('获取余额失败:', error)
+    }
+  }
+
+  // 加载用户订单、用户库和余额
   useEffect(() => {
     if (user?.id) {
       loadUserOrders()
       loadUserLibrary()
+      loadUserBalance()
     }
   }, [user])
 
@@ -398,7 +414,16 @@ function HomePage({ user, onLogout }) {
       case 'list':
         return <BlindBoxList onBlindBoxClick={handleBlindBoxClick} />
       case 'detail':
-        return <BlindBoxDetail blindBox={selectedBlindBox} onBack={() => setActiveTab(previousTab)} />
+        return <BlindBoxDetail 
+          blindBox={selectedBlindBox} 
+          onBack={() => setActiveTab(previousTab)}
+          user={user}
+          showToast={showToast}
+          onPurchaseSuccess={() => {
+            loadUserBalance() // 购买成功后刷新余额
+            loadUserOrders() // 刷新订单列表
+          }}
+        />
       case 'showcase':
         return <PlayerShowcase user={user} />
       case 'search':
@@ -461,23 +486,9 @@ function HomePage({ user, onLogout }) {
                           <div className="flex space-x-2">
                             <button
                               onClick={() => handleBlindBoxClick(blindBox)}
-                              className="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition-colors"
+                              className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700 transition-colors"
                             >
                               查看详情
-                            </button>
-                            <button
-                              onClick={async () => {
-                                const result = await drawBlindBox(blindBox.id)
-                                if (result) {
-                                  showToast(`恭喜获得: ${result.result?.name || '神秘奖品'}`, 'success')
-                                }
-                              }}
-                              disabled={loading}
-                              className={`bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700 transition-colors ${
-                                loading ? 'opacity-50 cursor-not-allowed' : ''
-                              }`}
-                            >
-                              {loading ? '抽取中...' : '立即抽取'}
                             </button>
                           </div>
                         </div>
@@ -501,7 +512,7 @@ function HomePage({ user, onLogout }) {
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-purple-100">当前余额</p>
-                  <p className="text-2xl font-bold">¥{user.balance.toFixed(2)}</p>
+                  <p className="text-2xl font-bold">¥{userBalance.toFixed(2)}</p>
                 </div>
               </div>
             </div>
@@ -603,7 +614,7 @@ function HomePage({ user, onLogout }) {
                 <div className="w-8 h-8 bg-purple-300 rounded-full"></div>
                 <div className="hidden md:block">
                   <p className="text-sm font-medium text-gray-800">{user.username}</p>
-                  <p className="text-xs text-gray-500">余额: ¥{user.balance.toFixed(2)}</p>
+                  <p className="text-xs text-gray-500">余额: ¥{userBalance.toFixed(2)}</p>
                 </div>
               </div>
               <button

@@ -4,7 +4,7 @@ import { join } from 'path';
 import { BlindBox } from '../entity/blind-box.entity';
 import { Prize, PrizeRarity } from '../entity/prize.entity';
 import { Order } from '../entity/order.entity';
-import { SqliteUserService } from './sqlite-user.service';
+import { MemoryUserService } from './memory-user.service';
 
 /**
  * 盲盒创建/更新请求数据结构
@@ -50,7 +50,7 @@ interface BlindBoxData {
 export class BlindBoxService {
 
   @Inject()
-  userService: SqliteUserService;
+  userService: MemoryUserService;
 
   private dataPath = join(__dirname, '../../database/blindbox_data.json');
   private blindBoxes: BlindBox[] = [];
@@ -546,9 +546,9 @@ export class BlindBoxService {
       return sum;
     }, 0);
 
-    // 获取用户数量（排除管理员）
+    // 获取用户数量
     const allUsers = await this.userService.getAllUsers();
-    const totalUsers = allUsers.filter(user => user.role !== 'admin').length;
+    const totalUsers = allUsers.length;
 
     return {
       totalBlindBoxes,
@@ -557,5 +557,91 @@ export class BlindBoxService {
       totalOrders: this.orders.length, // 使用实际订单数量
       totalRevenue: Number(totalRevenue.toFixed(2))
     };
+  }
+
+  /**
+   * 购买盲盒 - 支持并发安全
+   */
+  async purchaseBlindBox(userId: number, blindBoxId: number, quantity: number = 1): Promise<{
+    success: boolean;
+    message: string;
+    order?: Order;
+  }> {
+    try {
+      // 获取用户信息
+      const user = await this.userService.getUserById(userId);
+      if (!user) {
+        return { success: false, message: '用户不存在' };
+      }
+
+      // 获取盲盒信息
+      const blindBox = await this.getBlindBoxById(blindBoxId);
+      if (!blindBox) {
+        return { success: false, message: '盲盒不存在' };
+      }
+
+      // 检查盲盒状态
+      if (blindBox.status !== 1) {
+        return { success: false, message: '盲盒暂时不可购买' };
+      }
+
+      // 检查库存
+      if (blindBox.stock < quantity) {
+        return { success: false, message: `库存不足，仅剩 ${blindBox.stock} 个` };
+      }
+
+      // 计算总金额
+      const totalAmount = blindBox.price * quantity;
+
+      // 检查用户余额
+      if (user.balance < totalAmount) {
+        return { 
+          success: false, 
+          message: `余额不足，需要 ¥${totalAmount.toFixed(2)}，当前余额 ¥${user.balance.toFixed(2)}` 
+        };
+      }
+
+      // 原子性操作：扣减库存和余额，创建订单
+      const orderId = `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // 扣减盲盒库存
+      blindBox.stock -= quantity;
+      blindBox.updatedAt = new Date();
+
+      // 扣减用户余额
+      const updatedUser = await this.userService.updateUserBalance(userId, -totalAmount);
+      if (!updatedUser) {
+        return { success: false, message: '余额扣减失败' };
+      }
+
+      // 创建订单
+      const order: Order = {
+        id: orderId,
+        userId: userId,
+        username: user.username,
+        blindBoxId: blindBoxId,
+        blindBoxName: blindBox.name,
+        quantity: quantity,
+        totalAmount: totalAmount,
+        status: 'completed', // 立即完成订单
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      this.orders.push(order);
+
+      // 保存数据
+      await this.saveBlindBoxData();
+
+      return {
+        success: true,
+        message: '购买成功！',
+        order: order
+      };
+
+    } catch (error) {
+      console.error('购买失败:', error);
+      return { success: false, message: '购买失败，请重试' };
+    }
   }
 }

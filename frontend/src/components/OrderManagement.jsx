@@ -1,58 +1,36 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 
 /**
  * 订单管理组件
  */
 function OrderManagement({ user }) {
   const [activeTab, setActiveTab] = useState('all')
+  const [orders, setOrders] = useState([])
+  const [loading, setLoading] = useState(false)
 
-  // 模拟订单数据
-  const orders = [
-    {
-      id: 'ORD001',
-      type: '盲盒抽取',
-      items: [
-        { name: '可爱动物系列', quantity: 2, price: 59 }
-      ],
-      status: 'completed',
-      total: 118,
-      createTime: '2025-07-13 14:30:00',
-      completeTime: '2025-07-13 14:30:05'
-    },
-    {
-      id: 'ORD002',
-      type: '盲盒抽取',
-      items: [
-        { name: '梦幻公主系列', quantity: 1, price: 89 }
-      ],
-      status: 'completed',
-      total: 89,
-      createTime: '2025-07-12 16:20:00',
-      completeTime: '2025-07-12 16:20:03'
-    },
-    {
-      id: 'ORD003',
-      type: '余额充值',
-      items: [
-        { name: '账户充值', quantity: 1, price: 200 }
-      ],
-      status: 'completed',
-      total: 200,
-      createTime: '2025-07-11 10:15:00',
-      completeTime: '2025-07-11 10:15:30'
-    },
-    {
-      id: 'ORD004',
-      type: '盲盒抽取',
-      items: [
-        { name: '科幻机甲系列', quantity: 1, price: 99 }
-      ],
-      status: 'pending',
-      total: 99,
-      createTime: '2025-07-13 18:00:00',
-      completeTime: null
+  // 获取用户订单
+  useEffect(() => {
+    if (user?.id) {
+      fetchOrders()
     }
-  ]
+  }, [user])
+
+  const fetchOrders = async () => {
+    if (!user?.id) return
+    
+    setLoading(true)
+    try {
+      const response = await axios.get(`http://localhost:7001/api/orders?userId=${user.id}`)
+      if (response.data.success) {
+        setOrders(response.data.data || [])
+      }
+    } catch (error) {
+      console.error('获取订单失败:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -74,19 +52,15 @@ function OrderManagement({ user }) {
     }
   }
 
-  const getTypeIcon = (type) => {
-    switch (type) {
-      case '盲盒抽取': return '🎲'
-      case '余额充值': return '💰'
-      case '商品购买': return '🛒'
-      default: return '📋'
-    }
+  const getTypeIcon = (status) => {
+    // 根据订单状态返回图标，所有订单都是盲盒购买
+    return '�'
   }
 
   const filteredOrders = orders.filter(order => {
     if (activeTab === 'all') return true
-    if (activeTab === 'draw') return order.type === '盲盒抽取'
-    if (activeTab === 'recharge') return order.type === '余额充值'
+    if (activeTab === 'draw') return true // 所有订单都是盲盒购买
+    if (activeTab === 'recharge') return false // 暂时没有充值订单
     if (activeTab === 'pending') return order.status === 'pending'
     return true
   })
@@ -97,7 +71,7 @@ function OrderManagement({ user }) {
     const pending = orders.filter(o => o.status === 'pending').length
     const totalAmount = orders
       .filter(o => o.status === 'completed')
-      .reduce((sum, o) => sum + o.total, 0)
+      .reduce((sum, o) => sum + o.totalAmount, 0)
 
     return { total, completed, pending, totalAmount }
   }
@@ -183,7 +157,13 @@ function OrderManagement({ user }) {
 
       {/* 订单列表 */}
       <div className="space-y-4">
-        {filteredOrders.length === 0 ? (
+        {loading ? (
+          <div className="bg-white rounded-lg p-8 shadow-sm text-center">
+            <div className="text-gray-400 text-4xl mb-4">⏳</div>
+            <h3 className="text-lg font-medium text-gray-800 mb-2">加载中...</h3>
+            <p className="text-gray-600">正在获取订单数据</p>
+          </div>
+        ) : filteredOrders.length === 0 ? (
           <div className="bg-white rounded-lg p-8 shadow-sm text-center">
             <div className="text-gray-400 text-4xl mb-4">📋</div>
             <h3 className="text-lg font-medium text-gray-800 mb-2">暂无订单</h3>
@@ -195,10 +175,10 @@ function OrderManagement({ user }) {
               {/* 订单头部 */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <span className="text-2xl">{getTypeIcon(order.type)}</span>
+                  <span className="text-2xl">{getTypeIcon(order.status)}</span>
                   <div>
                     <h3 className="font-medium text-gray-800">订单号: {order.id}</h3>
-                    <p className="text-sm text-gray-600">{order.createTime}</p>
+                    <p className="text-sm text-gray-600">{new Date(order.createdAt).toLocaleString()}</p>
                   </div>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
@@ -208,34 +188,35 @@ function OrderManagement({ user }) {
 
               {/* 订单内容 */}
               <div className="space-y-2 mb-4">
-                {order.items.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-purple-300 rounded-lg"></div>
-                      <div>
-                        <p className="font-medium text-gray-800">{item.name}</p>
-                        <p className="text-sm text-gray-600">数量: {item.quantity}</p>
-                      </div>
+                <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-purple-300 rounded-lg flex items-center justify-center">
+                      <span className="text-white text-xl">📦</span>
                     </div>
-                    <div className="text-right">
-                      <p className="font-medium text-gray-800">¥{item.price.toFixed(2)}</p>
-                      <p className="text-sm text-gray-600">单价</p>
+                    <div>
+                      <p className="font-medium text-gray-800">{order.blindBoxName}</p>
+                      <p className="text-sm text-gray-600">数量: {order.quantity}</p>
                     </div>
                   </div>
-                ))}
+                  <div className="text-right">
+                    <p className="font-medium text-gray-800">¥{(order.totalAmount / order.quantity).toFixed(2)}</p>
+                    <p className="text-sm text-gray-600">单价</p>
+                  </div>
+                </div>
               </div>
 
               {/* 订单底部 */}
               <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                 <div className="text-sm text-gray-600">
-                  {order.completeTime && (
-                    <p>完成时间: {order.completeTime}</p>
+                  <p>创建时间: {new Date(order.createdAt).toLocaleString()}</p>
+                  {order.status === 'completed' && (
+                    <p>完成时间: {new Date(order.updatedAt).toLocaleString()}</p>
                   )}
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="text-right">
                     <p className="text-sm text-gray-600">订单总额</p>
-                    <p className="text-lg font-bold text-purple-600">¥{order.total.toFixed(2)}</p>
+                    <p className="text-lg font-bold text-purple-600">¥{order.totalAmount.toFixed(2)}</p>
                   </div>
                   <div className="flex space-x-2">
                     <button className="px-4 py-2 text-sm text-purple-600 border border-purple-600 rounded-lg hover:bg-purple-50 transition-colors">

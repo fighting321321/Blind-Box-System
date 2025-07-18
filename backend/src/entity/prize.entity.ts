@@ -1,6 +1,16 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { IsNotEmpty, IsNumber, IsString, IsOptional, Min, Max } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsOptional, Min, Max, IsIn } from 'class-validator';
 import { BlindBox } from './blind-box.entity';
+
+/**
+ * 奖品稀有度枚举
+ */
+export enum PrizeRarity {
+  COMMON = 'common',      // 普通
+  RARE = 'rare',          // 稀有
+  EPIC = 'epic',          // 史诗
+  LEGENDARY = 'legendary' // 传说
+}
 
 /**
  * 奖品实体类 - 用于存储奖品信息
@@ -49,13 +59,17 @@ export class Prize {
   imageUrl?: string;
 
   /**
-   * 奖品价值 - 可选字段
+   * 奖品稀有度 - 必填字段
    */
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  @IsOptional()
-  @IsNumber({}, { message: '奖品价值必须是数字' })
-  @Min(0, { message: '奖品价值不能为负数' })
-  value?: number;
+  @Column({ 
+    type: 'varchar', 
+    length: 20, 
+    default: PrizeRarity.COMMON 
+  })
+  @IsNotEmpty({ message: '奖品稀有度不能为空' })
+  @IsString({ message: '奖品稀有度必须是字符串' })
+  @IsIn(Object.values(PrizeRarity), { message: '无效的稀有度等级' })
+  rarity: PrizeRarity;
 
   /**
    * 奖品状态 - 1:启用 0:禁用

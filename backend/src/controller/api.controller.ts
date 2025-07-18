@@ -58,7 +58,7 @@ export class APIController {
    * GET /api/blind-boxes/:id
    */
   @Get('/blind-boxes/:id')
-  async getBlindBoxById(@Query('id') id: number) {
+  async getBlindBoxById(@Param('id') id: number) {
     try {
       const blindBox = await this.blindBoxService.getBlindBoxById(id);
       if (!blindBox) {

@@ -84,7 +84,8 @@
         "updatedAt": "2025-07-15T16:43:43.394Z"
       },
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-15T16:43:43.394Z"
+      "updatedAt": "2025-07-18T16:01:25.349Z",
+      "rarity": "RARE"
     },
     {
       "id": 3,
@@ -108,7 +109,8 @@
         "updatedAt": "2025-07-15T16:43:43.394Z"
       },
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-15T16:43:43.394Z"
+      "updatedAt": "2025-07-18T16:01:47.891Z",
+      "rarity": "LEGENDARY"
     },
     {
       "id": 4,
@@ -156,7 +158,8 @@
         "updatedAt": "2025-07-15T16:43:43.394Z"
       },
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-15T16:43:43.394Z"
+      "updatedAt": "2025-07-18T16:01:35.180Z",
+      "rarity": "EPIC"
     },
     {
       "id": 6,
@@ -180,12 +183,13 @@
         "updatedAt": "2025-07-15T16:43:43.394Z"
       },
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-15T16:43:43.394Z"
+      "updatedAt": "2025-07-18T16:01:38.013Z",
+      "rarity": "LEGENDARY"
     }
   ],
   "orders": [],
   "nextBlindBoxId": 12,
   "nextPrizeId": 18,
   "nextOrderId": 1,
-  "lastUpdate": "2025-07-16T16:01:15.388Z"
+  "lastUpdate": "2025-07-18T16:01:47.891Z"
 }

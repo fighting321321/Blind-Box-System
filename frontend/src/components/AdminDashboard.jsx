@@ -37,6 +37,17 @@ const AdminDashboard = ({ user, onLogout }) => {
     }
   }, [])
 
+  // 稀有度映射函数 - 将英文稀有度转换为中文显示
+  const getRarityDisplayName = (rarity) => {
+    const rarityMap = {
+      'COMMON': '普通',
+      'RARE': '稀有', 
+      'EPIC': '超稀有',
+      'LEGENDARY': '传说'
+    }
+    return rarityMap[rarity] || '普通'
+  }
+
   // 获取统计数据
   const fetchStats = async () => {
     try {
@@ -394,9 +405,16 @@ const AdminDashboard = ({ user, onLogout }) => {
       description: item?.description || '',
       probability: item?.probability || 0,
       imageUrl: item?.imageUrl || '',
-      value: item?.value || 0,
+      rarity: item?.rarity || 'COMMON',
       blindBoxId: item?.blindBoxId || selectedBlindBox?.id || 0
     })
+
+    const rarityOptions = [
+      { value: 'COMMON', label: '普通' },
+      { value: 'RARE', label: '稀有' },
+      { value: 'EPIC', label: '超稀有' },
+      { value: 'LEGENDARY', label: '传说' }
+    ]
 
     const handleSubmit = (e) => {
       e.preventDefault()
@@ -443,15 +461,19 @@ const AdminDashboard = ({ user, onLogout }) => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">奖品价值</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.value}
-                onChange={(e) => setFormData({ ...formData, value: parseFloat(e.target.value) || 0 })}
+              <label className="block text-sm font-medium text-gray-700 mb-1">稀有度</label>
+              <select
+                value={formData.rarity}
+                onChange={(e) => setFormData({ ...formData, rarity: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+                required
+              >
+                {rarityOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">图片URL</label>
@@ -606,7 +628,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">{prize.name}</h3>
                 <p className="text-gray-600 text-sm mb-2">{prize.description}</p>
                 <div className="flex items-center space-x-4 text-sm text-gray-500">
-                  <span>价值: ¥{(prize.value || 0).toFixed(2)}</span>
+                  <span>稀有度: {getRarityDisplayName(prize.rarity)}</span>
                   <span>概率: {(prize.probability * 100).toFixed(1)}%</span>
                 </div>
               </div>

@@ -18,49 +18,36 @@ function BlindBoxDetail({ blindBox, onBack }) {
     )
   }
 
-  // 模拟盲盒内容物数据
-  const items = [
-    { 
-      id: 1, 
-      name: '可爱小熊 - 普通款', 
-      rarity: '普通', 
-      probability: 40, 
-      color: 'bg-pink-200',
-      description: '经典可爱造型，适合日常摆放'
-    },
-    { 
-      id: 2, 
-      name: '可爱小熊 - 彩色款', 
-      rarity: '普通', 
-      probability: 30, 
-      color: 'bg-pink-300',
-      description: '多彩涂装版本，更加亮眼'
-    },
-    { 
-      id: 3, 
-      name: '可爱小熊 - 闪亮款', 
-      rarity: '稀有', 
-      probability: 20, 
-      color: 'bg-blue-300',
-      description: '带有闪亮效果的特殊版本'
-    },
-    { 
-      id: 4, 
-      name: '可爱小熊 - 黄金款', 
-      rarity: '超稀有', 
-      probability: 8, 
-      color: 'bg-yellow-400',
-      description: '黄金涂装，收藏价值极高'
-    },
-    { 
-      id: 5, 
-      name: '可爱小熊 - 钻石款', 
-      rarity: '传说', 
-      probability: 2, 
-      color: 'bg-purple-500',
-      description: '最稀有的钻石版本，万中挑一'
+  // 稀有度映射函数 - 将英文稀有度转换为中文显示
+  const getRarityDisplayName = (rarity) => {
+    const rarityMap = {
+      'COMMON': '普通',
+      'RARE': '稀有', 
+      'EPIC': '超稀有',
+      'LEGENDARY': '传说'
     }
-  ]
+    return rarityMap[rarity] || '普通'
+  }
+
+  // 获取稀有度对应的颜色
+  const getRarityColor = (rarity) => {
+    const displayRarity = getRarityDisplayName(rarity)
+    switch (displayRarity) {
+      case '普通': return 'bg-gray-200'
+      case '稀有': return 'bg-blue-200'
+      case '超稀有': return 'bg-purple-200'
+      case '传说': return 'bg-orange-200'
+      default: return 'bg-gray-200'
+    }
+  }
+
+  // 处理奖品数据，使用后端返回的稀有度信息
+  const items = (blindBox.prizes || []).map(prize => ({
+    ...prize,
+    rarity: getRarityDisplayName(prize.rarity), // 使用后端返回的稀有度
+    probabilityPercent: Math.round(prize.probability * 100),
+    color: getRarityColor(prize.rarity) // 根据稀有度获取颜色
+  }))
 
   // 用户评价数据
   const reviews = [
@@ -90,7 +77,7 @@ function BlindBoxDetail({ blindBox, onBack }) {
     }
   ]
 
-  const getRarityColor = (rarity) => {
+  const getRarityTextColor = (rarity) => {
     switch (rarity) {
       case '普通': return 'text-gray-600 bg-gray-100'
       case '稀有': return 'text-blue-600 bg-blue-100'
@@ -165,61 +152,97 @@ function BlindBoxDetail({ blindBox, onBack }) {
     </div>
   )
 
-  const renderItems = () => (
-    <div className="space-y-4">
-      <div className="bg-white rounded-lg p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">内容物列表</h3>
-        <div className="space-y-4">
-          {items.map((item) => (
-            <div key={item.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
-              <div className={`${item.color} w-16 h-16 rounded-lg`}></div>
-              <div className="flex-1">
-                <h4 className="font-medium text-gray-800 mb-1">{item.name}</h4>
-                <p className="text-sm text-gray-600 mb-2">{item.description}</p>
-                <div className="flex items-center space-x-3">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRarityColor(item.rarity)}`}>
-                    {item.rarity}
-                  </span>
-                  <span className="text-sm text-gray-500">概率: {item.probability}%</span>
+  const renderItems = () => {
+    // 计算总概率
+    const totalProbability = items.reduce((sum, item) => sum + item.probabilityPercent, 0)
+    
+    return (
+      <div className="space-y-4">
+        <div className="bg-white rounded-lg p-6 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">内容物列表</h3>
+          <div className="space-y-4">
+            {items.map((item) => (
+              <div key={item.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
+                <div className={`${item.color} w-16 h-16 rounded-lg flex items-center justify-center`}>
+                  <span className="text-2xl">🎁</span>
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-800 mb-1">{item.name}</h4>
+                  <p className="text-sm text-gray-600 mb-2">{item.description}</p>
+                  <div className="flex items-center space-x-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRarityTextColor(item.rarity)}`}>
+                      {item.rarity}
+                    </span>
+                    <span className="text-sm text-gray-500">概率: {item.probabilityPercent}%</span>
+                    {item.rarity && (
+                      <span className="text-sm text-purple-600">稀有度: {item.rarity}</span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* 概率统计 */}
-      <div className="bg-white rounded-lg p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">概率统计</h3>
-        <div className="space-y-3">
-          {['普通', '稀有', '超稀有', '传说'].map((rarity) => {
-            const totalProb = items
-              .filter(item => item.rarity === rarity)
-              .reduce((sum, item) => sum + item.probability, 0)
+        {/* 概率统计 */}
+        <div className="bg-white rounded-lg p-6 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">概率统计</h3>
+          <div className="space-y-3">
+            {['普通', '稀有', '超稀有', '传说'].map((rarity) => {
+              const totalProb = items
+                .filter(item => item.rarity === rarity)
+                .reduce((sum, item) => sum + item.probabilityPercent, 0)
+              
+              if (totalProb === 0) return null;
+              
+              return (
+                <div key={rarity} className="flex items-center">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium w-20 text-center ${getRarityTextColor(rarity)}`}>
+                    {rarity}
+                  </span>
+                  <div className="flex-1 mx-4 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full ${
+                        rarity === '普通' ? 'bg-gray-500' :
+                        rarity === '稀有' ? 'bg-blue-500' :
+                        rarity === '超稀有' ? 'bg-purple-500' : 'bg-orange-500'
+                      }`}
+                      style={{ width: `${totalProb}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm text-gray-600 w-12 text-right">{totalProb}%</span>
+                </div>
+              )
+            })}
             
-            return (
-              <div key={rarity} className="flex items-center">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium w-20 text-center ${getRarityColor(rarity)}`}>
-                  {rarity}
+            {/* 如果总概率不足100%，显示"无"选项 */}
+            {totalProbability < 100 && (
+              <div className="flex items-center">
+                <span className="px-3 py-1 rounded-full text-sm font-medium w-20 text-center text-gray-600 bg-gray-100">
+                  无
                 </span>
                 <div className="flex-1 mx-4 bg-gray-200 rounded-full h-2">
                   <div 
-                    className={`h-2 rounded-full ${
-                      rarity === '普通' ? 'bg-gray-500' :
-                      rarity === '稀有' ? 'bg-blue-500' :
-                      rarity === '超稀有' ? 'bg-purple-500' : 'bg-orange-500'
-                    }`}
-                    style={{ width: `${totalProb}%` }}
+                    className="h-2 rounded-full bg-gray-400"
+                    style={{ width: `${100 - totalProbability}%` }}
                   ></div>
                 </div>
-                <span className="text-sm text-gray-600 w-12 text-right">{totalProb}%</span>
+                <span className="text-sm text-gray-600 w-12 text-right">{100 - totalProbability}%</span>
               </div>
-            )
-          })}
+            )}
+          </div>
+          
+          {/* 总概率显示 */}
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">总概率:</span>
+              <span className="text-sm font-medium text-gray-800">{totalProbability}%</span>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   const renderReviews = () => (
     <div className="space-y-4">

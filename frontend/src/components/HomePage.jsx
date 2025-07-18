@@ -111,8 +111,8 @@ function HomePage({ user, onLogout }) {
           addedTime: new Date(item.createdAt),
           libraryItemId: item.id, // 保存库项目ID用于后续操作
           blindBoxId: item.blindBoxId, // 保存原始盲盒ID
-          // 使用库项目ID作为React key，避免冲突
-          id: item.id
+          // 保持原始盲盒ID，不要被覆盖
+          // id 字段保持为盲盒的真实ID，用于API调用
         }))
         setUserLibrary(formattedLibrary)
       }
@@ -214,15 +214,36 @@ function HomePage({ user, onLogout }) {
     setTimeout(() => setToast(null), 3000)
   }
 
-  const handleBlindBoxClick = (blindBox) => {
-    setSelectedBlindBox(blindBox)
-    setPreviousTab(activeTab) // 记录当前页面作为来源页面
-    setActiveTab('detail')
+  const handleBlindBoxClick = async (blindBox) => {
+    try {
+      setLoading(true)
+      
+      // 获取包含奖品信息的完整盲盒详情
+      const response = await blindBoxAPI.getBlindBoxById(blindBox.id)
+      
+      if (response.success) {
+        const mergedData = {
+          ...blindBox, // 保留列表页的显示属性
+          ...response.data // 使用后端的完整数据（包含奖品）
+        }
+        
+        setSelectedBlindBox(mergedData)
+        setPreviousTab(activeTab) // 记录当前页面作为来源页面
+        setActiveTab('detail')
+      } else {
+        showToast(response.message || '获取盲盒详情失败', 'error')
+      }
+    } catch (error) {
+      console.error('获取盲盒详情失败:', error)
+      showToast('网络错误，请稍后重试', 'error')
+    } finally {
+      setLoading(false)
+    }
   }
 
   // 渲染盲盒卡片
   const renderBlindBoxCard = (blindBox, showAddButton = true) => {
-    const isInLibrary = userLibrary.some(item => item.blindBoxId === blindBox.id)
+    const isInLibrary = userLibrary.some(item => item.id === blindBox.id)
     
     return (
       <div key={blindBox.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
@@ -414,10 +435,10 @@ function HomePage({ user, onLogout }) {
               ) : (
                 <div className="space-y-4">
                   {userLibrary.map(blindBox => (
-                    <div key={blindBox.id} className="bg-gray-50 rounded-lg p-4">
+                    <div key={blindBox.libraryItemId} className="bg-gray-50 rounded-lg p-4">
                       <div className="flex items-start space-x-4">
                         <BlindBoxImage
-                          blindBoxId={blindBox.blindBoxId}
+                          blindBoxId={blindBox.id}
                           name={blindBox.name}
                           width={64}
                           height={64}
@@ -427,7 +448,7 @@ function HomePage({ user, onLogout }) {
                           <div className="flex items-start justify-between mb-2">
                             <h3 className="font-medium text-gray-800">{blindBox.name}</h3>
                             <button
-                              onClick={() => removeFromLibrary(blindBox.id)}
+                              onClick={() => removeFromLibrary(blindBox.libraryItemId)}
                               className="text-red-500 hover:text-red-700 text-sm"
                             >
                               移除
@@ -504,9 +525,9 @@ function HomePage({ user, onLogout }) {
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {userLibrary.slice(0, 4).map(blindBox => (
-                    <div key={blindBox.id} className="text-center">
+                    <div key={blindBox.libraryItemId} className="text-center">
                       <BlindBoxImage
-                        blindBoxId={blindBox.blindBoxId}
+                        blindBoxId={blindBox.id}
                         name={blindBox.name}
                         width={64}
                         height={64}

@@ -1,8 +1,9 @@
 import { Controller, Post, Get, Put, Del, Body, Param, Query, Inject, Headers } from '@midwayjs/core';
 import { Validate } from '@midwayjs/validate';
-import { IsNotEmpty, IsNumber, IsString, IsOptional, Min } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsOptional, Min, IsEnum } from 'class-validator';
 import { SqliteUserService } from '../service/sqlite-user.service';
 import { BlindBoxService } from '../service/blindbox.service';
+import { PrizeRarity } from '../entity/prize.entity';
 
 /**
  * 盲盒创建/更新验证DTO
@@ -53,9 +54,8 @@ class PrizeDto {
   imageUrl?: string;
 
   @IsOptional()
-  @IsNumber({}, { message: '奖品价值必须是数字' })
-  @Min(0, { message: '奖品价值不能为负数' })
-  value?: number;
+  @IsEnum(PrizeRarity, { message: '奖品稀有度必须是有效的稀有度值' })
+  rarity?: PrizeRarity;
 
   @IsNotEmpty({ message: '盲盒ID不能为空' })
   @IsNumber({}, { message: '盲盒ID必须是数字' })

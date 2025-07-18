@@ -9,7 +9,7 @@
       "status": 1,
       "role": "admin",
       "createdAt": "2025-07-15T00:00:00.000Z",
-      "updatedAt": "2025-07-16T16:01:50.829Z"
+      "updatedAt": "2025-07-18T16:02:06.452Z"
     },
     {
       "id": 1,
@@ -20,7 +20,7 @@
       "status": 1,
       "role": "user",
       "createdAt": "2025-07-13T12:26:48.374Z",
-      "updatedAt": "2025-07-16T16:02:03.002Z"
+      "updatedAt": "2025-07-18T16:02:15.064Z"
     },
     {
       "id": 2,
@@ -31,9 +31,9 @@
       "status": 1,
       "role": "user",
       "createdAt": "2025-07-13T12:29:58.062Z",
-      "updatedAt": "2025-07-13T12:30:05.154Z"
+      "updatedAt": "2025-07-17T16:28:43.370Z"
     }
   ],
   "nextId": 3,
-  "lastUpdate": "2025-07-16T16:02:03.002Z"
+  "lastUpdate": "2025-07-18T16:02:15.065Z"
 }

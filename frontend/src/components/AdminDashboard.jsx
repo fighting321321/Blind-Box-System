@@ -818,16 +818,16 @@ const AdminDashboard = ({ user, onLogout }) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.role === 'admin'
-                        ? 'bg-purple-100 text-purple-800'
-                        : 'bg-gray-100 text-gray-800'
+                      ? 'bg-purple-100 text-purple-800'
+                      : 'bg-gray-100 text-gray-800'
                       }`}>
                       {user.role === 'admin' ? '管理员' : '普通用户'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.status === 1
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
                       }`}>
                       {user.status === 1 ? '正常' : '禁用'}
                     </span>
@@ -840,8 +840,8 @@ const AdminDashboard = ({ user, onLogout }) => {
                       <button
                         onClick={() => updateUserStatus(user.id, user.status === 1 ? 0 : 1)}
                         className={`inline-flex items-center px-3 py-1 rounded-md text-sm font-medium ${user.status === 1
-                            ? 'bg-red-100 text-red-800 hover:bg-red-200'
-                            : 'bg-green-100 text-green-800 hover:bg-green-200'
+                          ? 'bg-red-100 text-red-800 hover:bg-red-200'
+                          : 'bg-green-100 text-green-800 hover:bg-green-200'
                           }`}
                       >
                         {user.status === 1 ? (
@@ -876,8 +876,8 @@ const AdminDashboard = ({ user, onLogout }) => {
       '盲盒名称': order.blindBoxName,
       '购买数量': order.quantity,
       '总金额': order.totalAmount.toFixed(2),
-      '订单状态': order.status === 'completed' ? '已完成' : 
-                 order.status === 'pending' ? '进行中' : '已取消',
+      '订单状态': order.status === 'completed' ? '已完成' :
+        order.status === 'pending' ? '进行中' : '已取消',
       '购买时间': new Date(order.createdAt).toLocaleString()
     }))
 
@@ -1104,10 +1104,10 @@ const AdminDashboard = ({ user, onLogout }) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${order.status === 'completed'
-                        ? 'bg-green-100 text-green-800'
-                        : order.status === 'pending'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
+                      ? 'bg-green-100 text-green-800'
+                      : order.status === 'pending'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
                       }`}>
                       {order.status === 'completed' ? '已完成' :
                         order.status === 'pending' ? '进行中' : '已取消'}
@@ -1139,7 +1139,7 @@ const AdminDashboard = ({ user, onLogout }) => {
               >
                 上一页
               </button>
-              
+
               <div className="flex items-center space-x-1">
                 {Array.from({ length: Math.min(5, totalOrderPages) }, (_, i) => {
                   let pageNum
@@ -1152,16 +1152,15 @@ const AdminDashboard = ({ user, onLogout }) => {
                   } else {
                     pageNum = orderPage - 2 + i
                   }
-                  
+
                   return (
                     <button
                       key={pageNum}
                       onClick={() => setOrderPage(pageNum)}
-                      className={`px-3 py-1 text-sm rounded ${
-                        orderPage === pageNum
+                      className={`px-3 py-1 text-sm rounded ${orderPage === pageNum
                           ? 'bg-blue-600 text-white'
                           : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
-                      }`}
+                        }`}
                     >
                       {pageNum}
                     </button>

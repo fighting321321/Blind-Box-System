@@ -28,10 +28,10 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
       })
 
       if (response.data.success) {
-        showToast(response.data.message || '购买成功！', 'success')
-        // 调用成功回调
+        showToast(`🎉 购买成功！获得 ${quantity} 个 ${blindBox.name}`, 'success')
+        // 调用成功回调，传递更新后的用户信息
         if (onPurchaseSuccess) {
-          onPurchaseSuccess()
+          onPurchaseSuccess(response.data.user) // 传递用户信息
         }
         if (response.data.order) {
           console.log('订单信息:', response.data.order)
@@ -61,7 +61,7 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
   const getRarityDisplayName = (rarity) => {
     const rarityMap = {
       'COMMON': '普通',
-      'RARE': '稀有', 
+      'RARE': '稀有',
       'EPIC': '超稀有',
       'LEGENDARY': '传说'
     }
@@ -194,7 +194,7 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
   const renderItems = () => {
     // 计算总概率
     const totalProbability = items.reduce((sum, item) => sum + item.probabilityPercent, 0)
-    
+
     return (
       <div className="space-y-4">
         <div className="bg-white rounded-lg p-6 shadow-sm">
@@ -231,21 +231,20 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
               const totalProb = items
                 .filter(item => item.rarity === rarity)
                 .reduce((sum, item) => sum + item.probabilityPercent, 0)
-              
+
               if (totalProb === 0) return null;
-              
+
               return (
                 <div key={rarity} className="flex items-center">
                   <span className={`px-3 py-1 rounded-full text-sm font-medium w-20 text-center ${getRarityTextColor(rarity)}`}>
                     {rarity}
                   </span>
                   <div className="flex-1 mx-4 bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full ${
-                        rarity === '普通' ? 'bg-gray-500' :
+                    <div
+                      className={`h-2 rounded-full ${rarity === '普通' ? 'bg-gray-500' :
                         rarity === '稀有' ? 'bg-blue-500' :
-                        rarity === '超稀有' ? 'bg-purple-500' : 'bg-orange-500'
-                      }`}
+                          rarity === '超稀有' ? 'bg-purple-500' : 'bg-orange-500'
+                        }`}
                       style={{ width: `${totalProb}%` }}
                     ></div>
                   </div>
@@ -253,7 +252,7 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
                 </div>
               )
             })}
-            
+
             {/* 如果总概率不足100%，显示"无"选项 */}
             {totalProbability < 100 && (
               <div className="flex items-center">
@@ -261,7 +260,7 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
                   无
                 </span>
                 <div className="flex-1 mx-4 bg-gray-200 rounded-full h-2">
-                  <div 
+                  <div
                     className="h-2 rounded-full bg-gray-400"
                     style={{ width: `${100 - totalProbability}%` }}
                   ></div>
@@ -270,7 +269,7 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
               </div>
             )}
           </div>
-          
+
           {/* 总概率显示 */}
           <div className="mt-4 pt-4 border-t border-gray-200">
             <div className="flex justify-between items-center">
@@ -414,21 +413,20 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
               </div>
 
               <div className="flex space-x-4">
-                <button 
+                <button
                   onClick={handlePurchase}
                   disabled={purchasing || !user}
-                  className={`flex-1 px-6 py-3 text-white rounded-lg font-medium transition-colors ${
-                    purchasing 
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : !user 
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-purple-600 hover:bg-purple-700'
-                  }`}
+                  className={`flex-1 px-6 py-3 text-white rounded-lg font-medium transition-colors ${purchasing
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : !user
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-purple-600 hover:bg-purple-700'
+                    }`}
                 >
-                  {purchasing 
-                    ? '购买中...' 
-                    : !user 
-                      ? '请先登录' 
+                  {purchasing
+                    ? '购买中...'
+                    : !user
+                      ? '请先登录'
                       : `立即购买 (¥${(blindBox.price * quantity).toFixed(2)})`
                   }
                 </button>
@@ -445,31 +443,28 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
       <div className="bg-white rounded-lg shadow-sm">
         <div className="flex border-b border-gray-200">
           <button
-            className={`flex-1 py-3 px-6 text-center font-medium transition-colors ${
-              activeTab === 'detail'
-                ? 'text-purple-600 border-b-2 border-purple-600'
-                : 'text-gray-600 hover:text-purple-600'
-            }`}
+            className={`flex-1 py-3 px-6 text-center font-medium transition-colors ${activeTab === 'detail'
+              ? 'text-purple-600 border-b-2 border-purple-600'
+              : 'text-gray-600 hover:text-purple-600'
+              }`}
             onClick={() => setActiveTab('detail')}
           >
             商品详情
           </button>
           <button
-            className={`flex-1 py-3 px-6 text-center font-medium transition-colors ${
-              activeTab === 'items'
-                ? 'text-purple-600 border-b-2 border-purple-600'
-                : 'text-gray-600 hover:text-purple-600'
-            }`}
+            className={`flex-1 py-3 px-6 text-center font-medium transition-colors ${activeTab === 'items'
+              ? 'text-purple-600 border-b-2 border-purple-600'
+              : 'text-gray-600 hover:text-purple-600'
+              }`}
             onClick={() => setActiveTab('items')}
           >
             内容物
           </button>
           <button
-            className={`flex-1 py-3 px-6 text-center font-medium transition-colors ${
-              activeTab === 'reviews'
-                ? 'text-purple-600 border-b-2 border-purple-600'
-                : 'text-gray-600 hover:text-purple-600'
-            }`}
+            className={`flex-1 py-3 px-6 text-center font-medium transition-colors ${activeTab === 'reviews'
+              ? 'text-purple-600 border-b-2 border-purple-600'
+              : 'text-gray-600 hover:text-purple-600'
+              }`}
             onClick={() => setActiveTab('reviews')}
           >
             用户评价

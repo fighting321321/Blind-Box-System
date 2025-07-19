@@ -1,6 +1,6 @@
 import { Inject, Controller, Get, Query, Post, Body, Put, Del, Param } from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
-import { MemoryUserService } from '../service/memory-user.service';
+import { SqliteUserService } from '../service/sqlite-user.service';
 import { BlindBoxService } from '../service/blindbox.service';
 import { UserLibraryService } from '../service/user-library.service';
 
@@ -14,7 +14,7 @@ export class APIController {
   ctx: Context;
 
   @Inject()
-  userService: MemoryUserService;
+  userService: SqliteUserService;
 
   @Inject()
   blindBoxService: BlindBoxService;
@@ -65,10 +65,10 @@ export class APIController {
         return { success: false, message: '盲盒不存在', data: null };
       }
       const prizes = await this.blindBoxService.getBlindBoxPrizes(id);
-      return { 
-        success: true, 
-        message: 'OK', 
-        data: { ...blindBox, prizes } 
+      return {
+        success: true,
+        message: 'OK',
+        data: { ...blindBox, prizes }
       };
     } catch (error) {
       return { success: false, message: error.message || '获取盲盒详情失败', data: null };
@@ -83,7 +83,7 @@ export class APIController {
   async drawBlindBox(@Body() body: { userId: number; blindBoxId: number }) {
     try {
       const { userId, blindBoxId } = body;
-      
+
       // 检查用户是否存在
       const user = await this.userService.getUserById(userId);
       if (!user) {
@@ -186,6 +186,16 @@ export class APIController {
       }
 
       const result = await this.blindBoxService.purchaseBlindBox(body.userId, body.blindBoxId, quantity);
+
+      // 如果购买成功，获取更新后的用户信息
+      if (result.success) {
+        const updatedUser = await this.userService.getUserById(body.userId);
+        return {
+          ...result,
+          user: updatedUser // 包含更新后的用户信息（包括余额）
+        };
+      }
+
       return result;
     } catch (error) {
       console.error('购买接口错误:', error);
@@ -242,7 +252,7 @@ export class APIController {
       }
 
       const libraryItems = await this.userLibraryService.getUserLibrary(userId);
-      
+
       // 获取盲盒详细信息
       const libraryWithDetails = await Promise.all(
         libraryItems.map(async (item) => {

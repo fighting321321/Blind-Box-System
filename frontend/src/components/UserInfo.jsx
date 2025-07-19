@@ -24,7 +24,7 @@ function UserInfo({ user, onLogout }) {
           Authorization: `Bearer ${token}`
         }
       })
-      
+
       if (response.data.success) {
         setUserDetails(response.data.data)
       } else {
@@ -90,7 +90,7 @@ function UserInfo({ user, onLogout }) {
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           {error}
-          <button 
+          <button
             onClick={fetchUserInfo}
             className="ml-2 text-red-800 underline hover:no-underline"
           >
@@ -102,7 +102,7 @@ function UserInfo({ user, onLogout }) {
       {/* 用户详细信息 */}
       <div className="bg-gray-50 rounded-lg p-4 space-y-3">
         <h3 className="font-semibold text-gray-800 mb-3">账户信息</h3>
-        
+
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-gray-600">用户ID:</span>
@@ -134,11 +134,10 @@ function UserInfo({ user, onLogout }) {
         <button
           onClick={fetchUserInfo}
           disabled={loading}
-          className={`w-full py-2 px-4 rounded-md text-purple-600 border border-purple-600 font-medium ${
-            loading
+          className={`w-full py-2 px-4 rounded-md text-purple-600 border border-purple-600 font-medium ${loading
               ? 'opacity-50 cursor-not-allowed'
               : 'hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2'
-          } transition-colors`}
+            } transition-colors`}
         >
           {loading ? '刷新中...' : '刷新信息'}
         </button>

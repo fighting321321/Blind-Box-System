@@ -19,15 +19,39 @@ function App() {
   const [isLoading, setIsLoading] = useState(true) // 页面加载状态
 
   /**
+   * 刷新用户余额
+   * @param {number} userId - 用户ID
+   */
+  const refreshUserBalance = async (userId) => {
+    try {
+      const response = await fetch(`http://localhost:7001/api/user/${userId}/balance`)
+      const data = await response.json()
+      if (data.success) {
+        console.log(`🔄 登录后余额检查: ${data.data.balance}`)
+        // 更新用户对象中的余额信息
+        setUser(prevUser => ({
+          ...prevUser,
+          balance: data.data.balance
+        }))
+      }
+    } catch (error) {
+      console.error('刷新余额失败:', error)
+    }
+  }
+
+  /**
    * 处理用户登录成功
    * @param {Object} userData - 用户数据
    * @param {string} userToken - JWT令牌
    */
-  const handleLoginSuccess = (userData, userToken) => {
+  const handleLoginSuccess = async (userData, userToken) => {
     setUser(userData)
     setToken(userToken)
     localStorage.setItem('token', userToken)
     setCurrentView('home')
+
+    // 登录成功后立即检查用户余额
+    await refreshUserBalance(userData.id)
   }
 
   /**
@@ -63,9 +87,13 @@ function App() {
         const data = await response.json()
         if (data.success) {
           // token有效，恢复用户状态
-          setUser(data.data.user)
+          const userData = data.data.user
+          setUser(userData)
           setToken(storedToken)
           setCurrentView('home')
+
+          // 立即获取最新的用户余额
+          await refreshUserBalance(userData.id)
         } else {
           // token无效，清除存储的token
           localStorage.removeItem('token')
@@ -126,21 +154,19 @@ function App() {
             {!user && (
               <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
                 <button
-                  className={`flex-1 py-2 px-4 rounded-md transition-colors ${
-                    currentView === 'login'
+                  className={`flex-1 py-2 px-4 rounded-md transition-colors ${currentView === 'login'
                       ? 'bg-white text-purple-600 shadow-sm'
                       : 'text-gray-600 hover:text-purple-600'
-                  }`}
+                    }`}
                   onClick={() => setCurrentView('login')}
                 >
                   登录
                 </button>
                 <button
-                  className={`flex-1 py-2 px-4 rounded-md transition-colors ${
-                    currentView === 'register'
+                  className={`flex-1 py-2 px-4 rounded-md transition-colors ${currentView === 'register'
                       ? 'bg-white text-purple-600 shadow-sm'
                       : 'text-gray-600 hover:text-purple-600'
-                  }`}
+                    }`}
                   onClick={() => setCurrentView('register')}
                 >
                   注册
@@ -152,11 +178,11 @@ function App() {
             {currentView === 'login' && (
               <LoginForm onSuccess={handleLoginSuccess} />
             )}
-            
+
             {currentView === 'register' && (
               <RegisterForm onSuccess={handleRegisterSuccess} />
             )}
-            
+
             {currentView === 'user' && user && (
               <UserInfo user={user} onLogout={handleLogout} />
             )}
@@ -170,11 +196,15 @@ function App() {
           {user.role === 'admin' ? (
             <AdminDashboard user={user} onLogout={handleLogout} />
           ) : (
-            <HomePage user={user} onLogout={handleLogout} />
+            <HomePage
+              user={user}
+              onLogout={handleLogout}
+              onRefreshBalance={() => refreshUserBalance(user.id)}
+            />
           )}
         </>
       )}
-      
+
       {/* Toast通知容器 */}
       <ToastContainer />
     </>

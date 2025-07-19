@@ -14,7 +14,7 @@ import { blindBoxAPI, userLibraryAPI } from '../services/api'
  * 盲盒系统主页组件
  * 普通用户主页：展示所有盲盒，支持添加到库，库管理，订单管理
  */
-function HomePage({ user, onLogout }) {
+function HomePage({ user, onLogout, onRefreshBalance }) {
   const [activeTab, setActiveTab] = useState('home')
   const [selectedBlindBox, setSelectedBlindBox] = useState(null)
   const [previousTab, setPreviousTab] = useState('home') // 记录进入详情页前的页面
@@ -27,43 +27,69 @@ function HomePage({ user, onLogout }) {
   const [userBalance, setUserBalance] = useState(0) // 用户余额状态
 
   // 从后端获取盲盒数据
-  useEffect(() => {
-    const loadBlindBoxes = async () => {
-      try {
-        setLoading(true)
-        const response = await blindBoxAPI.getAllBlindBoxes()
-        if (response.success) {
-          // 将后端数据转换为前端格式
-          const formattedBoxes = response.data.map(box => ({
-            id: box.id,
-            name: box.name,
-            description: box.description,
-            price: box.price,
-            originalPrice: box.price * 1.2, // 模拟原价
-            color: getRandomColor(),
-            stock: box.stock,
-            sales: 0, // 后端暂时没有销量数据
-            rating: 4.5, // 模拟评分
-            isNew: Math.random() > 0.7,
-            isHot: Math.random() > 0.6,
-            tags: getRandomTags(),
-            category: 'general',
-            items: [] // 后续可以从奖品数据中获取
-          }))
-          setAllBlindBoxes(formattedBoxes)
-        } else {
-          showToast(response.message || '获取盲盒数据失败', 'error')
-        }
-      } catch (error) {
-        console.error('加载盲盒数据失败:', error)
-        showToast('网络错误，请稍后重试', 'error')
-      } finally {
-        setLoading(false)
+  // 加载盲盒数据
+  const loadBlindBoxes = async () => {
+    try {
+      setLoading(true)
+      const response = await blindBoxAPI.getAllBlindBoxes()
+      if (response.success) {
+        // 将后端数据转换为前端格式
+        const formattedBoxes = response.data.map(box => ({
+          id: box.id,
+          name: box.name,
+          description: box.description,
+          price: box.price,
+          originalPrice: box.price * 1.2, // 模拟原价
+          color: getRandomColor(),
+          stock: box.stock,
+          sales: 0, // 后端暂时没有销量数据
+          rating: 4.5, // 模拟评分
+          isNew: Math.random() > 0.7,
+          isHot: Math.random() > 0.6,
+          tags: getRandomTags(),
+          category: 'general',
+          items: [] // 后续可以从奖品数据中获取
+        }))
+        setAllBlindBoxes(formattedBoxes)
+      } else {
+        showToast(response.message || '获取盲盒数据失败', 'error')
       }
+    } catch (error) {
+      console.error('加载盲盒数据失败:', error)
+      showToast('网络错误，请稍后重试', 'error')
+    } finally {
+      setLoading(false)
     }
+  }
 
+  // 初始化加载盲盒数据
+  useEffect(() => {
     loadBlindBoxes()
   }, [])
+
+  // 更新当前选中盲盒的信息
+  const updateSelectedBlindBox = async () => {
+    if (!selectedBlindBox?.id) return
+
+    try {
+      const response = await blindBoxAPI.getAllBlindBoxes()
+      if (response.success) {
+        const updatedBlindBox = response.data.find(box => box.id === selectedBlindBox.id)
+        if (updatedBlindBox) {
+          // 保持原有的格式化，只更新必要的信息（如库存）
+          const formattedBox = {
+            ...selectedBlindBox,
+            stock: updatedBlindBox.stock,
+            // 可以根据需要更新其他字段
+          }
+          setSelectedBlindBox(formattedBox)
+          console.log(`📦 更新盲盒 ${updatedBlindBox.name} 库存: ${updatedBlindBox.stock}`)
+        }
+      }
+    } catch (error) {
+      console.error('更新盲盒信息失败:', error)
+    }
+  }
 
   // 获取随机颜色
   const getRandomColor = () => {
@@ -142,9 +168,17 @@ function HomePage({ user, onLogout }) {
     if (user?.id) {
       loadUserOrders()
       loadUserLibrary()
-      loadUserBalance()
+      loadUserBalance() // 登录后立即检查余额
     }
   }, [user])
+
+  // 监听用户余额变化，同步更新本地状态
+  useEffect(() => {
+    if (user?.balance !== undefined && user.balance !== userBalance) {
+      console.log(`🔄 从用户对象同步余额: ${userBalance} -> ${user.balance}`)
+      setUserBalance(user.balance)
+    }
+  }, [user?.balance])
 
   // 添加盲盒到用户库
   const addToLibrary = async (blindBox) => {
@@ -233,16 +267,16 @@ function HomePage({ user, onLogout }) {
   const handleBlindBoxClick = async (blindBox) => {
     try {
       setLoading(true)
-      
+
       // 获取包含奖品信息的完整盲盒详情
       const response = await blindBoxAPI.getBlindBoxById(blindBox.id)
-      
+
       if (response.success) {
         const mergedData = {
           ...blindBox, // 保留列表页的显示属性
           ...response.data // 使用后端的完整数据（包含奖品）
         }
-        
+
         setSelectedBlindBox(mergedData)
         setPreviousTab(activeTab) // 记录当前页面作为来源页面
         setActiveTab('detail')
@@ -260,7 +294,7 @@ function HomePage({ user, onLogout }) {
   // 渲染盲盒卡片
   const renderBlindBoxCard = (blindBox, showAddButton = true) => {
     const isInLibrary = userLibrary.some(item => item.id === blindBox.id)
-    
+
     return (
       <div key={blindBox.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
         <div className="relative">
@@ -311,11 +345,10 @@ function HomePage({ user, onLogout }) {
                 addToLibrary(blindBox)
               }}
               disabled={isInLibrary}
-              className={`w-full py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
-                isInLibrary 
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                  : 'bg-purple-600 text-white hover:bg-purple-700'
-              }`}
+              className={`w-full py-2 px-4 rounded-lg text-sm font-medium transition-colors ${isInLibrary
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-purple-600 text-white hover:bg-purple-700'
+                }`}
             >
               {isInLibrary ? '已添加到库' : '添加到库'}
             </button>
@@ -384,11 +417,10 @@ function HomePage({ user, onLogout }) {
                           addToLibrary(blindBox)
                         }}
                         disabled={isInLibrary}
-                        className={`py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
-                          isInLibrary 
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                            : 'bg-purple-600 text-white hover:bg-purple-700'
-                        }`}
+                        className={`py-2 px-4 rounded-lg text-sm font-medium transition-colors ${isInLibrary
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-purple-600 text-white hover:bg-purple-700'
+                          }`}
                       >
                         {isInLibrary ? '已添加到库' : '添加到库'}
                       </button>
@@ -414,14 +446,32 @@ function HomePage({ user, onLogout }) {
       case 'list':
         return <BlindBoxList onBlindBoxClick={handleBlindBoxClick} />
       case 'detail':
-        return <BlindBoxDetail 
-          blindBox={selectedBlindBox} 
+        return <BlindBoxDetail
+          blindBox={selectedBlindBox}
           onBack={() => setActiveTab(previousTab)}
           user={user}
           showToast={showToast}
-          onPurchaseSuccess={() => {
-            loadUserBalance() // 购买成功后刷新余额
+          onPurchaseSuccess={(updatedUser) => {
+            if (updatedUser && updatedUser.balance !== undefined) {
+              // 直接使用返回的用户信息更新余额
+              setUserBalance(updatedUser.balance)
+              console.log(`💰 订单生成后余额更新: ${updatedUser.balance}`)
+            } else {
+              // 如果没有返回用户信息，则重新加载
+              loadUserBalance()
+            }
             loadUserOrders() // 刷新订单列表
+            loadUserLibrary() // 刷新用户库
+            loadBlindBoxes() // 刷新盲盒列表（更新库存等信息）
+            updateSelectedBlindBox() // 更新当前盲盒详情（库存等信息）
+
+            // 调用App层级的余额刷新，确保全局状态同步
+            if (onRefreshBalance) {
+              onRefreshBalance()
+            }
+
+            // 购买成功后保留在当前页面，只刷新数据
+            console.log('🔄 购买成功，数据已刷新，保留在当前页面')
           }}
         />
       case 'showcase':
@@ -439,7 +489,7 @@ function HomePage({ user, onLogout }) {
               <span>←</span>
               <span>返回主页</span>
             </button>
-            
+
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-800">📦 我的盲盒库</h2>
@@ -558,21 +608,19 @@ function HomePage({ user, onLogout }) {
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`p-2 rounded-lg transition-colors ${
-                      viewMode === 'grid' 
-                        ? 'bg-purple-600 text-white' 
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
+                    className={`p-2 rounded-lg transition-colors ${viewMode === 'grid'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
                   >
                     <span className="text-sm">⋮⋮</span>
                   </button>
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`p-2 rounded-lg transition-colors ${
-                      viewMode === 'list' 
-                        ? 'bg-purple-600 text-white' 
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
+                    className={`p-2 rounded-lg transition-colors ${viewMode === 'list'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
                   >
                     <span className="text-sm">☰</span>
                   </button>

@@ -441,10 +441,10 @@ export class BlindBoxService {
   async getStats() {
     // 重新加载最新的盲盒数据，确保统计信息是最新的
     await this.loadBlindBoxData();
-    
+
     // 实时从数据库查询盲盒数量
     const totalBlindBoxes = this.blindBoxes.length;
-    
+
     // 实时从数据库查询奖品数量
     const totalPrizes = this.prizes.length;
 

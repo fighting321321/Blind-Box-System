@@ -103,6 +103,22 @@ export class SqliteUserService {
       const parsedData = JSON.parse(data);
       this.users = parsedData.users || [];
       this.nextId = parsedData.nextId || 1;
+      
+      // 修复现有用户的余额精度问题
+      let needsSave = false;
+      this.users.forEach(user => {
+        const roundedBalance = Math.round(user.balance * 100) / 100;
+        if (user.balance !== roundedBalance) {
+          console.log(`🔧 修复用户 ${user.username} 余额精度: ${user.balance} -> ${roundedBalance}`);
+          user.balance = roundedBalance;
+          needsSave = true;
+        }
+      });
+      
+      if (needsSave) {
+        await this.saveUsersData();
+        console.log('✅ 余额精度修复完成');
+      }
     } catch {
       // 文件不存在或读取失败，创建初始数据
       await this.createInitialData();
@@ -229,6 +245,9 @@ export class SqliteUserService {
    * 根据ID获取用户信息
    */
   async getUserById(userId: number): Promise<Partial<User> | null> {
+    // 重新加载最新的用户数据，确保数据是最新的
+    await this.loadUsersData();
+
     const user = this.users.find(u => u.id === userId);
     if (!user) {
       return null;
@@ -313,12 +332,12 @@ export class SqliteUserService {
       throw new Error('余额不足');
     }
 
-    // 更新余额
-    user.balance += amount;
+    // 更新余额并四舍五入到两位小数
+    user.balance = Math.round((user.balance + amount) * 100) / 100;
     user.updatedAt = new Date().toISOString();
     await this.saveUsersData();
 
-    console.log(`✅ 更新用户余额: ${user.username} ${amount > 0 ? '+' : ''}${amount}`);
+    console.log(`✅ 更新用户余额: ${user.username} ${amount > 0 ? '+' : ''}${amount} -> ${user.balance}`);
     return this.toSafeObject(user);
   }
 

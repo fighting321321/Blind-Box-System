@@ -9,18 +9,18 @@
       "status": 1,
       "role": "admin",
       "createdAt": "2025-07-15T00:00:00.000Z",
-      "updatedAt": "2025-07-19T07:09:32.439Z"
+      "updatedAt": "2025-07-19T08:45:55.295Z"
     },
     {
       "id": 1,
       "username": "demo",
       "email": "demo@example.com",
       "password": "$2a$10$ard/T34zd6suutg7fDZhOuDQEgx3B4LgUe9WPHzlsSqAwI/I62g8W",
-      "balance": 1000,
+      "balance": 970.1,
       "status": 1,
       "role": "user",
       "createdAt": "2025-07-13T12:26:48.374Z",
-      "updatedAt": "2025-07-19T07:15:00.000Z"
+      "updatedAt": "2025-07-19T08:45:45.439Z"
     },
     {
       "id": 2,
@@ -35,5 +35,5 @@
     }
   ],
   "nextId": 3,
-  "lastUpdate": "2025-07-19T07:12:48.965Z"
+  "lastUpdate": "2025-07-19T08:45:55.295Z"
 }

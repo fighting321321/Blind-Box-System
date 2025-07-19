@@ -4,7 +4,7 @@ import { join } from 'path';
 import { BlindBox } from '../entity/blind-box.entity';
 import { Prize, PrizeRarity } from '../entity/prize.entity';
 import { Order } from '../entity/order.entity';
-import { MemoryUserService } from './memory-user.service';
+import { SqliteUserService } from './sqlite-user.service';
 
 /**
  * 盲盒创建/更新请求数据结构
@@ -50,7 +50,7 @@ interface BlindBoxData {
 export class BlindBoxService {
 
   @Inject()
-  userService: MemoryUserService;
+  userService: SqliteUserService;
 
   private dataPath = join(__dirname, '../../database/blindbox_data.json');
   private blindBoxes: BlindBox[] = [];
@@ -264,6 +264,9 @@ export class BlindBoxService {
    * 获取所有盲盒
    */
   async getAllBlindBoxes(search?: string): Promise<BlindBox[]> {
+    // 重新加载最新的盲盒数据，确保数据是最新的
+    await this.loadBlindBoxData();
+    
     let result = [...this.blindBoxes];
 
     if (search) {
@@ -414,6 +417,9 @@ export class BlindBoxService {
    * 获取所有订单
    */
   async getAllOrders(): Promise<Order[]> {
+    // 重新加载最新的订单数据，确保数据是最新的
+    await this.loadBlindBoxData();
+    
     // 构建包含用户信息的订单数据
     const enrichedOrders: Order[] = [];
 
@@ -534,7 +540,13 @@ export class BlindBoxService {
    * 获取统计数据
    */
   async getStats() {
+    // 重新加载最新的盲盒数据，确保统计信息是最新的
+    await this.loadBlindBoxData();
+    
+    // 实时从数据库查询盲盒数量
     const totalBlindBoxes = this.blindBoxes.length;
+    
+    // 实时从数据库查询奖品数量
     const totalPrizes = this.prizes.length;
 
     // 基于订单信息计算总收入
@@ -546,15 +558,21 @@ export class BlindBoxService {
       return sum;
     }, 0);
 
-    // 获取用户数量
+    // 实时从数据库获取用户数量（排除管理员）
     const allUsers = await this.userService.getAllUsers();
-    const totalUsers = allUsers.length;
+    const totalUsers = allUsers.filter(user => user.role !== 'admin').length;
+
+    // 计算不同状态的订单数量
+    const completedOrders = this.orders.filter(order => order.status === 'completed').length;
+    const pendingOrders = this.orders.filter(order => order.status === 'pending').length;
 
     return {
       totalBlindBoxes,
       totalPrizes,
       totalUsers,
       totalOrders: this.orders.length, // 使用实际订单数量
+      completedOrders,
+      pendingOrders,
       totalRevenue: Number(totalRevenue.toFixed(2))
     };
   }

@@ -9,7 +9,7 @@
       "status": 1,
       "role": "admin",
       "createdAt": "2025-07-15T00:00:00.000Z",
-      "updatedAt": "2025-07-18T17:06:27.085Z"
+      "updatedAt": "2025-07-19T06:33:49.344Z"
     },
     {
       "id": 1,
@@ -21,19 +21,8 @@
       "role": "user",
       "createdAt": "2025-07-13T12:26:48.374Z",
       "updatedAt": "2025-07-18T17:06:15.772Z"
-    },
-    {
-      "id": 2,
-      "username": "testuser",
-      "email": "test@example.com",
-      "password": "$2a$10$RwcIUzPjvPot.uGn68/2x.ao6XHUCNEEB8bhzNyw0Vy1zGLMNH2Va",
-      "balance": 0,
-      "status": 1,
-      "role": "user",
-      "createdAt": "2025-07-13T12:29:58.062Z",
-      "updatedAt": "2025-07-17T16:28:43.370Z"
     }
   ],
-  "nextId": 3,
-  "lastUpdate": "2025-07-18T17:06:27.085Z"
+  "nextId": 2,
+  "lastUpdate": "2025-07-19T06:45:00.000Z"
 }

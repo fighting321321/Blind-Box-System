@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import axios from 'axios'
-import { Plus, Edit, Trash2, Package, Gift, BarChart3, Settings, LogOut, Users, Ban, CheckCircle, FileText } from 'lucide-react'
+import { Plus, Edit, Trash2, Package, Gift, BarChart3, Settings, LogOut, Users, Ban, CheckCircle, FileText, RefreshCw } from 'lucide-react'
 import { useToast } from './Toast'
 import ConfirmDialog from './ConfirmDialog'
 
@@ -81,24 +81,12 @@ const AdminDashboard = ({ user, onLogout }) => {
       setLoading(true)
       const response = await axios.get('http://localhost:7001/api/admin/users', getAuthHeaders())
       if (response.data.success) {
-        // 获取用户列表后，为每个用户获取最新余额
-        const usersWithUpdatedBalance = await Promise.all(
-          response.data.data.map(async (user) => {
-            try {
-              const balanceResponse = await axios.get(`http://localhost:7001/api/user/${user.id}/balance`)
-              if (balanceResponse.data.success) {
-                return { ...user, balance: balanceResponse.data.data.balance }
-              }
-            } catch (error) {
-              console.error(`获取用户${user.id}余额失败:`, error)
-            }
-            return user // 如果获取余额失败，返回原用户数据
-          })
-        )
-        setUsers(usersWithUpdatedBalance)
+        // 后端已经返回最新的用户数据，包括余额信息，直接使用
+        setUsers(response.data.data)
       }
     } catch (error) {
       console.error('获取用户列表失败:', error)
+      toast.error('获取用户列表失败')
     } finally {
       setLoading(false)
     }
@@ -270,6 +258,25 @@ const AdminDashboard = ({ user, onLogout }) => {
     })
   }
 
+  // 刷新所有数据
+  const refreshAllData = async () => {
+    setLoading(true)
+    try {
+      await Promise.all([
+        fetchStats(),
+        fetchBlindBoxes(),
+        fetchUsers(),
+        fetchOrders()
+      ])
+      toast.success('数据刷新成功！')
+    } catch (error) {
+      console.error('刷新数据失败:', error)
+      toast.error('刷新数据失败，请重试')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // 页面初始化
   useEffect(() => {
     fetchStats()
@@ -280,41 +287,89 @@ const AdminDashboard = ({ user, onLogout }) => {
 
   // 统计面板组件
   const StatsPanel = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-gray-600">总盲盒数</p>
-            <p className="text-2xl font-bold text-blue-600">{stats.totalBlindBoxes || 0}</p>
+    <div className="space-y-6">
+      {/* 主要统计数据 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">总盲盒数</p>
+              <p className="text-2xl font-bold text-blue-600">{stats.totalBlindBoxes || 0}</p>
+            </div>
+            <Package className="w-8 h-8 text-blue-500" />
           </div>
-          <Package className="w-8 h-8 text-blue-500" />
+        </div>
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">总奖品数</p>
+              <p className="text-2xl font-bold text-green-600">{stats.totalPrizes || 0}</p>
+            </div>
+            <Gift className="w-8 h-8 text-green-500" />
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">总用户数</p>
+              <p className="text-2xl font-bold text-purple-600">{stats.totalUsers || 0}</p>
+            </div>
+            <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">U</div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">总收入</p>
+              <p className="text-2xl font-bold text-orange-600">¥{(stats.totalRevenue || 0).toFixed(2)}</p>
+            </div>
+            <BarChart3 className="w-8 h-8 text-orange-500" />
+          </div>
         </div>
       </div>
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-gray-600">总奖品数</p>
-            <p className="text-2xl font-bold text-green-600">{stats.totalPrizes || 0}</p>
+
+      {/* 订单状态统计 */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">总订单数</p>
+              <p className="text-2xl font-bold text-indigo-600">{stats.totalOrders || 0}</p>
+            </div>
+            <FileText className="w-8 h-8 text-indigo-500" />
           </div>
-          <Gift className="w-8 h-8 text-green-500" />
+        </div>
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">已完成订单</p>
+              <p className="text-2xl font-bold text-green-600">{stats.completedOrders || 0}</p>
+            </div>
+            <CheckCircle className="w-8 h-8 text-green-500" />
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">待处理订单</p>
+              <p className="text-2xl font-bold text-yellow-600">{stats.pendingOrders || 0}</p>
+            </div>
+            <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold">!</div>
+          </div>
         </div>
       </div>
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-gray-600">总用户数</p>
-            <p className="text-2xl font-bold text-purple-600">{stats.totalUsers || 0}</p>
+
+      {/* 数据实时更新提示 */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-center">
+          <div className="flex-shrink-0">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
           </div>
-          <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">U</div>
-        </div>
-      </div>
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-gray-600">总收入</p>
-            <p className="text-2xl font-bold text-orange-600">¥{(stats.totalRevenue || 0).toFixed(2)}</p>
+          <div className="ml-3">
+            <p className="text-sm text-blue-800">
+              数据实时更新 - 所有统计信息均从数据库实时查询获取
+            </p>
           </div>
-          <BarChart3 className="w-8 h-8 text-orange-500" />
         </div>
       </div>
     </div>
@@ -927,6 +982,15 @@ const AdminDashboard = ({ user, onLogout }) => {
               <h1 className="text-xl font-bold text-gray-900">盲盒管理后台</h1>
             </div>
             <div className="flex items-center space-x-4">
+              <button
+                onClick={refreshAllData}
+                disabled={loading}
+                className="text-blue-600 hover:text-blue-800 flex items-center space-x-1 disabled:opacity-50"
+                title="刷新所有数据"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                <span>刷新</span>
+              </button>
               <span className="text-sm text-gray-600">欢迎，{user.username}</span>
               <button
                 onClick={onLogout}

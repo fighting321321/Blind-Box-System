@@ -43,7 +43,7 @@ export interface User {
  */
 @Provide()
 export class SqliteUserService {
-  
+
   private dbPath = join(__dirname, '../../database/blind_box_users.db');
   private dataPath = join(__dirname, '../../database/users_data.json');
   private users: User[] = [];
@@ -88,7 +88,7 @@ export class SqliteUserService {
         // SQLite format 3 header (16 bytes)
         ...new Array(84).fill(0) // Rest of the 100 byte header
       ]);
-      
+
       await fs.writeFile(this.dbPath, sqliteHeader);
       console.log(`✅ 创建SQLite数据库文件: ${this.dbPath}`);
     }
@@ -141,9 +141,9 @@ export class SqliteUserService {
       nextId: this.nextId,
       lastUpdate: new Date().toISOString()
     };
-    
+
     await fs.writeFile(this.dataPath, JSON.stringify(data, null, 2), 'utf-8');
-    
+
     // 同时更新SQLite文件的修改时间（模拟数据库操作）
     const now = new Date();
     await fs.utimes(this.dbPath, now, now);
@@ -198,7 +198,7 @@ export class SqliteUserService {
     const { usernameOrEmail, password } = loginData;
 
     // 根据用户名或邮箱查找用户
-    const user = this.users.find(u => 
+    const user = this.users.find(u =>
       u.username === usernameOrEmail || u.email === usernameOrEmail
     );
 
@@ -243,17 +243,20 @@ export class SqliteUserService {
    */
   async getAllUsers(search?: string): Promise<Partial<User>[]> {
     try {
+      // 重新加载最新的用户数据，确保数据是最新的
+      await this.loadUsersData();
+
       let filteredUsers = this.users;
-      
+
       // 如果有搜索关键字，过滤用户
       if (search) {
         const keyword = search.toLowerCase();
-        filteredUsers = this.users.filter(user => 
-          user.username.toLowerCase().includes(keyword) || 
+        filteredUsers = this.users.filter(user =>
+          user.username.toLowerCase().includes(keyword) ||
           user.email.toLowerCase().includes(keyword)
         );
       }
-      
+
       // 返回用户信息，排除密码字段
       return filteredUsers.map(user => ({
         id: user.id,
@@ -284,10 +287,10 @@ export class SqliteUserService {
       if (userIndex === -1) {
         return false;
       }
-      
+
       this.users[userIndex].status = status;
       this.users[userIndex].updatedAt = new Date().toISOString();
-      
+
       await this.saveUsersData();
       return true;
     } catch (error) {
@@ -351,12 +354,12 @@ export class SqliteUserService {
     try {
       const decoded = jwt.verify(token, this.jwtSecret) as any;
       const userId = decoded.userId;
-      
+
       const user = await this.getUserById(userId);
       if (!user) {
         throw new Error('用户不存在');
       }
-      
+
       return user;
     } catch (error) {
       throw new Error('Token验证失败');
@@ -383,13 +386,13 @@ export class SqliteUserService {
 
       // 移除 Bearer 前缀
       const jwtToken = token.replace('Bearer ', '');
-      
+
       // 验证JWT令牌
       const decoded = jwt.verify(jwtToken, 'your-secret-key') as any;
-      
+
       // 查找用户
       const user = this.users.find(u => u.id === decoded.id);
-      
+
       // 验证用户是否存在且为管理员
       return user && user.role === 'admin';
     } catch (error) {

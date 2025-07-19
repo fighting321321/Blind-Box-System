@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import BlindBoxImage from './BlindBoxImage'
+import PurchaseSuccessModal from './PurchaseSuccessModal'
 import axios from 'axios'
 
 /**
@@ -9,6 +10,8 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
   const [activeTab, setActiveTab] = useState('detail')
   const [quantity, setQuantity] = useState(1)
   const [purchasing, setPurchasing] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [purchaseResult, setPurchaseResult] = useState(null)
 
   // 购买盲盒的处理函数
   const handlePurchase = async () => {
@@ -28,7 +31,19 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
       })
 
       if (response.data.success) {
+        // 保存购买结果用于弹窗显示
+        setPurchaseResult({
+          blindBoxName: blindBox.name,
+          quantity: quantity,
+          prizeInfo: response.data.order?.prize || null
+        })
+        
+        // 显示购买成功弹窗
+        setShowSuccessModal(true)
+        
+        // 仍然显示Toast通知（作为备选）
         showToast(`🎉 购买成功！获得 ${quantity} 个 ${blindBox.name}`, 'success')
+        
         // 调用成功回调，传递更新后的用户信息
         if (onPurchaseSuccess) {
           onPurchaseSuccess(response.data.user) // 传递用户信息
@@ -477,6 +492,15 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
           {activeTab === 'reviews' && renderReviews()}
         </div>
       </div>
+      
+      {/* 购买成功弹窗 */}
+      <PurchaseSuccessModal 
+        isVisible={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        blindBoxName={purchaseResult?.blindBoxName}
+        quantity={purchaseResult?.quantity}
+        prizeInfo={purchaseResult?.prizeInfo}
+      />
     </div>
   )
 }

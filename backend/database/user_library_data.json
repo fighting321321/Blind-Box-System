@@ -10,8 +10,19 @@
       "note": "",
       "createdAt": "2025-07-17T16:28:10.289Z",
       "updatedAt": "2025-07-17T16:28:10.289Z"
+    },
+    {
+      "id": 6,
+      "userId": 1,
+      "blindBoxId": 2,
+      "quantity": 1,
+      "priceAtAdd": 49.9,
+      "isPurchased": false,
+      "note": "",
+      "createdAt": "2025-07-19T15:16:41.161Z",
+      "updatedAt": "2025-07-19T15:16:41.161Z"
     }
   ],
-  "nextId": 6,
-  "lastUpdated": "2025-07-17T16:28:55.050Z"
+  "nextId": 7,
+  "lastUpdated": "2025-07-19T15:16:41.161Z"
 }

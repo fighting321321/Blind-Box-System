@@ -48,7 +48,7 @@ export class SqliteUserService {
   private dataPath = join(__dirname, '../../database/users_data.json');
   private users: User[] = [];
   private nextId = 1;
-  private jwtSecret = 'blind-box-jwt-secret-key-2024';
+  private jwtSecret = 'blind-box-jwt-secret-key-2025';
 
   /**
    * 初始化数据库
@@ -388,10 +388,10 @@ export class SqliteUserService {
       const jwtToken = token.replace('Bearer ', '');
 
       // 验证JWT令牌
-      const decoded = jwt.verify(jwtToken, 'your-secret-key') as any;
+      const decoded = jwt.verify(jwtToken, this.jwtSecret) as any;
 
       // 查找用户
-      const user = this.users.find(u => u.id === decoded.id);
+      const user = this.users.find(u => u.id === decoded.userId);
 
       // 验证用户是否存在且为管理员
       return user && user.role === 'admin';

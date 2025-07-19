@@ -41,7 +41,7 @@ const AdminDashboard = ({ user, onLogout }) => {
   const getRarityDisplayName = (rarity) => {
     const rarityMap = {
       'COMMON': '普通',
-      'RARE': '稀有', 
+      'RARE': '稀有',
       'EPIC': '超稀有',
       'LEGENDARY': '传说'
     }
@@ -817,20 +817,18 @@ const AdminDashboard = ({ user, onLogout }) => {
                     <div className="text-sm text-gray-900">¥{user.balance.toFixed(2)}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      user.role === 'admin' 
-                        ? 'bg-purple-100 text-purple-800' 
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.role === 'admin'
+                        ? 'bg-purple-100 text-purple-800'
                         : 'bg-gray-100 text-gray-800'
-                    }`}>
+                      }`}>
                       {user.role === 'admin' ? '管理员' : '普通用户'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      user.status === 1 
-                        ? 'bg-green-100 text-green-800' 
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.status === 1
+                        ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
-                    }`}>
+                      }`}>
                       {user.status === 1 ? '正常' : '禁用'}
                     </span>
                   </td>
@@ -841,11 +839,10 @@ const AdminDashboard = ({ user, onLogout }) => {
                     {user.role !== 'admin' && (
                       <button
                         onClick={() => updateUserStatus(user.id, user.status === 1 ? 0 : 1)}
-                        className={`inline-flex items-center px-3 py-1 rounded-md text-sm font-medium ${
-                          user.status === 1
+                        className={`inline-flex items-center px-3 py-1 rounded-md text-sm font-medium ${user.status === 1
                             ? 'bg-red-100 text-red-800 hover:bg-red-200'
                             : 'bg-green-100 text-green-800 hover:bg-green-200'
-                        }`}
+                          }`}
                       >
                         {user.status === 1 ? (
                           <>
@@ -870,11 +867,169 @@ const AdminDashboard = ({ user, onLogout }) => {
     </div>
   )
 
+  // 导出订单数据为CSV
+  const exportOrdersToCSV = () => {
+    const csvData = filteredOrders.map(order => ({
+      '订单编号': order.id,
+      '用户名': order.username || '未知用户',
+      '用户ID': order.userId,
+      '盲盒名称': order.blindBoxName,
+      '购买数量': order.quantity,
+      '总金额': order.totalAmount.toFixed(2),
+      '订单状态': order.status === 'completed' ? '已完成' : 
+                 order.status === 'pending' ? '进行中' : '已取消',
+      '购买时间': new Date(order.createdAt).toLocaleString()
+    }))
+
+    // 生成CSV内容
+    const headers = Object.keys(csvData[0] || {})
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => headers.map(header => `"${row[header]}"`).join(','))
+    ].join('\n')
+
+    // 下载文件
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', `订单数据_${new Date().toISOString().split('T')[0]}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+  const [orderFilter, setOrderFilter] = useState('all') // 'all', 'completed', 'pending', 'cancelled'
+  const [orderSearch, setOrderSearch] = useState('')
+  const [orderPage, setOrderPage] = useState(1)
+  const [ordersPerPage] = useState(10)
+
+  // 订单筛选和分页逻辑
+  const getFilteredOrders = () => {
+    let filtered = orders
+
+    // 状态筛选
+    if (orderFilter !== 'all') {
+      filtered = filtered.filter(order => order.status === orderFilter)
+    }
+
+    // 搜索筛选
+    if (orderSearch.trim()) {
+      const search = orderSearch.toLowerCase()
+      filtered = filtered.filter(order =>
+        order.id.toLowerCase().includes(search) ||
+        order.username?.toLowerCase().includes(search) ||
+        order.blindBoxName?.toLowerCase().includes(search)
+      )
+    }
+
+    return filtered
+  }
+
+  const filteredOrders = getFilteredOrders()
+  const totalOrderPages = Math.ceil(filteredOrders.length / ordersPerPage)
+  const paginatedOrders = filteredOrders.slice(
+    (orderPage - 1) * ordersPerPage,
+    orderPage * ordersPerPage
+  )
+
   // 订单详情面板
   const OrderPanel = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">订单详情</h2>
+        <div className="flex items-center space-x-4">
+          <div className="text-sm text-gray-600">
+            共 {filteredOrders.length} 条订单记录
+          </div>
+          <button
+            onClick={exportOrdersToCSV}
+            disabled={filteredOrders.length === 0}
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+          >
+            <FileText className="w-4 h-4" />
+            <span>导出CSV</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 订单统计卡片 */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">全部订单</p>
+              <p className="text-2xl font-bold text-blue-600">{orders.length}</p>
+            </div>
+            <FileText className="w-8 h-8 text-blue-500" />
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">已完成</p>
+              <p className="text-2xl font-bold text-green-600">
+                {orders.filter(order => order.status === 'completed').length}
+              </p>
+            </div>
+            <CheckCircle className="w-8 h-8 text-green-500" />
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">进行中</p>
+              <p className="text-2xl font-bold text-yellow-600">
+                {orders.filter(order => order.status === 'pending').length}
+              </p>
+            </div>
+            <Package className="w-8 h-8 text-yellow-500" />
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">已取消</p>
+              <p className="text-2xl font-bold text-red-600">
+                {orders.filter(order => order.status === 'cancelled').length}
+              </p>
+            </div>
+            <Ban className="w-8 h-8 text-red-500" />
+          </div>
+        </div>
+      </div>
+
+      {/* 搜索和筛选区域 */}
+      <div className="bg-white rounded-lg shadow-md p-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="搜索订单号、用户名或盲盒名称..."
+              value={orderSearch}
+              onChange={(e) => {
+                setOrderSearch(e.target.value)
+                setOrderPage(1) // 重置到第一页
+              }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div className="flex gap-2">
+            <select
+              value={orderFilter}
+              onChange={(e) => {
+                setOrderFilter(e.target.value)
+                setOrderPage(1) // 重置到第一页
+              }}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="all">全部状态</option>
+              <option value="completed">已完成</option>
+              <option value="pending">进行中</option>
+              <option value="cancelled">已取消</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -911,14 +1066,14 @@ const AdminDashboard = ({ user, onLogout }) => {
                   加载中...
                 </td>
               </tr>
-            ) : orders.length === 0 ? (
+            ) : paginatedOrders.length === 0 ? (
               <tr>
                 <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
-                  暂无订单数据
+                  {orderSearch.trim() || orderFilter !== 'all' ? '没有找到匹配的订单' : '暂无订单数据'}
                 </td>
               </tr>
             ) : (
-              orders.map((order) => (
+              paginatedOrders.map((order) => (
                 <tr key={order.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">#{order.id}</div>
@@ -948,15 +1103,14 @@ const AdminDashboard = ({ user, onLogout }) => {
                     <div className="text-sm font-medium text-gray-900">¥{order.totalAmount.toFixed(2)}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      order.status === 'completed' 
-                        ? 'bg-green-100 text-green-800' 
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${order.status === 'completed'
+                        ? 'bg-green-100 text-green-800'
                         : order.status === 'pending'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {order.status === 'completed' ? '已完成' : 
-                       order.status === 'pending' ? '进行中' : '已取消'}
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                      {order.status === 'completed' ? '已完成' :
+                        order.status === 'pending' ? '进行中' : '已取消'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -968,6 +1122,64 @@ const AdminDashboard = ({ user, onLogout }) => {
           </tbody>
         </table>
       </div>
+
+      {/* 分页控件 */}
+      {totalOrderPages > 1 && (
+        <div className="bg-white rounded-lg shadow-md p-4">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-600">
+              显示第 {(orderPage - 1) * ordersPerPage + 1} - {Math.min(orderPage * ordersPerPage, filteredOrders.length)} 条，
+              共 {filteredOrders.length} 条记录
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setOrderPage(Math.max(1, orderPage - 1))}
+                disabled={orderPage === 1}
+                className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                上一页
+              </button>
+              
+              <div className="flex items-center space-x-1">
+                {Array.from({ length: Math.min(5, totalOrderPages) }, (_, i) => {
+                  let pageNum
+                  if (totalOrderPages <= 5) {
+                    pageNum = i + 1
+                  } else if (orderPage <= 3) {
+                    pageNum = i + 1
+                  } else if (orderPage >= totalOrderPages - 2) {
+                    pageNum = totalOrderPages - 4 + i
+                  } else {
+                    pageNum = orderPage - 2 + i
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setOrderPage(pageNum)}
+                      className={`px-3 py-1 text-sm rounded ${
+                        orderPage === pageNum
+                          ? 'bg-blue-600 text-white'
+                          : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  )
+                })}
+              </div>
+
+              <button
+                onClick={() => setOrderPage(Math.min(totalOrderPages, orderPage + 1))}
+                disabled={orderPage === totalOrderPages}
+                className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                下一页
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 

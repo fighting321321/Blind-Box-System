@@ -5,6 +5,7 @@ import { BlindBox } from '../entity/blind-box.entity';
 import { Prize, PrizeRarity } from '../entity/prize.entity';
 import { Order } from '../entity/order.entity';
 import { SqliteUserService } from './sqlite-user.service';
+import { OrderService } from './order.service';
 
 /**
  * 盲盒创建/更新请求数据结构
@@ -35,10 +36,8 @@ export interface PrizeDto {
 interface BlindBoxData {
   blindBoxes: BlindBox[];
   prizes: Prize[];
-  orders: Order[];
   nextBlindBoxId: number;
   nextPrizeId: number;
-  nextOrderId: number;
   lastUpdate: string;
 }
 
@@ -52,13 +51,14 @@ export class BlindBoxService {
   @Inject()
   userService: SqliteUserService;
 
+  @Inject()
+  orderService: OrderService;
+
   private dataPath = join(__dirname, '../../database/blindbox_data.json');
   private blindBoxes: BlindBox[] = [];
   private prizes: Prize[] = [];
-  private orders: Order[] = [];
   private nextBlindBoxId = 1;
   private nextPrizeId = 1;
-  private nextOrderId = 1;
 
   /**
    * 初始化数据
@@ -90,12 +90,10 @@ export class BlindBoxService {
       const parsed: BlindBoxData = JSON.parse(data);
       this.blindBoxes = parsed.blindBoxes || [];
       this.prizes = parsed.prizes || [];
-      this.orders = parsed.orders || [];
       this.nextBlindBoxId = parsed.nextBlindBoxId || 1;
       this.nextPrizeId = parsed.nextPrizeId || 1;
-      this.nextOrderId = parsed.nextOrderId || 1;
 
-      console.log(`✅ 加载盲盒数据: ${this.blindBoxes.length} 个盲盒, ${this.prizes.length} 个奖品, ${this.orders.length} 个订单`);
+      console.log(`✅ 加载盲盒数据: ${this.blindBoxes.length} 个盲盒, ${this.prizes.length} 个奖品`);
     } catch (error) {
       // 文件不存在，创建初始数据
       console.log('盲盒数据文件不存在，创建初始数据...');
@@ -236,9 +234,6 @@ export class BlindBoxService {
     this.nextBlindBoxId = 4;
     this.nextPrizeId = 7;
 
-    // 创建初始订单数据
-    await this.createMockOrders();
-
     await this.saveBlindBoxData();
     console.log('✅ 创建初始盲盒数据完成');
   }
@@ -250,10 +245,8 @@ export class BlindBoxService {
     const data: BlindBoxData = {
       blindBoxes: this.blindBoxes,
       prizes: this.prizes,
-      orders: this.orders,
       nextBlindBoxId: this.nextBlindBoxId,
       nextPrizeId: this.nextPrizeId,
-      nextOrderId: this.nextOrderId,
       lastUpdate: new Date().toISOString()
     };
 
@@ -266,7 +259,7 @@ export class BlindBoxService {
   async getAllBlindBoxes(search?: string): Promise<BlindBox[]> {
     // 重新加载最新的盲盒数据，确保数据是最新的
     await this.loadBlindBoxData();
-    
+
     let result = [...this.blindBoxes];
 
     if (search) {
@@ -417,116 +410,22 @@ export class BlindBoxService {
    * 获取所有订单
    */
   async getAllOrders(): Promise<Order[]> {
-    // 重新加载最新的订单数据，确保数据是最新的
-    await this.loadBlindBoxData();
-    
-    // 构建包含用户信息的订单数据
-    const enrichedOrders: Order[] = [];
-
-    for (const order of this.orders) {
-      // 获取用户信息
-      const allUsers = await this.userService.getAllUsers();
-      const user = allUsers.find(u => u.id === order.userId);
-
-      // 获取盲盒信息
-      const blindBox = this.blindBoxes.find(b => b.id === order.blindBoxId);
-
-      enrichedOrders.push({
-        ...order,
-        username: user?.username || '未知用户',
-        blindBoxName: blindBox?.name || '未知盲盒'
-      });
-    }
-
-    return enrichedOrders;
-  }
-
-  /**
+    // 使用OrderService获取订单数据
+    return await this.orderService.getAllOrders();
+  }  /**
    * 根据ID获取订单
    */
   async getOrderById(id: string): Promise<Order | null> {
-    const order = this.orders.find(order => order.id === id);
-    if (!order) {
-      return null;
-    }
-
-    // 获取用户信息
-    const allUsers = await this.userService.getAllUsers();
-    const user = allUsers.find(u => u.id === order.userId);
-
-    // 获取盲盒信息
-    const blindBox = this.blindBoxes.find(b => b.id === order.blindBoxId);
-
-    return {
-      ...order,
-      username: user?.username || '未知用户',
-      blindBoxName: blindBox?.name || '未知盲盒'
-    };
+    // 使用OrderService获取订单数据
+    return await this.orderService.getOrderById(id);
   }
 
   /**
    * 更新订单状态
    */
   async updateOrderStatus(id: string, status: string): Promise<boolean> {
-    const order = this.orders.find(order => order.id === id);
-    if (!order) {
-      return false;
-    }
-
-    order.status = status as 'pending' | 'completed' | 'cancelled';
-    order.updatedAt = new Date().toISOString();
-
-    await this.saveBlindBoxData();
-    return true;
-  }
-
-  /**
-   * 创建模拟订单数据
-   */
-  private async createMockOrders() {
-    // 创建一些模拟订单数据
-    const mockOrders: Order[] = [
-      {
-        id: '1',
-        userId: 1,
-        username: '用户1',
-        blindBoxId: 1,
-        blindBoxName: '经典盲盒',
-        quantity: 1,
-        totalAmount: 29.99,
-        status: 'completed',
-        createdAt: '2024-01-15T10:30:00Z',
-        updatedAt: '2024-01-15T10:30:00Z'
-      },
-      {
-        id: '2',
-        userId: 2,
-        username: '用户2',
-        blindBoxId: 2,
-        blindBoxName: '限定盲盒',
-        quantity: 2,
-        totalAmount: 119.98,
-        status: 'pending',
-        createdAt: '2024-01-16T14:20:00Z',
-        updatedAt: '2024-01-16T14:20:00Z'
-      },
-      {
-        id: '3',
-        userId: 3,
-        username: '用户3',
-        blindBoxId: 1,
-        blindBoxName: '经典盲盒',
-        quantity: 1,
-        totalAmount: 29.99,
-        status: 'completed',
-        createdAt: '2024-01-17T09:15:00Z',
-        updatedAt: '2024-01-17T09:15:00Z'
-      }
-    ];
-
-    this.orders = mockOrders;
-    this.nextOrderId = 4;
-    await this.saveBlindBoxData();
+    // 使用OrderService更新订单状态
+    return await this.orderService.updateOrderStatus(id, status);
   }
 
   /**
@@ -549,35 +448,23 @@ export class BlindBoxService {
     // 实时从数据库查询奖品数量
     const totalPrizes = this.prizes.length;
 
-    // 基于订单信息计算总收入
-    const totalRevenue = this.orders.reduce((sum, order) => {
-      // 只计算已完成的订单
-      if (order.status === 'completed') {
-        return sum + order.totalAmount;
-      }
-      return sum;
-    }, 0);
+    // 使用OrderService获取订单统计信息
+    const orderStats = await this.orderService.getOrderStats();
 
     // 实时从数据库获取用户数量（排除管理员）
     const allUsers = await this.userService.getAllUsers();
     const totalUsers = allUsers.filter(user => user.role !== 'admin').length;
 
-    // 计算不同状态的订单数量
-    const completedOrders = this.orders.filter(order => order.status === 'completed').length;
-    const pendingOrders = this.orders.filter(order => order.status === 'pending').length;
-
     return {
       totalBlindBoxes,
       totalPrizes,
       totalUsers,
-      totalOrders: this.orders.length, // 使用实际订单数量
-      completedOrders,
-      pendingOrders,
-      totalRevenue: Number(totalRevenue.toFixed(2))
+      totalOrders: orderStats.totalOrders,
+      completedOrders: orderStats.completedOrders,
+      pendingOrders: orderStats.pendingOrders,
+      totalRevenue: orderStats.totalRevenue
     };
-  }
-
-  /**
+  }  /**
    * 购买盲盒 - 支持并发安全
    */
   async purchaseBlindBox(userId: number, blindBoxId: number, quantity: number = 1): Promise<{
@@ -613,15 +500,15 @@ export class BlindBoxService {
 
       // 检查用户余额
       if (user.balance < totalAmount) {
-        return { 
-          success: false, 
-          message: `余额不足，需要 ¥${totalAmount.toFixed(2)}，当前余额 ¥${user.balance.toFixed(2)}` 
+        return {
+          success: false,
+          message: `余额不足，需要 ¥${totalAmount.toFixed(2)}，当前余额 ¥${user.balance.toFixed(2)}`
         };
       }
 
       // 原子性操作：扣减库存和余额，创建订单
       const orderId = `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
       // 扣减盲盒库存
       blindBox.stock -= quantity;
       blindBox.updatedAt = new Date();
@@ -646,15 +533,16 @@ export class BlindBoxService {
         updatedAt: new Date().toISOString()
       };
 
-      this.orders.push(order);
+      // 使用OrderService创建订单
+      const createdOrder = await this.orderService.createOrder(order);
 
-      // 保存数据
+      // 保存盲盒数据（库存更新）
       await this.saveBlindBoxData();
 
       return {
         success: true,
         message: '购买成功！',
-        order: order
+        order: createdOrder
       };
 
     } catch (error) {

@@ -27,9 +27,17 @@ body {
 }
 
 @keyframes rainbow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* 文本截断 */
@@ -44,36 +52,55 @@ body {
   .btn-primary {
     @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md;
   }
-  
+
   .btn-secondary {
     @apply bg-secondary-100 hover:bg-secondary-200 text-secondary-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200 border border-secondary-300;
   }
-  
+
   .btn-outline {
     @apply border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white font-medium py-2 px-4 rounded-lg transition-all duration-200;
   }
-  
+
   .card {
     @apply bg-white rounded-lg shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-shadow duration-200;
   }
-  
+
   .input-field {
     @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
   }
-  
+
   .rarity-common {
     @apply text-rarity-common border-rarity-common bg-rarity-common bg-opacity-10;
   }
-  
+
   .rarity-rare {
     @apply text-rarity-rare border-rarity-rare bg-rarity-rare bg-opacity-10;
   }
-  
+
   .rarity-epic {
     @apply text-rarity-epic border-rarity-epic bg-rarity-epic bg-opacity-10;
   }
-  
+
   .rarity-legendary {
     @apply text-rarity-legendary border-rarity-legendary bg-rarity-legendary bg-opacity-10;
   }
+}
+
+/* 下拉菜单样式 */
+.dropdown-menu {
+  transform: translateY(-10px);
+  transition: all 0.2s ease-in-out;
+}
+
+.dropdown-menu.show {
+  transform: translateY(0);
+}
+
+/* 确保下拉菜单在hover时保持可见 */
+.group:hover .group-hover\:opacity-100 {
+  opacity: 1;
+}
+
+.group:hover .group-hover\:visible {
+  visibility: visible;
 }

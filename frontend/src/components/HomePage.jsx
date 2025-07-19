@@ -6,6 +6,7 @@ import BlindBoxList from './BlindBoxList'
 import BlindBoxDetail from './BlindBoxDetail'
 import PlayerShowcase from './PlayerShowcase'
 import BlindBoxSearch from './BlindBoxSearch'
+import UserPrizes from './UserPrizes'
 import Toast from './Toast'
 import BlindBoxImage from './BlindBoxImage'
 import { blindBoxAPI, userLibraryAPI } from '../services/api'
@@ -322,14 +323,7 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
                 <span className="text-sm text-gray-400 line-through">¥{blindBox.originalPrice.toFixed(2)}</span>
               )}
             </div>
-            <div className="flex items-center space-x-1">
-              <span className="text-yellow-400">★</span>
-              <span className="text-sm text-gray-600">{blindBox.rating}</span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between mb-3">
             <span className="text-sm text-gray-500">剩余: {blindBox.stock}个</span>
-            <span className="text-sm text-gray-500">已售: {blindBox.sales}</span>
           </div>
           <div className="flex flex-wrap gap-1 mb-3">
             {blindBox.tags.map(tag => (
@@ -345,12 +339,12 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
                 addToLibrary(blindBox)
               }}
               disabled={isInLibrary}
-              className={`w-full py-2 px-4 rounded-lg text-sm font-medium transition-colors ${isInLibrary
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-purple-600 text-white hover:bg-purple-700'
+              className={`w-full py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm ${isInLibrary
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                : 'bg-purple-600 text-white hover:bg-purple-700 hover:shadow-md transform hover:scale-105 border border-purple-600 hover:border-purple-700'
                 }`}
             >
-              {isInLibrary ? '已添加到库' : '添加到库'}
+              {isInLibrary ? '✓ 已添加到库' : '+ 添加到库'}
             </button>
           )}
         </div>
@@ -386,10 +380,6 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
                 <div className="flex-1">
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="font-medium text-gray-800 text-lg">{blindBox.name}</h3>
-                    <div className="flex items-center space-x-1">
-                      <span className="text-yellow-400">★</span>
-                      <span className="text-sm text-gray-600">{blindBox.rating}</span>
-                    </div>
                   </div>
                   <p className="text-sm text-gray-600 mb-2">{blindBox.description}</p>
                   <div className="flex flex-wrap gap-1 mb-3">
@@ -408,7 +398,6 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
                         )}
                       </div>
                       <span className="text-sm text-gray-500">剩余: {blindBox.stock}个</span>
-                      <span className="text-sm text-gray-500">已售: {blindBox.sales}</span>
                     </div>
                     {showAddButton && (
                       <button
@@ -417,12 +406,12 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
                           addToLibrary(blindBox)
                         }}
                         disabled={isInLibrary}
-                        className={`py-2 px-4 rounded-lg text-sm font-medium transition-colors ${isInLibrary
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          : 'bg-purple-600 text-white hover:bg-purple-700'
+                        className={`py-2.5 px-6 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm ${isInLibrary
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                          : 'bg-purple-600 text-white hover:bg-purple-700 hover:shadow-md transform hover:scale-105 border border-purple-600 hover:border-purple-700'
                           }`}
                       >
-                        {isInLibrary ? '已添加到库' : '添加到库'}
+                        {isInLibrary ? '✓ 已添加到库' : '+ 添加到库'}
                       </button>
                     )}
                   </div>
@@ -443,8 +432,8 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
         return <BlindBoxDraw user={user} selectedBlindBox={selectedBlindBox} />
       case 'orders':
         return <OrderManagement user={user} />
-      case 'list':
-        return <BlindBoxList onBlindBoxClick={handleBlindBoxClick} />
+      case 'prizes':
+        return <UserPrizes user={user} />
       case 'detail':
         return <BlindBoxDetail
           blindBox={selectedBlindBox}
@@ -481,20 +470,38 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
       case 'library':
         return (
           <div className="space-y-6">
-            {/* 返回主页按钮 */}
-            <button
-              onClick={() => setActiveTab('home')}
-              className="flex items-center space-x-2 text-purple-600 hover:text-purple-700 transition-colors"
-            >
-              <span>←</span>
-              <span>返回主页</span>
-            </button>
-
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-800">📦 我的盲盒库</h2>
-                <span className="text-sm text-gray-500">共 {userLibrary.length} 种盲盒</span>
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm text-gray-500">共 {userLibrary.length} 种盲盒</span>
+
+                  {/* 显示方式切换 */}
+                  <div className="flex border border-gray-200 rounded-lg p-1 bg-white shadow-sm">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 min-w-[60px] ${viewMode === 'grid'
+                        ? 'bg-purple-600 text-white shadow-md transform scale-105 border-purple-600'
+                        : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50 border border-transparent hover:border-purple-200'
+                        }`}
+                    >
+                      <span className="mr-1">⊞</span>
+                      网格
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 min-w-[60px] ml-1 ${viewMode === 'list'
+                        ? 'bg-purple-600 text-white shadow-md transform scale-105 border-purple-600'
+                        : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50 border border-transparent hover:border-purple-200'
+                        }`}
+                    >
+                      <span className="mr-1">☰</span>
+                      列表
+                    </button>
+                  </div>
+                </div>
               </div>
+
               {userLibrary.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="text-gray-400 text-4xl mb-4">📦</div>
@@ -502,44 +509,78 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
                   <p className="text-gray-600 mb-4">快去首页添加喜欢的盲盒吧！</p>
                   <button
                     onClick={() => setActiveTab('home')}
-                    className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                    className="bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:scale-105 border border-purple-600"
                   >
-                    去首页看看
+                    🏠 去首页看看
                   </button>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className={viewMode === 'grid'
+                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                  : "space-y-4"
+                }>
                   {userLibrary.map(blindBox => (
-                    <div key={blindBox.libraryItemId} className="bg-gray-50 rounded-lg p-4">
-                      <div className="flex items-start space-x-4">
+                    <div
+                      key={blindBox.libraryItemId}
+                      className={viewMode === 'grid'
+                        ? "bg-gray-50 rounded-lg p-4 hover:shadow-md transition-shadow"
+                        : "bg-gray-50 rounded-lg p-4"
+                      }
+                    >
+                      <div className={viewMode === 'grid'
+                        ? "text-center space-y-3"
+                        : "flex items-center space-x-4"
+                      }>
                         <BlindBoxImage
                           blindBoxId={blindBox.id}
                           name={blindBox.name}
-                          width={64}
-                          height={64}
-                          className="rounded-lg flex-shrink-0"
+                          width={viewMode === 'grid' ? 80 : 64}
+                          height={viewMode === 'grid' ? 80 : 64}
+                          className={viewMode === 'grid'
+                            ? "rounded-lg mx-auto"
+                            : "rounded-lg flex-shrink-0"
+                          }
                         />
-                        <div className="flex-1">
-                          <div className="flex items-start justify-between mb-2">
+                        <div className={viewMode === 'grid' ? "space-y-2" : "flex-1"}>
+                          <div className={viewMode === 'grid'
+                            ? "space-y-1"
+                            : "flex items-start justify-between mb-2"
+                          }>
                             <h3 className="font-medium text-gray-800">{blindBox.name}</h3>
-                            <button
-                              onClick={() => removeFromLibrary(blindBox.libraryItemId)}
-                              className="text-red-500 hover:text-red-700 text-sm"
-                            >
-                              移除
-                            </button>
+                            {viewMode === 'list' && (
+                              <button
+                                onClick={() => removeFromLibrary(blindBox.libraryItemId)}
+                                className="text-red-500 hover:text-red-700 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-red-50 transition-all duration-200 border border-transparent hover:border-red-200"
+                              >
+                                移除
+                              </button>
+                            )}
                           </div>
-                          <div className="flex items-center space-x-4 mb-3">
+                          <div className={viewMode === 'grid'
+                            ? "space-y-1 text-sm text-gray-600"
+                            : "flex items-center space-x-4 mb-3"
+                          }>
                             <span className="text-sm text-gray-600">价格: ¥{blindBox.price.toFixed(2)}</span>
                             <span className="text-sm text-gray-600">剩余: {blindBox.stock}个</span>
                           </div>
-                          <div className="flex space-x-2">
+                          <div className={viewMode === 'grid'
+                            ? "flex flex-col space-y-2"
+                            : "flex space-x-2"
+                          }>
                             <button
                               onClick={() => handleBlindBoxClick(blindBox)}
-                              className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700 transition-colors"
+                              className="bg-purple-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-purple-700 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105 border border-purple-600"
                             >
                               查看详情
                             </button>
+                            {viewMode === 'grid' && (
+                              <button
+                                onClick={() => removeFromLibrary(blindBox.libraryItemId)}
+                                className="text-red-500 hover:text-red-700 text-sm py-2 font-medium hover:bg-red-50 rounded-lg transition-all duration-200 border border-transparent hover:border-red-200"
+                              >
+                                移除
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -573,9 +614,9 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
                 <h2 className="text-xl font-bold text-gray-800">📦 我的盲盒库</h2>
                 <button
                   onClick={() => setActiveTab('library')}
-                  className="text-purple-600 text-sm hover:text-purple-700"
+                  className="text-purple-600 text-sm hover:text-purple-700 font-medium px-3 py-1.5 rounded-lg hover:bg-purple-50 transition-all duration-200 border border-transparent hover:border-purple-200"
                 >
-                  查看全部 →
+                  📋 查看全部 →
                 </button>
               </div>
               {userLibrary.length === 0 ? (
@@ -605,25 +646,32 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-800">🎲 所有盲盒</h2>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setViewMode('grid')}
-                    className={`p-2 rounded-lg transition-colors ${viewMode === 'grid'
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
-                  >
-                    <span className="text-sm">⋮⋮</span>
-                  </button>
-                  <button
-                    onClick={() => setViewMode('list')}
-                    className={`p-2 rounded-lg transition-colors ${viewMode === 'list'
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
-                  >
-                    <span className="text-sm">☰</span>
-                  </button>
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm text-gray-500">发现精彩盲盒</span>
+
+                  {/* 显示方式切换 */}
+                  <div className="flex border border-gray-200 rounded-lg p-1 bg-white shadow-sm">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 min-w-[60px] ${viewMode === 'grid'
+                        ? 'bg-purple-600 text-white shadow-md transform scale-105 border-purple-600'
+                        : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50 border border-transparent hover:border-purple-200'
+                        }`}
+                    >
+                      <span className="mr-1">⊞</span>
+                      网格
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 min-w-[60px] ml-1 ${viewMode === 'list'
+                        ? 'bg-purple-600 text-white shadow-md transform scale-105 border-purple-600'
+                        : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50 border border-transparent hover:border-purple-200'
+                        }`}
+                    >
+                      <span className="mr-1">☰</span>
+                      列表
+                    </button>
+                  </div>
                 </div>
               </div>
               {viewMode === 'grid' ? (
@@ -656,11 +704,64 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
               </div>
             </div>
 
+            {/* 主导航菜单 */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <button
+                onClick={() => setActiveTab('home')}
+                className={`text-sm font-medium transition-colors ${activeTab === 'home'
+                  ? 'text-purple-600 border-b-2 border-purple-600 pb-2'
+                  : 'text-gray-600 hover:text-purple-600'
+                  }`}
+              >
+                主页
+              </button>
+
+              <button
+                onClick={() => setActiveTab('library')}
+                className={`text-sm font-medium transition-colors ${activeTab === 'library'
+                  ? 'text-purple-600 border-b-2 border-purple-600 pb-2'
+                  : 'text-gray-600 hover:text-purple-600'
+                  }`}
+              >
+                盲盒
+              </button>
+
+              <button
+                onClick={() => setActiveTab('orders')}
+                className={`text-sm font-medium transition-colors ${activeTab === 'orders'
+                  ? 'text-purple-600 border-b-2 border-purple-600 pb-2'
+                  : 'text-gray-600 hover:text-purple-600'
+                  }`}
+              >
+                订单
+              </button>
+
+              <button
+                onClick={() => setActiveTab('prizes')}
+                className={`text-sm font-medium transition-colors ${activeTab === 'prizes'
+                  ? 'text-purple-600 border-b-2 border-purple-600 pb-2'
+                  : 'text-gray-600 hover:text-purple-600'
+                  }`}
+              >
+                奖品
+              </button>
+
+              <button
+                onClick={() => setActiveTab('showcase')}
+                className={`text-sm font-medium transition-colors ${activeTab === 'showcase'
+                  ? 'text-purple-600 border-b-2 border-purple-600 pb-2'
+                  : 'text-gray-600 hover:text-purple-600'
+                  }`}
+              >
+                玩家秀
+              </button>
+            </nav>
+
             {/* 用户信息 */}
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-purple-300 rounded-full"></div>
-                <div className="hidden md:block">
+                <div className="hidden lg:block">
                   <p className="text-sm font-medium text-gray-800">{user.username}</p>
                   <p className="text-xs text-gray-500">余额: ¥{userBalance.toFixed(2)}</p>
                 </div>
@@ -698,15 +799,7 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
             onClick={() => setActiveTab('library')}
           >
             <span className="text-lg">📦</span>
-            <span className="text-xs">我的库</span>
-          </button>
-          <button
-            className={`flex flex-col items-center justify-center space-y-1 ${activeTab === 'draw' ? 'text-purple-600' : 'text-gray-500'
-              }`}
-            onClick={() => setActiveTab('draw')}
-          >
-            <span className="text-lg">🎲</span>
-            <span className="text-xs">抽取</span>
+            <span className="text-xs">盲盒</span>
           </button>
           <button
             className={`flex flex-col items-center justify-center space-y-1 ${activeTab === 'orders' ? 'text-purple-600' : 'text-gray-500'
@@ -717,12 +810,20 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
             <span className="text-xs">订单</span>
           </button>
           <button
-            className={`flex flex-col items-center justify-center space-y-1 ${activeTab === 'management' ? 'text-purple-600' : 'text-gray-500'
+            className={`flex flex-col items-center justify-center space-y-1 ${activeTab === 'prizes' ? 'text-purple-600' : 'text-gray-500'
               }`}
-            onClick={() => setActiveTab('management')}
+            onClick={() => setActiveTab('prizes')}
           >
-            <span className="text-lg">👤</span>
-            <span className="text-xs">我的</span>
+            <span className="text-lg">🎁</span>
+            <span className="text-xs">奖品</span>
+          </button>
+          <button
+            className={`flex flex-col items-center justify-center space-y-1 ${activeTab === 'showcase' ? 'text-purple-600' : 'text-gray-500'
+              }`}
+            onClick={() => setActiveTab('showcase')}
+          >
+            <span className="text-lg">�</span>
+            <span className="text-xs">玩家秀</span>
           </button>
         </div>
       </nav>

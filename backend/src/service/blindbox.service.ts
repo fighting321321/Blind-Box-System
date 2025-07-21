@@ -116,6 +116,7 @@ export class BlindBoxService {
         price: 29.9,
         imageUrl: '',
         stock: 100,
+        sales: 0,
         status: 1,
         prizes: [],
         createdAt: new Date(now),
@@ -128,6 +129,7 @@ export class BlindBoxService {
         price: 49.9,
         imageUrl: '',
         stock: 50,
+        sales: 0,
         status: 1,
         prizes: [],
         createdAt: new Date(now),
@@ -140,6 +142,7 @@ export class BlindBoxService {
         price: 39.9,
         imageUrl: '',
         stock: 75,
+        sales: 0,
         status: 1,
         prizes: [],
         createdAt: new Date(now),
@@ -292,6 +295,7 @@ export class BlindBoxService {
       price: dto.price,
       imageUrl: dto.imageUrl || '',
       stock: dto.stock || 0,
+      sales: 0,
       status: 1,
       prizes: [],
       createdAt: new Date(now),
@@ -509,8 +513,9 @@ export class BlindBoxService {
       // 原子性操作：扣减库存和余额，创建订单
       const orderId = `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-      // 扣减盲盒库存
+      // 扣减盲盒库存并增加销售数量
       blindBox.stock -= quantity;
+      blindBox.sales = (blindBox.sales || 0) + quantity; // 增加销售数量
       blindBox.updatedAt = new Date();
 
       // 扣减用户余额

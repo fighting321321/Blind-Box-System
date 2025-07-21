@@ -37,13 +37,13 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
           quantity: quantity,
           prizeInfo: response.data.order?.prize || null
         })
-        
+
         // 显示购买成功弹窗
         setShowSuccessModal(true)
-        
+
         // 仍然显示Toast通知（作为备选）
         showToast(`🎉 购买成功！获得 ${quantity} 个 ${blindBox.name}`, 'success')
-        
+
         // 调用成功回调，传递更新后的用户信息
         if (onPurchaseSuccess) {
           onPurchaseSuccess(response.data.user) // 传递用户信息
@@ -108,7 +108,6 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
     {
       id: 1,
       username: '盲盒达人',
-      rating: 5,
       content: '质量很好，造型可爱，孩子很喜欢！',
       date: '2025-07-12',
       avatar: 'bg-pink-300'
@@ -116,7 +115,6 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
     {
       id: 2,
       username: '收藏家小王',
-      rating: 4,
       content: '包装精美，不过希望稀有款概率能高一点。',
       date: '2025-07-11',
       avatar: 'bg-blue-300'
@@ -124,7 +122,6 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
     {
       id: 3,
       username: '萌妹子',
-      rating: 5,
       content: '抽到了超稀有款！太开心了！💕',
       date: '2025-07-10',
       avatar: 'bg-purple-300'
@@ -139,14 +136,6 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
       case '传说': return 'text-orange-600 bg-orange-100'
       default: return 'text-gray-600 bg-gray-100'
     }
-  }
-
-  const renderStars = (rating) => {
-    return Array.from({ length: 5 }, (_, index) => (
-      <span key={index} className={index < rating ? 'text-yellow-500' : 'text-gray-300'}>
-        ⭐
-      </span>
-    ))
   }
 
   const renderDetail = () => (
@@ -166,10 +155,6 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
           <div>
             <p className="text-sm text-gray-600 mb-2">销售数量</p>
             <p className="font-medium text-gray-800">{blindBox.sales} 件</p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-600 mb-2">商品评分</p>
-            <p className="font-medium text-gray-800">{blindBox.rating} 分</p>
           </div>
           <div>
             <p className="text-sm text-gray-600 mb-2">发布时间</p>
@@ -303,8 +288,6 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-800">用户评价</h3>
           <div className="flex items-center space-x-2">
-            <span className="text-2xl">⭐</span>
-            <span className="text-lg font-bold text-gray-800">{blindBox.rating}</span>
             <span className="text-sm text-gray-600">({reviews.length} 条评价)</span>
           </div>
         </div>
@@ -317,7 +300,6 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
                 <div className="flex-1">
                   <div className="flex items-center space-x-2">
                     <span className="font-medium text-gray-800">{review.username}</span>
-                    <div className="flex">{renderStars(review.rating)}</div>
                   </div>
                   <span className="text-sm text-gray-500">{review.date}</span>
                 </div>
@@ -379,8 +361,6 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
             <div>
               <h1 className="text-2xl font-bold text-gray-800 mb-2">{blindBox.name}</h1>
               <div className="flex items-center space-x-4 mb-2">
-                <div className="flex">{renderStars(Math.floor(blindBox.rating))}</div>
-                <span className="text-sm text-gray-600">{blindBox.rating} 分</span>
                 <span className="text-sm text-gray-600">已售 {blindBox.sales}</span>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -492,9 +472,9 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
           {activeTab === 'reviews' && renderReviews()}
         </div>
       </div>
-      
+
       {/* 购买成功弹窗 */}
-      <PurchaseSuccessModal 
+      <PurchaseSuccessModal
         isVisible={showSuccessModal}
         onClose={() => setShowSuccessModal(false)}
         blindBoxName={purchaseResult?.blindBoxName}

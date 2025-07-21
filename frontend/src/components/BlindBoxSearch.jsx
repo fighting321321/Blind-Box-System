@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-/**
- * 盲盒搜索组件
+/**      sales: 867,      sales: 456,
+      isNew: false,     isNew: true, 盲盒搜索组件
  */
 function BlindBoxSearch({ onBlindBoxClick }) {
   const [searchQuery, setSearchQuery] = useState('')
@@ -24,7 +24,6 @@ function BlindBoxSearch({ onBlindBoxClick }) {
       originalPrice: 69,
       color: 'bg-pink-300',
       sales: 1234,
-      rating: 4.8,
       isNew: false,
       isHot: true,
       inStock: true,
@@ -87,7 +86,7 @@ function BlindBoxSearch({ onBlindBoxClick }) {
       if (!searchHistory.includes(searchQuery.trim())) {
         setSearchHistory([searchQuery.trim(), ...searchHistory.slice(0, 4)])
       }
-      
+
       // 执行搜索逻辑
       console.log('搜索:', searchQuery, filterOptions)
     }
@@ -330,7 +329,7 @@ function BlindBoxSearch({ onBlindBoxClick }) {
                 {/* 盲盒图片和标签 */}
                 <div className="relative">
                   <div className={`${box.color} h-48 rounded-t-lg group-hover:scale-105 transition-transform`}></div>
-                  
+
                   {/* 标签 */}
                   <div className="absolute top-2 left-2 flex space-x-1">
                     {box.isNew && (
@@ -357,7 +356,7 @@ function BlindBoxSearch({ onBlindBoxClick }) {
                   <h3 className="font-semibold text-gray-800 mb-2 group-hover:text-purple-600 transition-colors">
                     {box.name}
                   </h3>
-                  
+
                   <p className="text-sm text-gray-600 mb-3 line-clamp-2">
                     {box.description}
                   </p>
@@ -374,12 +373,8 @@ function BlindBoxSearch({ onBlindBoxClick }) {
                     ))}
                   </div>
 
-                  {/* 评分和销量 */}
+                  {/* 销量 */}
                   <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-1">
-                      <span className="text-yellow-500">⭐</span>
-                      <span className="text-sm text-gray-600">{box.rating}</span>
-                    </div>
                     <span className="text-sm text-gray-500">已售 {box.sales}</span>
                   </div>
 
@@ -392,11 +387,10 @@ function BlindBoxSearch({ onBlindBoxClick }) {
                       )}
                     </div>
                     <button
-                      className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-                        box.inStock
-                          ? 'bg-purple-600 text-white hover:bg-purple-700'
-                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      }`}
+                      className={`px-3 py-1 text-sm rounded-lg transition-colors ${box.inStock
+                        ? 'bg-purple-600 text-white hover:bg-purple-700'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
                       onClick={(e) => {
                         e.stopPropagation()
                         if (box.inStock) {

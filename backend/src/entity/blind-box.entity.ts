@@ -57,6 +57,15 @@ export class BlindBox {
   stock: number;
 
   /**
+   * 盲盒销售数量 - 默认为0
+   */
+  @Column({ type: 'integer', default: 0 })
+  @IsOptional()
+  @IsNumber({}, { message: '销售数量必须是数字' })
+  @Min(0, { message: '销售数量不能为负数' })
+  sales: number;
+
+  /**
    * 盲盒状态 - 1:上架 0:下架
    */
   @Column({ type: 'integer', default: 1 })

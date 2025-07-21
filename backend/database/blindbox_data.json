@@ -6,11 +6,12 @@
       "description": "超萌动物系列，每个都是惊喜",
       "price": 29.9,
       "imageUrl": "",
-      "stock": 90,
+      "stock": 100,
+      "sales": 0,
       "status": 1,
       "prizes": [],
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-19T16:39:01.121Z"
+      "updatedAt": "2025-07-21T08:00:00.000Z"
     },
     {
       "id": 2,
@@ -18,11 +19,12 @@
       "description": "时尚潮流系列，收藏价值极高",
       "price": 49.9,
       "imageUrl": "",
-      "stock": 47,
+      "stock": 50,
+      "sales": 0,
       "status": 1,
       "prizes": [],
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-19T15:16:53.998Z"
+      "updatedAt": "2025-07-21T08:00:00.000Z"
     },
     {
       "id": 3,
@@ -31,10 +33,11 @@
       "price": 39.9,
       "imageUrl": "",
       "stock": 75,
+      "sales": 0,
       "status": 1,
       "prizes": [],
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-15T16:43:43.394Z"
+      "updatedAt": "2025-07-21T08:00:00.000Z"
     }
   ],
   "prizes": [
@@ -190,5 +193,5 @@
   ],
   "nextBlindBoxId": 12,
   "nextPrizeId": 18,
-  "lastUpdate": "2025-07-19T16:39:01.125Z"
+  "lastUpdate": "2025-07-21T07:45:07.870Z"
 }

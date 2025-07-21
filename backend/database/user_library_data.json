@@ -1,17 +1,17 @@
 {
   "libraryItems": [
     {
-      "id": 4,
+      "id": 1,
       "userId": 1,
       "blindBoxId": 1,
       "quantity": 1,
       "priceAtAdd": 29.9,
       "isPurchased": false,
       "note": "",
-      "createdAt": "2025-07-17T16:28:10.289Z",
-      "updatedAt": "2025-07-17T16:28:10.289Z"
+      "createdAt": "2025-07-21T07:49:11.253Z",
+      "updatedAt": "2025-07-21T07:49:11.253Z"
     }
   ],
-  "nextId": 7,
-  "lastUpdated": "2025-07-19T17:04:23.067Z"
+  "nextId": 2,
+  "lastUpdated": "2025-07-21T07:49:11.253Z"
 }

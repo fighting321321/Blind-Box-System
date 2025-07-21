@@ -35,7 +35,7 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
       const response = await blindBoxAPI.getAllBlindBoxes()
       if (response.success) {
         // 将后端数据转换为前端格式
-        const formattedBoxes = response.data.map(box => ({
+        const formattedBoxes = response.data.map((box, index) => ({
           id: box.id,
           name: box.name,
           description: box.description,
@@ -43,13 +43,13 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
           originalPrice: box.price * 1.2, // 模拟原价
           color: getRandomColor(),
           stock: box.stock,
-          sales: 0, // 后端暂时没有销量数据
-          rating: 4.5, // 模拟评分
+          sales: box.sales || 0, // 使用后端返回的真实销量数据
           isNew: Math.random() > 0.7,
           isHot: Math.random() > 0.6,
           tags: getRandomTags(),
           category: 'general',
-          items: [] // 后续可以从奖品数据中获取
+          items: [], // 后续可以从奖品数据中获取
+          releaseDate: box.createdAt ? new Date(box.createdAt).toISOString().split('T')[0] : '2025-07-21'
         }))
         setAllBlindBoxes(formattedBoxes)
       } else {
@@ -77,14 +77,15 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
       if (response.success) {
         const updatedBlindBox = response.data.find(box => box.id === selectedBlindBox.id)
         if (updatedBlindBox) {
-          // 保持原有的格式化，只更新必要的信息（如库存）
+          // 保持原有的格式化，更新库存和销量信息
           const formattedBox = {
             ...selectedBlindBox,
             stock: updatedBlindBox.stock,
+            sales: updatedBlindBox.sales || 0, // 更新销量信息
             // 可以根据需要更新其他字段
           }
           setSelectedBlindBox(formattedBox)
-          console.log(`📦 更新盲盒 ${updatedBlindBox.name} 库存: ${updatedBlindBox.stock}`)
+          console.log(`📦 更新盲盒 ${updatedBlindBox.name} 库存: ${updatedBlindBox.stock}, 销量: ${updatedBlindBox.sales || 0}`)
         }
       }
     } catch (error) {
@@ -133,7 +134,7 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
       const response = await userLibraryAPI.getUserLibrary(user.id)
       if (response.success) {
         // 转换数据格式以兼容现有的前端逻辑
-        const formattedLibrary = response.data.map(item => ({
+        const formattedLibrary = response.data.map((item, index) => ({
           ...item.blindBox,
           quantity: item.quantity,
           addedTime: new Date(item.createdAt),
@@ -141,6 +142,15 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
           blindBoxId: item.blindBoxId, // 保存原始盲盒ID
           // 保持原始盲盒ID，不要被覆盖
           // id 字段保持为盲盒的真实ID，用于API调用
+          // 添加格式化字段以保持一致性
+          originalPrice: item.blindBox.price * 1.2, // 模拟原价
+          color: getRandomColor(),
+          sales: item.blindBox.sales || 0, // 使用后端返回的真实销量数据
+          isNew: Math.random() > 0.7,
+          isHot: Math.random() > 0.6,
+          tags: getRandomTags(),
+          category: 'general',
+          releaseDate: item.blindBox.createdAt ? new Date(item.blindBox.createdAt).toISOString().split('T')[0] : '2025-07-21'
         }))
         setUserLibrary(formattedLibrary)
       }
@@ -227,7 +237,7 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
         // 重新加载盲盒数据（更新库存）
         const blindBoxResponse = await blindBoxAPI.getAllBlindBoxes()
         if (blindBoxResponse.success) {
-          const formattedBoxes = blindBoxResponse.data.map(box => ({
+          const formattedBoxes = blindBoxResponse.data.map((box, index) => ({
             id: box.id,
             name: box.name,
             description: box.description,
@@ -235,13 +245,13 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
             originalPrice: box.price * 1.2,
             color: getRandomColor(),
             stock: box.stock,
-            sales: 0,
-            rating: 4.5,
+            sales: box.sales || 0, // 使用后端返回的真实销量数据
             isNew: Math.random() > 0.7,
             isHot: Math.random() > 0.6,
             tags: getRandomTags(),
             category: 'general',
-            items: []
+            items: [],
+            releaseDate: box.createdAt ? new Date(box.createdAt).toISOString().split('T')[0] : '2025-07-21'
           }))
           setAllBlindBoxes(formattedBoxes)
         }
@@ -616,7 +626,7 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
                   onClick={() => setActiveTab('library')}
                   className="text-purple-600 text-sm hover:text-purple-700 font-medium px-3 py-1.5 rounded-lg hover:bg-purple-50 transition-all duration-200 border border-transparent hover:border-purple-200"
                 >
-                  📋 查看全部 →
+                  查看全部 →
                 </button>
               </div>
               {userLibrary.length === 0 ? (

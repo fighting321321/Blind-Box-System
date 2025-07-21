@@ -38,7 +38,6 @@ function BlindBoxList({ onBlindBoxClick }) {
       originalPrice: 69,
       color: 'bg-pink-300',
       sales: 1234,
-      rating: 4.8,
       isNew: false,
       isHot: true,
       tags: ['限量版', '热门'],
@@ -53,7 +52,6 @@ function BlindBoxList({ onBlindBoxClick }) {
       originalPrice: 89,
       color: 'bg-blue-300',
       sales: 987,
-      rating: 4.9,
       isNew: true,
       isHot: true,
       tags: ['新品', '联名'],
@@ -68,7 +66,6 @@ function BlindBoxList({ onBlindBoxClick }) {
       originalPrice: 49,
       color: 'bg-green-300',
       sales: 756,
-      rating: 4.6,
       isNew: false,
       isHot: false,
       tags: ['经典'],
@@ -83,7 +80,6 @@ function BlindBoxList({ onBlindBoxClick }) {
       originalPrice: 99,
       color: 'bg-purple-300',
       sales: 654,
-      rating: 4.7,
       isNew: false,
       isHot: true,
       tags: ['精品', '限量'],
@@ -98,7 +94,6 @@ function BlindBoxList({ onBlindBoxClick }) {
       originalPrice: 119,
       color: 'bg-gray-300',
       sales: 543,
-      rating: 4.5,
       isNew: true,
       isHot: false,
       tags: ['新品', '可动'],
@@ -201,11 +196,10 @@ function BlindBoxList({ onBlindBoxClick }) {
           {categories.map((cat) => (
             <button
               key={cat.id}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 ${
-                category === cat.id
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-purple-100 hover:text-purple-600'
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2 ${category === cat.id
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-purple-100 hover:text-purple-600'
+                }`}
               onClick={() => setCategory(cat.id)}
             >
               <span>{cat.icon}</span>
@@ -250,7 +244,7 @@ function BlindBoxList({ onBlindBoxClick }) {
                 height={192}
                 className="rounded-t-lg group-hover:scale-105 transition-transform"
               />
-              
+
               {/* 标签 */}
               <div className="absolute top-2 left-2 flex space-x-1">
                 {box.isNew && (
@@ -272,7 +266,7 @@ function BlindBoxList({ onBlindBoxClick }) {
               <h3 className="font-semibold text-gray-800 mb-2 group-hover:text-purple-600 transition-colors">
                 {box.name}
               </h3>
-              
+
               <p className="text-sm text-gray-600 mb-3 line-clamp-2">
                 {box.description}
               </p>

@@ -18,7 +18,7 @@ function OrderManagement({ user }) {
 
   const fetchOrders = async () => {
     if (!user?.id) return
-    
+
     setLoading(true)
     try {
       const response = await axios.get(`http://localhost:7001/api/orders?userId=${user.id}`)
@@ -50,11 +50,6 @@ function OrderManagement({ user }) {
       case 'cancelled': return '已取消'
       default: return '未知'
     }
-  }
-
-  const getTypeIcon = (status) => {
-    // 根据订单状态返回图标，所有订单都是盲盒购买
-    return '�'
   }
 
   const filteredOrders = orders.filter(order => {
@@ -113,41 +108,37 @@ function OrderManagement({ user }) {
       <div className="bg-white rounded-lg p-1 shadow-sm">
         <div className="flex space-x-1">
           <button
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-              activeTab === 'all'
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'all'
                 ? 'bg-purple-600 text-white'
                 : 'text-gray-600 hover:text-purple-600'
-            }`}
+              }`}
             onClick={() => setActiveTab('all')}
           >
             全部订单
           </button>
           <button
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-              activeTab === 'draw'
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'draw'
                 ? 'bg-purple-600 text-white'
                 : 'text-gray-600 hover:text-purple-600'
-            }`}
+              }`}
             onClick={() => setActiveTab('draw')}
           >
             盲盒抽取
           </button>
           <button
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-              activeTab === 'recharge'
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'recharge'
                 ? 'bg-purple-600 text-white'
                 : 'text-gray-600 hover:text-purple-600'
-            }`}
+              }`}
             onClick={() => setActiveTab('recharge')}
           >
             余额充值
           </button>
           <button
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-              activeTab === 'pending'
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'pending'
                 ? 'bg-purple-600 text-white'
                 : 'text-gray-600 hover:text-purple-600'
-            }`}
+              }`}
             onClick={() => setActiveTab('pending')}
           >
             待处理
@@ -175,7 +166,6 @@ function OrderManagement({ user }) {
               {/* 订单头部 */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <span className="text-2xl">{getTypeIcon(order.status)}</span>
                   <div>
                     <h3 className="font-medium text-gray-800">订单号: {order.id}</h3>
                     <p className="text-sm text-gray-600">{new Date(order.createdAt).toLocaleString()}</p>

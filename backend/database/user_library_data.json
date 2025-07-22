@@ -1,5 +1,17 @@
 {
-  "userItems": [],
-  "nextId": 1,
-  "lastUpdate": "2025-07-22T07:02:24.088Z"
+  "libraryItems": [
+    {
+      "id": 1,
+      "userId": 1,
+      "blindBoxId": 1,
+      "quantity": 1,
+      "priceAtAdd": 29.9,
+      "isPurchased": false,
+      "note": "",
+      "createdAt": "2025-07-22T07:14:13.582Z",
+      "updatedAt": "2025-07-22T07:14:13.582Z"
+    }
+  ],
+  "nextId": 2,
+  "lastUpdated": "2025-07-22T07:14:13.583Z"
 }

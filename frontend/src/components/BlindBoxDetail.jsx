@@ -31,18 +31,20 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
       })
 
       if (response.data.success) {
-        // 保存购买结果用于弹窗显示
+        // 保存购买结果用于弹窗显示，使用后端返回的奖品数组
         setPurchaseResult({
           blindBoxName: blindBox.name,
           quantity: quantity,
-          prizeInfo: response.data.order?.prize || null
+          prizes: response.data.prizes || [], // 使用后端返回的奖品数组
+          order: response.data.order
         })
 
         // 显示购买成功弹窗
         setShowSuccessModal(true)
 
         // 仍然显示Toast通知（作为备选）
-        showToast(`🎉 购买成功！获得 ${quantity} 个 ${blindBox.name}`, 'success')
+        const prizeNames = response.data.prizes?.map(prize => prize.prizeName).join(', ') || '神秘奖品'
+        showToast(`🎉 购买成功！获得奖品：${prizeNames}`, 'success')
 
         // 调用成功回调，传递更新后的用户信息
         if (onPurchaseSuccess) {
@@ -50,6 +52,7 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
         }
         if (response.data.order) {
           console.log('订单信息:', response.data.order)
+          console.log('获得奖品:', response.data.prizes)
         }
       } else {
         showToast(response.data.message || '购买失败', 'error')
@@ -405,8 +408,36 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
         onClose={() => setShowSuccessModal(false)}
         blindBoxName={purchaseResult?.blindBoxName}
         quantity={purchaseResult?.quantity}
-        prizeInfo={purchaseResult?.prizeInfo}
+        prizes={purchaseResult?.prizes}
       />
+
+      {/* 本次抽中奖品展示区域 */}
+      {purchaseResult?.prizes && purchaseResult.prizes.length > 0 && (
+        <div className="bg-gradient-to-r from-purple-50 to-orange-50 border border-purple-200 rounded-xl p-6 mt-4 shadow text-center">
+          <h3 className="text-lg font-bold text-purple-700 mb-4 flex items-center justify-center">
+            <span className="mr-2">🎁</span>
+            本次抽中奖品
+            <span className="ml-2">🎁</span>
+          </h3>
+          <div className="flex flex-wrap justify-center gap-4">
+            {purchaseResult.prizes.map((prize, idx) => (
+              <div key={prize.prizeId + '-' + idx} className="bg-white border border-gray-200 rounded-lg p-4 min-w-[180px] max-w-xs shadow hover:scale-105 transition-all duration-300">
+                <div className="flex items-center justify-center mb-2">
+                  <span className="text-2xl mr-2">{prize.rarity === 'LEGENDARY' ? '🟡' : prize.rarity === 'EPIC' ? '🟠' : prize.rarity === 'RARE' ? '🟣' : '🔹'}</span>
+                  <span className="font-bold text-base text-gray-800">{prize.prizeName}</span>
+                </div>
+                <div className="text-sm text-gray-600 mb-1">{prize.prizeDescription}</div>
+                <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold bg-purple-50 border border-purple-200 mt-2 ${prize.rarity === 'LEGENDARY' ? 'text-yellow-700' : prize.rarity === 'EPIC' ? 'text-orange-700' : prize.rarity === 'RARE' ? 'text-purple-700' : 'text-blue-700'}`}>
+                  {prize.rarity === 'LEGENDARY' ? '传说' : prize.rarity === 'EPIC' ? '史诗' : prize.rarity === 'RARE' ? '稀有' : '普通'}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 text-green-700 font-medium">
+            🌟 恭喜获得 <span className="font-bold text-lg text-green-800">{purchaseResult.prizes.length}</span> 个奖品！
+          </div>
+        </div>
+      )}
     </div>
   )
 }

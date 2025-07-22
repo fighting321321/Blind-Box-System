@@ -6,12 +6,12 @@
       "description": "超萌动物系列，每个都是惊喜",
       "price": 29.9,
       "imageUrl": "",
-      "stock": 88,
-      "sales": 12,
+      "stock": 81,
+      "sales": 19,
       "status": 1,
       "prizes": [],
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-22T07:01:00.470Z"
+      "updatedAt": "2025-07-22T07:28:34.364Z"
     },
     {
       "id": 2,
@@ -45,6 +45,30 @@
       "id": 1,
       "name": "小熊公仔",
       "description": "可爱的小熊玩偶",
+      "probability": 0.6,
+      "imageUrl": "",
+      "status": 1,
+      "blindBoxId": 1,
+      "blindBox": {
+        "id": 1,
+        "name": "可爱动物盲盒",
+        "description": "超萌动物系列，每个都是惊喜",
+        "price": 29.9,
+        "imageUrl": "",
+        "stock": 100,
+        "status": 1,
+        "prizes": [],
+        "createdAt": "2025-07-15T16:43:43.394Z",
+        "updatedAt": "2025-07-15T16:43:43.394Z"
+      },
+      "createdAt": "2025-07-15T16:43:43.394Z",
+      "updatedAt": "2025-07-22T07:14:51.009Z",
+      "rarity": "COMMON"
+    },
+    {
+      "id": 2,
+      "name": "小兔玩偶",
+      "description": "萌萌的小兔子",
       "probability": 0.3,
       "imageUrl": "",
       "status": 1,
@@ -62,38 +86,14 @@
         "updatedAt": "2025-07-15T16:43:43.394Z"
       },
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-18T16:09:46.786Z",
-      "rarity": "COMMON"
-    },
-    {
-      "id": 2,
-      "name": "小兔玩偶",
-      "description": "萌萌的小兔子",
-      "probability": 0.25,
-      "imageUrl": "",
-      "status": 1,
-      "blindBoxId": 1,
-      "blindBox": {
-        "id": 1,
-        "name": "可爱动物盲盒",
-        "description": "超萌动物系列，每个都是惊喜",
-        "price": 29.9,
-        "imageUrl": "",
-        "stock": 100,
-        "status": 1,
-        "prizes": [],
-        "createdAt": "2025-07-15T16:43:43.394Z",
-        "updatedAt": "2025-07-15T16:43:43.394Z"
-      },
-      "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-18T16:01:25.349Z",
+      "updatedAt": "2025-07-22T07:15:03.327Z",
       "rarity": "RARE"
     },
     {
       "id": 3,
       "name": "稀有金卡",
       "description": "超稀有收藏卡片",
-      "probability": 0.05,
+      "probability": 0.1,
       "imageUrl": "",
       "status": 1,
       "blindBoxId": 1,
@@ -110,14 +110,14 @@
         "updatedAt": "2025-07-15T16:43:43.394Z"
       },
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-18T16:01:47.891Z",
+      "updatedAt": "2025-07-22T07:15:07.542Z",
       "rarity": "LEGENDARY"
     },
     {
       "id": 4,
       "name": "潮流手办",
       "description": "限量版潮流手办",
-      "probability": 0.2,
+      "probability": 0.8,
       "imageUrl": "",
       "status": 1,
       "blindBoxId": 2,
@@ -134,14 +134,14 @@
         "updatedAt": "2025-07-15T16:43:43.394Z"
       },
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-22T06:39:52.548Z",
+      "updatedAt": "2025-07-22T07:15:30.803Z",
       "rarity": "COMMON"
     },
     {
       "id": 5,
       "name": "炫彩徽章",
       "description": "个性化炫彩徽章",
-      "probability": 0.4,
+      "probability": 0.15,
       "imageUrl": "",
       "status": 1,
       "blindBoxId": 2,
@@ -158,14 +158,14 @@
         "updatedAt": "2025-07-15T16:43:43.394Z"
       },
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-18T16:01:35.180Z",
+      "updatedAt": "2025-07-22T07:15:45.405Z",
       "rarity": "EPIC"
     },
     {
       "id": 6,
       "name": "隐藏款玩偶",
       "description": "神秘隐藏款，价值连城",
-      "probability": 0.02,
+      "probability": 0.05,
       "imageUrl": "",
       "status": 1,
       "blindBoxId": 2,
@@ -182,11 +182,11 @@
         "updatedAt": "2025-07-15T16:43:43.394Z"
       },
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-18T16:01:38.013Z",
+      "updatedAt": "2025-07-22T07:15:40.712Z",
       "rarity": "LEGENDARY"
     }
   ],
   "nextBlindBoxId": 12,
   "nextPrizeId": 18,
-  "lastUpdate": "2025-07-22T07:01:00.476Z"
+  "lastUpdate": "2025-07-22T07:28:34.368Z"
 }

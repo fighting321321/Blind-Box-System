@@ -103,31 +103,6 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
     color: getRarityColor(prize.rarity) // 根据稀有度获取颜色
   }))
 
-  // 用户评价数据
-  const reviews = [
-    {
-      id: 1,
-      username: '盲盒达人',
-      content: '质量很好，造型可爱，孩子很喜欢！',
-      date: '2025-07-12',
-      avatar: 'bg-pink-300'
-    },
-    {
-      id: 2,
-      username: '收藏家小王',
-      content: '包装精美，不过希望稀有款概率能高一点。',
-      date: '2025-07-11',
-      avatar: 'bg-blue-300'
-    },
-    {
-      id: 3,
-      username: '萌妹子',
-      content: '抽到了超稀有款！太开心了！💕',
-      date: '2025-07-10',
-      avatar: 'bg-purple-300'
-    }
-  ]
-
   const getRarityTextColor = (rarity) => {
     switch (rarity) {
       case '普通': return 'text-gray-600 bg-gray-100'
@@ -282,42 +257,6 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
     )
   }
 
-  const renderReviews = () => (
-    <div className="space-y-4">
-      <div className="bg-white rounded-lg p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-800">用户评价</h3>
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-600">({reviews.length} 条评价)</span>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          {reviews.map((review) => (
-            <div key={review.id} className="border-b border-gray-200 pb-4 last:border-b-0">
-              <div className="flex items-center space-x-3 mb-2">
-                <div className={`w-10 h-10 ${review.avatar} rounded-full`}></div>
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <span className="font-medium text-gray-800">{review.username}</span>
-                  </div>
-                  <span className="text-sm text-gray-500">{review.date}</span>
-                </div>
-              </div>
-              <p className="text-gray-700 ml-13">{review.content}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-6 text-center">
-          <button className="px-4 py-2 text-purple-600 border border-purple-600 rounded-lg hover:bg-purple-50 transition-colors">
-            查看更多评价
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-
   return (
     <div className="space-y-6">
       {/* 返回按钮 */}
@@ -407,11 +346,11 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
                 </div>
               </div>
 
-              <div className="flex space-x-4">
+              <div className="w-full">
                 <button
                   onClick={handlePurchase}
                   disabled={purchasing || !user}
-                  className={`flex-1 px-6 py-3 text-white rounded-lg font-medium transition-colors ${purchasing
+                  className={`w-full px-6 py-3 text-white rounded-lg font-medium transition-colors ${purchasing
                     ? 'bg-gray-400 cursor-not-allowed'
                     : !user
                       ? 'bg-gray-400 cursor-not-allowed'
@@ -424,9 +363,6 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
                       ? '请先登录'
                       : `立即购买 (¥${(blindBox.price * quantity).toFixed(2)})`
                   }
-                </button>
-                <button className="px-6 py-3 border border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors">
-                  ♡ 收藏
                 </button>
               </div>
             </div>
@@ -455,21 +391,11 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
           >
             内容物
           </button>
-          <button
-            className={`flex-1 py-3 px-6 text-center font-medium transition-colors ${activeTab === 'reviews'
-              ? 'text-purple-600 border-b-2 border-purple-600'
-              : 'text-gray-600 hover:text-purple-600'
-              }`}
-            onClick={() => setActiveTab('reviews')}
-          >
-            用户评价
-          </button>
         </div>
 
         <div className="p-6">
           {activeTab === 'detail' && renderDetail()}
           {activeTab === 'items' && renderItems()}
-          {activeTab === 'reviews' && renderReviews()}
         </div>
       </div>
 

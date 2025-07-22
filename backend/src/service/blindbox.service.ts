@@ -6,6 +6,7 @@ import { Prize, PrizeRarity } from '../entity/prize.entity';
 import { Order } from '../entity/order.entity';
 import { SqliteUserService } from './sqlite-user.service';
 import { OrderService } from './order.service';
+import { UserPrizeService } from './user-prize.service';
 
 /**
  * 盲盒创建/更新请求数据结构
@@ -53,6 +54,9 @@ export class BlindBoxService {
 
   @Inject()
   orderService: OrderService;
+
+  @Inject()
+  userPrizeService: UserPrizeService;
 
   private dataPath = join(__dirname, '../../database/blindbox_data.json');
   private blindBoxes: BlindBox[] = [];
@@ -475,6 +479,7 @@ export class BlindBoxService {
     success: boolean;
     message: string;
     order?: Order;
+    prizes?: any[];
   }> {
     try {
       // 获取用户信息
@@ -541,18 +546,73 @@ export class BlindBoxService {
       // 使用OrderService创建订单
       const createdOrder = await this.orderService.createOrder(order);
 
+      // 抽取奖品
+      const drawnPrizes = [];
+      for (let i = 0; i < quantity; i++) {
+        const prize = await this.drawPrizeFromBlindBox(blindBoxId);
+        if (prize) {
+          // 为用户添加奖品记录
+          const userPrize = await this.userPrizeService.addUserPrize(
+            {
+              userId: userId,
+              prizeId: prize.id,
+              blindBoxId: blindBoxId,
+              orderId: orderId
+            },
+            prize,
+            blindBox
+          );
+          drawnPrizes.push(userPrize);
+        }
+      }
+
       // 保存盲盒数据（库存更新）
       await this.saveBlindBoxData();
 
       return {
         success: true,
         message: '购买成功！',
-        order: createdOrder
+        order: createdOrder,
+        prizes: drawnPrizes // 返回抽到的奖品
       };
 
     } catch (error) {
       console.error('购买失败:', error);
       return { success: false, message: '购买失败，请重试' };
+    }
+  }
+
+  /**
+   * 从指定盲盒中抽取奖品
+   */
+  async drawPrizeFromBlindBox(blindBoxId: number): Promise<Prize | null> {
+    try {
+      // 获取该盲盒的所有奖品
+      const blindBoxPrizes = this.prizes.filter(prize => prize.blindBoxId === blindBoxId);
+      
+      if (blindBoxPrizes.length === 0) {
+        console.warn(`⚠️ 盲盒 ${blindBoxId} 没有配置奖品`);
+        return null;
+      }
+
+      // 根据概率抽取奖品
+      const random = Math.random();
+      let cumulativeProbability = 0;
+
+      for (const prize of blindBoxPrizes) {
+        cumulativeProbability += prize.probability;
+        if (random <= cumulativeProbability) {
+          console.log(`🎁 抽中奖品: ${prize.name} (概率: ${(prize.probability * 100).toFixed(1)}%)`);
+          return prize;
+        }
+      }
+
+      // 如果没有抽中任何奖品，返回第一个（兜底）
+      console.log(`🎁 兜底奖品: ${blindBoxPrizes[0].name}`);
+      return blindBoxPrizes[0];
+    } catch (error) {
+      console.error('抽奖失败:', error);
+      return null;
     }
   }
 }

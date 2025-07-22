@@ -3,6 +3,7 @@ import { Context } from '@midwayjs/koa';
 import { SqliteUserService } from '../service/sqlite-user.service';
 import { BlindBoxService } from '../service/blindbox.service';
 import { UserLibraryService } from '../service/user-library.service';
+import { UserPrizeService } from '../service/user-prize.service';
 
 /**
  * API控制器
@@ -21,6 +22,9 @@ export class APIController {
 
   @Inject()
   userLibraryService: UserLibraryService;
+
+  @Inject()
+  userPrizeService: UserPrizeService;
 
   /**
    * 获取用户信息接口（向后兼容）
@@ -323,6 +327,42 @@ export class APIController {
       return { success: true, message: 'OK', data: stats };
     } catch (error) {
       return { success: false, message: error.message || '获取统计信息失败', data: null };
+    }
+  }
+
+  /**
+   * 获取用户奖品列表
+   * GET /api/user/:userId/prizes
+   */
+  @Get('/user/:userId/prizes')
+  async getUserPrizes(@Param('userId') userId: number) {
+    try {
+      if (!userId) {
+        return { success: false, message: '用户ID不能为空', data: null };
+      }
+
+      const prizes = await this.userPrizeService.getUserPrizes(userId);
+      return { success: true, message: 'OK', data: prizes };
+    } catch (error) {
+      return { success: false, message: error.message || '获取用户奖品失败', data: null };
+    }
+  }
+
+  /**
+   * 获取用户奖品统计
+   * GET /api/user/:userId/prize-stats
+   */
+  @Get('/user/:userId/prize-stats')
+  async getUserPrizeStats(@Param('userId') userId: number) {
+    try {
+      if (!userId) {
+        return { success: false, message: '用户ID不能为空', data: null };
+      }
+
+      const stats = await this.userPrizeService.getUserPrizeStats(userId);
+      return { success: true, message: 'OK', data: stats };
+    } catch (error) {
+      return { success: false, message: error.message || '获取奖品统计失败', data: null };
     }
   }
 }

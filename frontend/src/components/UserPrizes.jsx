@@ -14,58 +14,61 @@ function UserPrizes({ user }) {
     const loadUserPrizes = async () => {
         try {
             setLoading(true)
-            // TODO: 调用后端API获取用户奖品
-            // const response = await fetch(`http://localhost:7001/api/user/${user.id}/prizes`)
-            // const data = await response.json()
+            // 调用后端API获取用户奖品
+            const response = await fetch(`http://localhost:7001/api/user/${user.id}/prizes`)
+            const data = await response.json()
 
-            // 模拟数据
-            const mockPrizes = [
-                {
-                    id: 1,
-                    name: '限定版手办',
-                    rarity: 'legendary',
-                    image: '🎯',
-                    blindBoxName: '动漫系列盲盒',
-                    obtainedAt: new Date('2025-01-15'),
-                    description: '超稀有限定版手办，收藏价值极高'
-                },
-                {
-                    id: 2,
-                    name: '可爱徽章',
-                    rarity: 'common',
-                    image: '🏅',
-                    blindBoxName: '徽章系列盲盒',
-                    obtainedAt: new Date('2025-01-10'),
-                    description: '精美可爱的徽章，适合收藏'
-                },
-                {
-                    id: 3,
-                    name: '稀有卡片',
-                    rarity: 'rare',
-                    image: '🃏',
-                    blindBoxName: '卡片系列盲盒',
-                    obtainedAt: new Date('2025-01-08'),
-                    description: '稀有度较高的收藏卡片'
-                }
-            ]
+            if (data.success) {
+                // 转换数据格式
+                const formattedPrizes = data.data.map(prize => ({
+                    id: prize.id,
+                    name: prize.prizeName,
+                    rarity: prize.rarity,
+                    image: getRarityEmoji(prize.rarity),
+                    blindBoxName: prize.blindBoxName,
+                    obtainedAt: new Date(prize.obtainedAt),
+                    description: prize.prizeDescription,
+                    value: prize.prizeValue
+                }))
 
-            setPrizes(mockPrizes)
+                setPrizes(formattedPrizes)
+                console.log('📦 获取到用户奖品:', formattedPrizes)
+            } else {
+                console.error('获取用户奖品失败:', data.message)
+                setPrizes([])
+            }
         } catch (error) {
-            console.error('获取奖品失败:', error)
+            console.error('获取用户奖品失败:', error)
+            setPrizes([])
         } finally {
             setLoading(false)
         }
     }
 
+    // 根据稀有度获取对应的emoji
+    const getRarityEmoji = (rarity) => {
+        switch (rarity) {
+            case 'common': return '🎁'
+            case 'rare': return '🏆'
+            case 'epic': return '💎'
+            case 'legendary': return '👑'
+            default: return '🎁'
+        }
+    }
+
     useEffect(() => {
-        loadUserPrizes()
-    }, [user.id])
+        if (user?.id) {
+            loadUserPrizes()
+        }
+    }, [user?.id])
 
     // 根据稀有度获取颜色
     const getRarityColor = (rarity) => {
         switch (rarity) {
             case 'legendary':
                 return 'from-yellow-400 to-orange-500'
+            case 'epic':
+                return 'from-red-400 to-pink-500'
             case 'rare':
                 return 'from-purple-400 to-pink-500'
             case 'common':
@@ -75,11 +78,13 @@ function UserPrizes({ user }) {
         }
     }
 
-    // 根据稀有度获取文字
-    const getRarityText = (rarity) => {
+    // 获取稀有度中文名
+    const getRarityName = (rarity) => {
         switch (rarity) {
             case 'legendary':
                 return '传说'
+            case 'epic':
+                return '超稀有'
             case 'rare':
                 return '稀有'
             case 'common':
@@ -89,8 +94,8 @@ function UserPrizes({ user }) {
         }
     }
 
-    // 过滤和排序奖品
-    const getFilteredAndSortedPrizes = () => {
+    // 过滤奖品
+    const getFilteredPrizes = () => {
         let filtered = prizes
 
         // 按稀有度过滤
@@ -99,65 +104,83 @@ function UserPrizes({ user }) {
         }
 
         // 排序
-        switch (sortBy) {
-            case 'newest':
-                filtered.sort((a, b) => new Date(b.obtainedAt) - new Date(a.obtainedAt))
-                break
-            case 'oldest':
-                filtered.sort((a, b) => new Date(a.obtainedAt) - new Date(b.obtainedAt))
-                break
-            case 'rarity':
-                const rarityOrder = { legendary: 3, rare: 2, common: 1 }
-                filtered.sort((a, b) => rarityOrder[b.rarity] - rarityOrder[a.rarity])
-                break
-        }
+        filtered.sort((a, b) => {
+            switch (sortBy) {
+                case 'newest':
+                    return new Date(b.obtainedAt) - new Date(a.obtainedAt)
+                case 'oldest':
+                    return new Date(a.obtainedAt) - new Date(b.obtainedAt)
+                case 'rarity':
+                    const rarityOrder = { 'legendary': 4, 'epic': 3, 'rare': 2, 'common': 1 }
+                    return (rarityOrder[b.rarity] || 0) - (rarityOrder[a.rarity] || 0)
+                default:
+                    return 0
+            }
+        })
 
         return filtered
     }
 
-    const filteredPrizes = getFilteredAndSortedPrizes()
+    const filteredPrizes = getFilteredPrizes()
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+            <div className="flex justify-center items-center h-64">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">加载中...</p>
+                </div>
             </div>
         )
     }
 
     return (
         <div className="space-y-6">
-            {/* 页面标题 */}
+            {/* 页面标题和统计 */}
             <div className="bg-white rounded-lg p-6 shadow-sm">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">🎁 我的奖品</h2>
-                <p className="text-gray-600">查看您从盲盒中获得的所有奖品</p>
+                <div className="flex items-center justify-between mb-4">
+                    <h1 className="text-2xl font-bold text-gray-800">🎁 我的奖品</h1>
+                    <div className="text-right">
+                        <p className="text-sm text-gray-600">总奖品数</p>
+                        <p className="text-2xl font-bold text-purple-600">{prizes.length}</p>
+                    </div>
+                </div>
+
+                {/* 奖品统计 */}
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    {['legendary', 'epic', 'rare', 'common'].map(rarity => {
+                        const count = prizes.filter(p => p.rarity === rarity).length
+                        return (
+                            <div key={rarity} className={`bg-gradient-to-r ${getRarityColor(rarity)} p-4 rounded-lg text-white`}>
+                                <div className="text-sm opacity-90">{getRarityName(rarity)}</div>
+                                <div className="text-xl font-bold">{count}</div>
+                            </div>
+                        )
+                    })}
+                    <div className="bg-gradient-to-r from-green-400 to-blue-500 p-4 rounded-lg text-white">
+                        <div className="text-sm opacity-90">总价值</div>
+                        <div className="text-xl font-bold">¥{prizes.reduce((sum, p) => sum + (p.value || 0), 0).toFixed(2)}</div>
+                    </div>
+                </div>
             </div>
 
-            {/* 过滤和排序控件 */}
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-                    {/* 稀有度过滤 */}
+            {/* 筛选和排序 */}
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+                <div className="flex flex-wrap gap-4 items-center justify-between">
+                    {/* 稀有度筛选 */}
                     <div className="flex items-center space-x-2">
                         <span className="text-sm font-medium text-gray-700">稀有度:</span>
-                        <div className="flex space-x-1 p-1 bg-gray-50 rounded-lg border border-gray-200">
-                            {[
-                                { value: 'all', label: '全部' },
-                                { value: 'legendary', label: '传说' },
-                                { value: 'rare', label: '稀有' },
-                                { value: 'common', label: '普通' }
-                            ].map(({ value, label }) => (
-                                <button
-                                    key={value}
-                                    onClick={() => setFilter(value)}
-                                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 min-w-[50px] ${filter === value
-                                            ? 'bg-purple-600 text-white shadow-md transform scale-105'
-                                            : 'text-gray-600 hover:text-purple-600 hover:bg-white hover:shadow-sm border border-transparent hover:border-purple-200'
-                                        }`}
-                                >
-                                    {label}
-                                </button>
-                            ))}
-                        </div>
+                        <select
+                            value={filter}
+                            onChange={(e) => setFilter(e.target.value)}
+                            className="border border-gray-300 rounded-lg px-3 py-1 text-sm"
+                        >
+                            <option value="all">全部</option>
+                            <option value="legendary">传说</option>
+                            <option value="epic">超稀有</option>
+                            <option value="rare">稀有</option>
+                            <option value="common">普通</option>
+                        </select>
                     </div>
 
                     {/* 排序 */}
@@ -166,87 +189,75 @@ function UserPrizes({ user }) {
                         <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
-                            className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-purple-600 bg-white shadow-sm hover:border-purple-300 transition-all duration-200"
+                            className="border border-gray-300 rounded-lg px-3 py-1 text-sm"
                         >
                             <option value="newest">最新获得</option>
                             <option value="oldest">最早获得</option>
-                            <option value="rarity">按稀有度</option>
+                            <option value="rarity">稀有度</option>
                         </select>
                     </div>
                 </div>
             </div>
 
             {/* 奖品列表 */}
-            {filteredPrizes.length === 0 ? (
-                <div className="bg-white rounded-lg p-12 shadow-sm text-center">
-                    <div className="text-gray-400 text-6xl mb-4">🎁</div>
-                    <h3 className="text-lg font-medium text-gray-800 mb-2">还没有奖品</h3>
-                    <p className="text-gray-600">
-                        {filter === 'all'
-                            ? '快去购买盲盒抽取您的第一个奖品吧！'
-                            : `没有找到${getRarityText(filter)}稀有度的奖品`
-                        }
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+                <div className="mb-4">
+                    <p className="text-sm text-gray-600">
+                        当前显示 {filteredPrizes.length} 个奖品
+                        {filter !== 'all' && ` (${getRarityName(filter)})`}
+                        {prizes.length === 0 && ' (暂无奖品数据)'}
                     </p>
                 </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredPrizes.map((prize) => (
-                        <div
-                            key={prize.id}
-                            className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
-                        >
-                            {/* 奖品图片和稀有度标识 */}
-                            <div className={`h-32 bg-gradient-to-br ${getRarityColor(prize.rarity)} flex items-center justify-center relative`}>
-                                <span className="text-6xl">{prize.image}</span>
-                                <div className="absolute top-2 right-2">
-                                    <span className="bg-white bg-opacity-90 text-xs font-medium px-2 py-1 rounded-full">
-                                        {getRarityText(prize.rarity)}
-                                    </span>
+
+                {filteredPrizes.length === 0 ? (
+                    <div className="text-center py-12">
+                        <div className="text-gray-400 text-6xl mb-4">🎁</div>
+                        <h3 className="text-lg font-medium text-gray-800 mb-2">
+                            {prizes.length === 0
+                                ? '还没有获得任何奖品'
+                                : `没有找到${getRarityName(filter)}奖品`
+                            }
+                        </h3>
+                        <p className="text-gray-600 mb-4">
+                            {prizes.length === 0
+                                ? '快去购买盲盒获取奖品吧！'
+                                : '尝试调整筛选条件'
+                            }
+                        </p>
+                        {filter !== 'all' && prizes.length > 0 && (
+                            <button
+                                onClick={() => setFilter('all')}
+                                className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                            >
+                                查看全部奖品
+                            </button>
+                        )}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredPrizes.map((prize) => (
+                            <div key={prize.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <div className="flex items-start space-x-4">
+                                    <div className="text-4xl">{prize.image}</div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center space-x-2 mb-1">
+                                            <h3 className="font-medium text-gray-800">{prize.name}</h3>
+                                            <span className={`text-xs px-2 py-1 rounded text-white bg-gradient-to-r ${getRarityColor(prize.rarity)}`}>
+                                                {getRarityName(prize.rarity)}
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-gray-600 mb-2">{prize.description}</p>
+                                        <div className="text-xs text-gray-500 space-y-1">
+                                            <div>来源: {prize.blindBoxName}</div>
+                                            <div>获得时间: {prize.obtainedAt.toLocaleDateString()}</div>
+                                            {prize.value > 0 && <div>价值: ¥{prize.value.toFixed(2)}</div>}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
-                            {/* 奖品信息 */}
-                            <div className="p-4">
-                                <h3 className="font-bold text-gray-800 mb-1">{prize.name}</h3>
-                                <p className="text-sm text-gray-600 mb-2">{prize.description}</p>
-
-                                <div className="space-y-1 text-xs text-gray-500">
-                                    <p>来源: {prize.blindBoxName}</p>
-                                    <p>获得时间: {prize.obtainedAt.toLocaleDateString()}</p>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {/* 统计信息 */}
-            <div className="bg-white rounded-lg p-6 shadow-sm">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">奖品统计</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center">
-                        <div className="text-2xl font-bold text-purple-600">{prizes.length}</div>
-                        <div className="text-sm text-gray-600">总奖品数</div>
+                        ))}
                     </div>
-                    <div className="text-center">
-                        <div className="text-2xl font-bold text-yellow-600">
-                            {prizes.filter(p => p.rarity === 'legendary').length}
-                        </div>
-                        <div className="text-sm text-gray-600">传说奖品</div>
-                    </div>
-                    <div className="text-center">
-                        <div className="text-2xl font-bold text-purple-600">
-                            {prizes.filter(p => p.rarity === 'rare').length}
-                        </div>
-                        <div className="text-sm text-gray-600">稀有奖品</div>
-                    </div>
-                    <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-600">
-                            {prizes.filter(p => p.rarity === 'common').length}
-                        </div>
-                        <div className="text-sm text-gray-600">普通奖品</div>
-                    </div>
-                </div>
+                )}
             </div>
         </div>
     )

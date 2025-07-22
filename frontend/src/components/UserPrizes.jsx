@@ -14,25 +14,23 @@ function UserPrizes({ user }) {
     const loadUserPrizes = async () => {
         try {
             setLoading(true)
-            // 调用后端API获取用户奖品
-            const response = await fetch(`http://localhost:7001/api/user/${user.id}/prizes`)
+            // 调用 SQLite 用户奖品数据库 API
+            const response = await fetch(`http://localhost:7001/api/sqlite/user-prizes?userId=${user.id}&pageSize=1000`)
             const data = await response.json()
 
             if (data.success) {
-                // 转换数据格式
-                const formattedPrizes = data.data.map(prize => ({
+                const formattedPrizes = data.data.prizes.map(prize => ({
                     id: prize.id,
                     name: prize.prizeName,
-                    rarity: prize.rarity,
-                    image: getRarityEmoji(prize.rarity),
+                    rarity: prize.rarity.toLowerCase(), // 转换为小写以匹配前端格式
+                    image: getRarityEmoji(prize.rarity.toLowerCase()),
                     blindBoxName: prize.blindBoxName,
                     obtainedAt: new Date(prize.obtainedAt),
-                    description: prize.prizeDescription,
-                    value: prize.prizeValue
+                    description: prize.prizeDescription
                 }))
 
                 setPrizes(formattedPrizes)
-                console.log('📦 获取到用户奖品:', formattedPrizes)
+                console.log('📦 从SQLite数据库获取到用户奖品:', formattedPrizes)
             } else {
                 console.error('获取用户奖品失败:', data.message)
                 setPrizes([])
@@ -47,7 +45,8 @@ function UserPrizes({ user }) {
 
     // 根据稀有度获取对应的emoji
     const getRarityEmoji = (rarity) => {
-        switch (rarity) {
+        const rarityLower = rarity ? rarity.toLowerCase() : 'common'
+        switch (rarityLower) {
             case 'common': return '🎁'
             case 'rare': return '🏆'
             case 'epic': return '💎'
@@ -147,7 +146,7 @@ function UserPrizes({ user }) {
                 </div>
 
                 {/* 奖品统计 */}
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {['legendary', 'epic', 'rare', 'common'].map(rarity => {
                         const count = prizes.filter(p => p.rarity === rarity).length
                         return (
@@ -157,10 +156,6 @@ function UserPrizes({ user }) {
                             </div>
                         )
                     })}
-                    <div className="bg-gradient-to-r from-green-400 to-blue-500 p-4 rounded-lg text-white">
-                        <div className="text-sm opacity-90">总价值</div>
-                        <div className="text-xl font-bold">¥{prizes.reduce((sum, p) => sum + (p.value || 0), 0).toFixed(2)}</div>
-                    </div>
                 </div>
             </div>
 
@@ -250,7 +245,6 @@ function UserPrizes({ user }) {
                                         <div className="text-xs text-gray-500 space-y-1">
                                             <div>来源: {prize.blindBoxName}</div>
                                             <div>获得时间: {prize.obtainedAt.toLocaleDateString()}</div>
-                                            {prize.value > 0 && <div>价值: ¥{prize.value.toFixed(2)}</div>}
                                         </div>
                                     </div>
                                 </div>

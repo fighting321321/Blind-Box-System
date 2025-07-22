@@ -7,6 +7,7 @@ import { Order } from '../entity/order.entity';
 import { SqliteUserService } from './sqlite-user.service';
 import { OrderService } from './order.service';
 import { UserPrizeService } from './user-prize.service';
+import { SqliteUserPrizeService } from './sqlite-user-prize.service';
 
 /**
  * 盲盒创建/更新请求数据结构
@@ -57,6 +58,9 @@ export class BlindBoxService {
 
   @Inject()
   userPrizeService: UserPrizeService;
+
+  @Inject()
+  sqliteUserPrizeService: SqliteUserPrizeService;
 
   private dataPath = join(__dirname, '../../database/blindbox_data.json');
   private blindBoxes: BlindBox[] = [];
@@ -551,7 +555,7 @@ export class BlindBoxService {
       for (let i = 0; i < quantity; i++) {
         const prize = await this.drawPrizeFromBlindBox(blindBoxId);
         if (prize) {
-          // 为用户添加奖品记录
+          // 为用户添加奖品记录到原有服务
           const userPrize = await this.userPrizeService.addUserPrize(
             {
               userId: userId,
@@ -562,6 +566,29 @@ export class BlindBoxService {
             prize,
             blindBox
           );
+
+          // 同时添加到新的 SQLite 用户奖品数据库
+          try {
+            await this.sqliteUserPrizeService.addUserPrize(
+              {
+                userId: userId,
+                prizeId: prize.id,
+                blindBoxId: blindBoxId,
+                orderId: orderId
+              },
+              {
+                name: prize.name,
+                description: prize.description,
+                imageUrl: prize.imageUrl || '',
+                rarity: prize.rarity || 'common', // 如果没有稀有度，默认为普通
+                blindBoxName: blindBox.name
+              }
+            );
+            console.log(`🔄 奖品已同步到 SQLite 数据库: ${prize.name} (稀有度: ${prize.rarity || 'common'})`);
+          } catch (error) {
+            console.error('同步奖品到 SQLite 数据库失败:', error);
+          }
+
           drawnPrizes.push(userPrize);
         }
       }
@@ -589,7 +616,7 @@ export class BlindBoxService {
     try {
       // 获取该盲盒的所有奖品
       const blindBoxPrizes = this.prizes.filter(prize => prize.blindBoxId === blindBoxId);
-      
+
       if (blindBoxPrizes.length === 0) {
         console.warn(`⚠️ 盲盒 ${blindBoxId} 没有配置奖品`);
         return null;

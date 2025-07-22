@@ -4,6 +4,7 @@ import { SqliteUserService } from '../service/sqlite-user.service';
 import { BlindBoxService } from '../service/blindbox.service';
 import { UserLibraryService } from '../service/user-library.service';
 import { UserPrizeService } from '../service/user-prize.service';
+import { SqliteUserPrizeService } from '../service/sqlite-user-prize.service';
 
 /**
  * API控制器
@@ -25,6 +26,9 @@ export class APIController {
 
   @Inject()
   userPrizeService: UserPrizeService;
+
+  @Inject()
+  sqliteUserPrizeService: SqliteUserPrizeService;
 
   /**
    * 获取用户信息接口（向后兼容）
@@ -363,6 +367,112 @@ export class APIController {
       return { success: true, message: 'OK', data: stats };
     } catch (error) {
       return { success: false, message: error.message || '获取奖品统计失败', data: null };
+    }
+  }
+
+  // ==================== SQLite 用户奖品数据库测试接口 ====================
+
+  /**
+   * 获取SQLite用户奖品数据库统计信息
+   * GET /api/sqlite/user-prizes/stats
+   */
+  @Get('/sqlite/user-prizes/stats')
+  async getSqliteUserPrizeStats() {
+    try {
+      const stats = await this.sqliteUserPrizeService.getAllUserPrizeStats();
+      return { success: true, message: 'OK', data: stats };
+    } catch (error) {
+      return { success: false, message: error.message || '获取SQLite用户奖品统计失败', data: null };
+    }
+  }
+
+  /**
+   * 获取SQLite用户奖品列表
+   * GET /api/sqlite/user-prizes?userId=1&page=1&pageSize=10
+   */
+  @Get('/sqlite/user-prizes')
+  async getSqliteUserPrizes(
+    @Query('userId') userId?: number,
+    @Query('page') page?: number,
+    @Query('pageSize') pageSize?: number,
+    @Query('rarity') rarity?: string
+  ) {
+    try {
+      const query = {
+        userId,
+        page: page || 1,
+        pageSize: pageSize || 20,
+        rarity
+      };
+
+      const result = await this.sqliteUserPrizeService.queryUserPrizes(query);
+      return { success: true, message: 'OK', data: result };
+    } catch (error) {
+      return { success: false, message: error.message || '获取SQLite用户奖品失败', data: null };
+    }
+  }
+
+  /**
+   * 添加测试奖品到SQLite数据库
+   * POST /api/sqlite/user-prizes/test
+   */
+  @Post('/sqlite/user-prizes/test')
+  async addTestSqliteUserPrize(@Body() body: any) {
+    try {
+      const { userId = 1, prizeId = 101, blindBoxId = 1 } = body;
+
+      const createDto = {
+        userId,
+        prizeId,
+        blindBoxId,
+        orderId: `test-order-${Date.now()}`
+      };
+
+      const prizeDetails = {
+        name: '测试奖品',
+        description: '这是一个测试奖品',
+        imageUrl: 'https://example.com/test-prize.jpg',
+        value: 25.50,
+        rarity: 'common',
+        blindBoxName: '测试盲盒'
+      };
+
+      const addedPrize = await this.sqliteUserPrizeService.addUserPrize(createDto, prizeDetails);
+      return { success: true, message: '测试奖品添加成功', data: addedPrize };
+    } catch (error) {
+      return { success: false, message: error.message || '添加测试奖品失败', data: null };
+    }
+  }
+
+  /**
+   * 获取指定用户的SQLite奖品统计
+   * GET /api/sqlite/user/:userId/prize-stats
+   */
+  @Get('/sqlite/user/:userId/prize-stats')
+  async getSqliteUserPrizeStatsByUserId(@Param('userId') userId: number) {
+    try {
+      if (!userId) {
+        return { success: false, message: '用户ID不能为空', data: null };
+      }
+
+      const stats = await this.sqliteUserPrizeService.getUserPrizeStats(userId);
+      return { success: true, message: 'OK', data: stats };
+    } catch (error) {
+      return { success: false, message: error.message || '获取SQLite用户奖品统计失败', data: null };
+    }
+  }
+
+  /**
+   * 获取最近的SQLite用户奖品
+   * GET /api/sqlite/user-prizes/recent?limit=10
+   */
+  @Get('/sqlite/user-prizes/recent')
+  async getRecentSqliteUserPrizes(@Query('limit') limit?: number) {
+    try {
+      const recentPrizes = await this.sqliteUserPrizeService.getGlobalRecentUserPrizes(limit || 20);
+      return { success: true, message: 'OK', data: recentPrizes };
+    } catch (error) {
+      return { success: false, message: error.message || '获取最近SQLite用户奖品失败', data: null };
     }
   }
 }

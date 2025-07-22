@@ -8,7 +8,6 @@ export interface UserPrize {
   prizeName: string;
   prizeDescription: string;
   prizeImageUrl?: string;
-  prizeValue: number;
   rarity: string;
   blindBoxId: number;
   blindBoxName: string;

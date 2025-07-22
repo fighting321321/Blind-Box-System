@@ -66,7 +66,6 @@ export class UserPrizeService {
       prizeName: prize.name,
       prizeDescription: prize.description,
       prizeImageUrl: prize.imageUrl || '',
-      prizeValue: prize.value,
       rarity: prize.rarity || 'common',
       blindBoxId: dto.blindBoxId,
       blindBoxName: blindBox.name,
@@ -102,21 +101,17 @@ export class UserPrizeService {
   async getUserPrizeStats(userId: number): Promise<{
     total: number;
     byRarity: { [key: string]: number };
-    totalValue: number;
   }> {
     const userPrizes = await this.getUserPrizes(userId);
-    
+
     const stats = {
       total: userPrizes.length,
-      byRarity: {},
-      totalValue: 0
+      byRarity: {}
     };
 
     userPrizes.forEach(prize => {
       // 统计稀有度
       stats.byRarity[prize.rarity] = (stats.byRarity[prize.rarity] || 0) + 1;
-      // 统计总价值
-      stats.totalValue += prize.prizeValue;
     });
 
     return stats;

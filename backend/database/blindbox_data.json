@@ -6,12 +6,12 @@
       "description": "超萌动物系列，每个都是惊喜",
       "price": 29.9,
       "imageUrl": "",
-      "stock": 100,
-      "sales": 0,
+      "stock": 88,
+      "sales": 12,
       "status": 1,
       "prizes": [],
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-21T08:00:00.000Z"
+      "updatedAt": "2025-07-22T07:01:00.470Z"
     },
     {
       "id": 2,
@@ -19,12 +19,12 @@
       "description": "时尚潮流系列，收藏价值极高",
       "price": 49.9,
       "imageUrl": "",
-      "stock": 50,
-      "sales": 0,
+      "stock": 48,
+      "sales": 2,
       "status": 1,
       "prizes": [],
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-21T08:00:00.000Z"
+      "updatedAt": "2025-07-22T06:32:30.584Z"
     },
     {
       "id": 3,
@@ -47,7 +47,6 @@
       "description": "可爱的小熊玩偶",
       "probability": 0.3,
       "imageUrl": "",
-      "value": 15,
       "status": 1,
       "blindBoxId": 1,
       "blindBox": {
@@ -72,7 +71,6 @@
       "description": "萌萌的小兔子",
       "probability": 0.25,
       "imageUrl": "",
-      "value": 18,
       "status": 1,
       "blindBoxId": 1,
       "blindBox": {
@@ -97,7 +95,6 @@
       "description": "超稀有收藏卡片",
       "probability": 0.05,
       "imageUrl": "",
-      "value": 100,
       "status": 1,
       "blindBoxId": 1,
       "blindBox": {
@@ -122,7 +119,6 @@
       "description": "限量版潮流手办",
       "probability": 0.2,
       "imageUrl": "",
-      "value": 35,
       "status": 1,
       "blindBoxId": 2,
       "blindBox": {
@@ -138,7 +134,8 @@
         "updatedAt": "2025-07-15T16:43:43.394Z"
       },
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-15T16:43:43.394Z"
+      "updatedAt": "2025-07-22T06:39:52.548Z",
+      "rarity": "COMMON"
     },
     {
       "id": 5,
@@ -146,7 +143,6 @@
       "description": "个性化炫彩徽章",
       "probability": 0.4,
       "imageUrl": "",
-      "value": 12,
       "status": 1,
       "blindBoxId": 2,
       "blindBox": {
@@ -171,7 +167,6 @@
       "description": "神秘隐藏款，价值连城",
       "probability": 0.02,
       "imageUrl": "",
-      "value": 200,
       "status": 1,
       "blindBoxId": 2,
       "blindBox": {
@@ -193,5 +188,5 @@
   ],
   "nextBlindBoxId": 12,
   "nextPrizeId": 18,
-  "lastUpdate": "2025-07-21T07:45:07.870Z"
+  "lastUpdate": "2025-07-22T07:01:00.476Z"
 }

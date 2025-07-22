@@ -15,12 +15,13 @@
 
 ## 🎯 系统概述
 
-本系统是一个完整的盲盒抽取平台，支持用户注册登录、盲盒浏览、个人库管理、抽奖功能和订单管理。管理员可以通过后台管理系统管理盲盒、奖品和用户数据。
+本系统是一个完整的盲盒抽取平台，支持用户注册登录、盲盒浏览、奖品收藏、抽奖功能和订单管理。管理员可以通过后台管理系统管理盲盒、奖品和用户数据。
 
 ### 核心功能
 - 🔐 **用户认证系统**: JWT Token认证，安全的密码加密存储
 - 📦 **盲盒管理**: 完整的盲盒浏览、库存管理和抽取功能
-- 🎲 **抽奖系统**: 基于概率的真实抽奖机制，支持多种奖品配置
+- 🎲 **抽奖系统**: 基于概率的真实抽奖机制，支持多种稀有度奖品配置
+- 🏆 **奖品收藏**: 完整的用户奖品收藏和展示系统
 - 📱 **响应式设计**: 支持桌面端和移动端访问
 - 🛡️ **权限控制**: 完整的角色权限管理和数据安全保护
 - 📊 **管理后台**: 功能完整的管理员控制面板
@@ -87,28 +88,38 @@ npm run dev
 - **添加到库**: 每个盲盒都有"添加到库"按钮，点击即可添加到用户的个人库中
 - **盲盒信息**: 显示盲盒的价格、剩余库存、销量、评分等信息
 
-### 2. 用户库功能
-- **库管理**: 显示用户已添加的所有盲盒
-- **数量统计**: 显示每种盲盒的数量
-- **直接抽取**: 可以直接从库中选择盲盒进行抽取
-- **移除功能**: 可以从库中移除不需要的盲盒
+### 2. 盲盒购买功能
+- **盲盒浏览**: 浏览所有可用的盲盒系列
+- **库存查看**: 实时查看盲盒库存和销量信息
+- **购买操作**: 支持单次或多次购买盲盒
+- **余额检查**: 自动检查用户余额是否足够
 
 ### 3. 抽取功能
 - **选择盲盒**: 可以选择要抽取的盲盒系列
-- **余额检查**: 自动检查用户余额是否足够
-- **库存检查**: 自动检查盲盒库存是否充足
+- **数量选择**: 支持一次抽取多个盲盒
 - **实时抽取**: 调用后端API进行真实的抽取操作
 - **结果展示**: 显示抽取结果和获得的奖品
+- **稀有度系统**: 支持普通、稀有、史诗、传说四种稀有度
 
-### 4. 订单管理
-- **订单历史**: 显示用户的所有抽取订单
-- **订单详情**: 包含抽取时间、盲盒信息、获得奖品等
+### 4. 奖品收藏系统 🏆
+- **我的奖品**: 专门的奖品页面展示用户获得的所有奖品
+- **奖品展示**: 以卡片形式展示每个奖品的详细信息
+- **稀有度筛选**: 支持按稀有度（传说、超稀有、稀有、普通）筛选奖品
+- **多种排序**: 支持按获得时间、稀有度等多种方式排序
+- **统计信息**: 显示各种稀有度奖品的数量统计
+- **来源追踪**: 显示每个奖品来自哪个盲盒
+- **获得时间**: 记录和显示奖品的获得时间
+
+### 5. 订单管理
+- **订单历史**: 显示用户的所有购买订单
+- **订单详情**: 包含购买时间、盲盒信息、获得奖品等
 - **状态跟踪**: 显示订单状态（已完成/待处理等）
 
-### 5. 用户界面
+### 6. 用户界面
 - **响应式设计**: 支持桌面端和移动端访问
 - **直观导航**: 清晰的页面导航和功能分区
 - **实时反馈**: 操作结果的即时反馈和状态更新
+- **主题风格**: 现代化的UI设计，支持深色和浅色主题
 
 ## 🔧 管理员功能
 
@@ -130,7 +141,8 @@ npm run dev
 #### 3. 奖品管理
 - 奖品配置：为盲盒添加和管理奖品
 - 概率设置：设置各奖品的中奖概率
-- 奖品编辑：修改奖品信息和价值
+- 稀有度管理：设置奖品稀有度（普通、稀有、史诗、传说）
+- 奖品编辑：修改奖品信息和属性
 
 #### 4. 用户管理
 - 用户列表：查看所有注册用户
@@ -148,9 +160,16 @@ npm run dev
 ### 用户接口
 - `GET /api/blind-boxes` - 获取所有盲盒
 - `GET /api/blind-boxes/:id` - 获取盲盒详情
-- `POST /api/draw-blind-box` - 抽取盲盒
+- `POST /api/buy-blindbox/:userId` - 购买盲盒
 - `GET /api/orders?userId=:id` - 获取用户订单
 - `GET /api/get_user?uid=:id` - 获取用户信息
+
+### 用户奖品接口 🏆
+- `GET /api/sqlite/user-prizes?userId=:id` - 获取用户所有奖品
+- `GET /api/sqlite/user-prizes/stats?userId=:id` - 获取用户奖品统计
+- `GET /api/sqlite/user-prizes/recent?userId=:id&limit=:limit` - 获取最近获得的奖品
+- `GET /api/sqlite/user-prizes/by-blindbox?userId=:id&blindBoxId=:id` - 按盲盒筛选奖品
+- `GET /api/sqlite/test-data` - 测试数据接口
 
 ### 管理员接口
 - `GET /api/admin/stats` - 获取统计数据
@@ -174,10 +193,16 @@ npm run dev
 ## 🗄️ 数据库设计
 
 ### 存储方式
-- **SQLite数据库**: `backend/database/blind_box_users.db`
+- **SQLite数据库**: 
+  - 用户主数据库: `backend/database/blind_box_users.db`
+  - 用户奖品数据库: `backend/database/user_prizes.db`
+  - 用户库存数据库: `backend/database/user_library.db`
 - **JSON数据文件**: 
   - 用户数据: `backend/database/users_data.json`
   - 盲盒数据: `backend/database/blindbox_data.json`
+  - 订单数据: `backend/database/orders_data.json`
+  - 用户奖品数据: `backend/database/user_prizes_data.json`
+  - 用户库存数据: `backend/database/user_library_data.json`
 
 ### 数据结构
 
@@ -217,9 +242,42 @@ interface Prize {
   name: string;
   description: string;
   probability: number;
+  rarity: 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
   blindBoxId: number;
   imageUrl?: string;
-  value?: number;
+  status: number;
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+#### 用户奖品数据模型 🏆
+```typescript
+interface UserPrize {
+  id: string;
+  userId: number;
+  prizeId: number;
+  prizeName: string;
+  prizeDescription: string;
+  prizeImageUrl?: string;
+  rarity: string;
+  blindBoxId: number;
+  blindBoxName: string;
+  orderId: string;
+  obtainedAt: string;
+  createdAt: string;
+}
+```
+
+#### 订单数据模型
+```typescript
+interface Order {
+  id: string;
+  userId: number;
+  blindBoxId: number;
+  quantity: number;
+  totalAmount: number;
+  status: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -280,19 +338,29 @@ CMD ["npm", "start"]
 - API响应时间监控
 
 ### 数据维护
-- 定期备份用户数据和盲盒配置
+- 定期备份用户数据、盲盒配置和用户奖品数据
 - 日志文件定期清理和归档
-- 数据库文件备份和恢复
+- 多数据库文件备份和恢复
+- 用户奖品数据完整性检查
+
+### 系统监控
+- 用户活跃度统计
+- 盲盒购买成功率监控
+- 奖品稀有度分布监控
+- 盲盒库存状态跟踪
+- API响应时间监控
 
 ## 🔮 功能扩展
 
 系统架构支持以下扩展功能：
-- 盲盒收藏和分享功能
-- 用户等级和积分系统
-- 实时通知和消息推送
-- 多语言国际化支持
-- 移动端应用开发
-- 支付系统集成
+- 🎁 奖品交易和转赠功能
+- 🌟 用户等级和积分系统
+- 📢 实时通知和消息推送
+- 🌍 多语言国际化支持
+- 📱 移动端应用开发
+- 💳 支付系统集成
+- 🏆 奖品展示和炫耀功能
+- 📊 高级数据分析和报表
 
 ## 🆘 常见问题
 
@@ -303,8 +371,14 @@ CMD ["npm", "start"]
 
 ### 功能问题
 1. 登录失败：检查用户名密码是否正确
-2. 抽取失败：检查用户余额和盲盒库存
-3. 管理员功能：确认使用admin账号登录
+2. 购买失败：检查用户余额和盲盒库存
+3. 奖品不显示：确认奖品数据完整性和稀有度字段
+4. 管理员功能：确认使用admin账号登录
+
+### 数据问题
+1. 用户奖品丢失：检查SQLite数据库文件完整性
+2. 稀有度显示异常：确认奖品数据中rarity字段正确
+3. 统计数据不准确：重新同步用户奖品数据
 
 ### 技术支持
 - 项目地址: https://github.com/fighting321321/Blind-Box-System
@@ -312,7 +386,7 @@ CMD ["npm", "start"]
 
 ---
 
-## � 许可证
+## 📄 许可证
 本项目仅用于学习和演示目的。
 
-*最后更新: 2025年7月17日*
+*最后更新: 2025年7月22日*

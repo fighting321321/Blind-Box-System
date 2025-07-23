@@ -16,6 +16,29 @@ import { blindBoxAPI, userLibraryAPI } from '../services/api'
  * 普通用户主页：展示所有盲盒，支持添加到库，库管理，订单管理
  */
 function HomePage({ user, onLogout, onRefreshBalance, showToast }) {
+  // 用户奖品数据
+  const [userPrizes, setUserPrizes] = useState([]);
+  // 拉取用户奖品数据
+  const loadUserPrizes = async () => {
+    if (!user?.id) return;
+    try {
+      const response = await fetch(`http://localhost:7001/api/sqlite/user-prizes?userId=${user.id}&pageSize=1000`);
+      const data = await response.json();
+      if (data.success) {
+        // 只保留必要字段，兼容 PlayerShowcase
+        const formatted = data.data.prizes.map(prize => ({
+          id: prize.id,
+          name: prize.prizeName,
+          color: prize.color || 'bg-gray-300',
+        }));
+        setUserPrizes(formatted);
+      } else {
+        setUserPrizes([]);
+      }
+    } catch (e) {
+      setUserPrizes([]);
+    }
+  };
   const [activeTab, setActiveTab] = useState('home')
   const [selectedBlindBox, setSelectedBlindBox] = useState(null)
   const [previousTab, setPreviousTab] = useState('home') // 记录进入详情页前的页面
@@ -174,14 +197,15 @@ function HomePage({ user, onLogout, onRefreshBalance, showToast }) {
     }
   }
 
-  // 加载用户订单、用户库和余额
+  // 加载用户订单、用户库、余额和奖品
   useEffect(() => {
     if (user?.id) {
-      loadUserOrders()
-      loadUserLibrary()
-      loadUserBalance() // 登录后立即检查余额
+      loadUserOrders();
+      loadUserLibrary();
+      loadUserBalance();
+      loadUserPrizes();
     }
-  }, [user])
+  }, [user]);
 
   // 监听用户余额变化，同步更新本地状态
   useEffect(() => {
@@ -470,7 +494,13 @@ function HomePage({ user, onLogout, onRefreshBalance, showToast }) {
           }}
         />
       case 'showcase':
-        return <PlayerShowcase user={user} />
+        // 传递默认标题和描述逻辑给PlayerShowcase
+        const getDefaultShowcaseFields = (fields) => ({
+          ...fields,
+          title: fields.title && fields.title.trim() ? fields.title : '该用户没有填写标题',
+          description: fields.description && fields.description.trim() ? fields.description : '该用户没有填写描述',
+        });
+        return <PlayerShowcase user={user} userPrizes={userPrizes} getDefaultShowcaseFields={getDefaultShowcaseFields} />
       case 'search':
         return <BlindBoxSearch onBlindBoxClick={handleBlindBoxClick} />
       case 'library':

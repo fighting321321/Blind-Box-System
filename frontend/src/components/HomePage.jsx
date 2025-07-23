@@ -7,7 +7,7 @@ import BlindBoxDetail from './BlindBoxDetail'
 import PlayerShowcase from './PlayerShowcase'
 import BlindBoxSearch from './BlindBoxSearch'
 import UserPrizes from './UserPrizes'
-import Toast from './Toast'
+// import Toast from './Toast'
 import BlindBoxImage from './BlindBoxImage'
 import { blindBoxAPI, userLibraryAPI } from '../services/api'
 
@@ -15,7 +15,7 @@ import { blindBoxAPI, userLibraryAPI } from '../services/api'
  * 盲盒系统主页组件
  * 普通用户主页：展示所有盲盒，支持添加到库，库管理，订单管理
  */
-function HomePage({ user, onLogout, onRefreshBalance }) {
+function HomePage({ user, onLogout, onRefreshBalance, showToast }) {
   const [activeTab, setActiveTab] = useState('home')
   const [selectedBlindBox, setSelectedBlindBox] = useState(null)
   const [previousTab, setPreviousTab] = useState('home') // 记录进入详情页前的页面
@@ -24,7 +24,7 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
   const [allBlindBoxes, setAllBlindBoxes] = useState([]) // 所有可用盲盒
   const [userOrders, setUserOrders] = useState([]) // 用户订单
   const [loading, setLoading] = useState(false)
-  const [toast, setToast] = useState(null)
+  // const [toast, setToast] = useState(null)
   const [userBalance, setUserBalance] = useState(0) // 用户余额状态
 
   // 从后端获取盲盒数据
@@ -269,11 +269,7 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
     }
   }
 
-  // 显示提示消息
-  const showToast = (message, type = 'info') => {
-    setToast({ message, type })
-    setTimeout(() => setToast(null), 3000)
-  }
+  // 显示提示消息由 props 提供
 
   const handleBlindBoxClick = async (blindBox) => {
     try {
@@ -439,7 +435,7 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
       case 'management':
         return <BlindBoxManagement user={user} />
       case 'draw':
-        return <BlindBoxDraw user={user} selectedBlindBox={selectedBlindBox} />
+        return <BlindBoxDraw user={user} selectedBlindBox={selectedBlindBox} showToast={showToast} />
       case 'orders':
         return <OrderManagement user={user} />
       case 'prizes':
@@ -838,14 +834,7 @@ function HomePage({ user, onLogout, onRefreshBalance }) {
         </div>
       </nav>
 
-      {/* Toast 消息提示 */}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
+      {/* Toast 消息提示已全局处理 */}
     </div>
   )
 }

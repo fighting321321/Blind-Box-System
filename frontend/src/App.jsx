@@ -11,7 +11,7 @@ import { useToast } from './components/Toast'
  * 包含用户认证功能（登录、注册、用户信息展示）
  */
 function App() {
-  const { ToastContainer } = useToast()
+  const { ToastContainer, toast } = useToast();
   // 应用状态管理
   const [currentView, setCurrentView] = useState('login') // 'login' | 'register' | 'user'
   const [user, setUser] = useState(null) // 当前登录用户
@@ -155,8 +155,8 @@ function App() {
               <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
                 <button
                   className={`flex-1 py-2 px-4 rounded-md transition-colors ${currentView === 'login'
-                      ? 'bg-white text-purple-600 shadow-sm'
-                      : 'text-gray-600 hover:text-purple-600'
+                    ? 'bg-white text-purple-600 shadow-sm'
+                    : 'text-gray-600 hover:text-purple-600'
                     }`}
                   onClick={() => setCurrentView('login')}
                 >
@@ -164,8 +164,8 @@ function App() {
                 </button>
                 <button
                   className={`flex-1 py-2 px-4 rounded-md transition-colors ${currentView === 'register'
-                      ? 'bg-white text-purple-600 shadow-sm'
-                      : 'text-gray-600 hover:text-purple-600'
+                    ? 'bg-white text-purple-600 shadow-sm'
+                    : 'text-gray-600 hover:text-purple-600'
                     }`}
                   onClick={() => setCurrentView('register')}
                 >
@@ -200,6 +200,7 @@ function App() {
               user={user}
               onLogout={handleLogout}
               onRefreshBalance={() => refreshUserBalance(user.id)}
+              showToast={(msg) => toast.error(msg, 5000)}
             />
           )}
         </>

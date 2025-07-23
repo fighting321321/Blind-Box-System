@@ -42,9 +42,7 @@ function BlindBoxDetail({ blindBox, onBack, user, showToast, onPurchaseSuccess }
         // 显示购买成功弹窗
         setShowSuccessModal(true)
 
-        // 仍然显示Toast通知（作为备选）
-        const prizeNames = response.data.prizes?.map(prize => prize.prizeName).join(', ') || '神秘奖品'
-        showToast(`🎉 购买成功！获得奖品：${prizeNames}`, 'success')
+        // 不再弹出成功Toast
 
         // 调用成功回调，传递更新后的用户信息
         if (onPurchaseSuccess) {

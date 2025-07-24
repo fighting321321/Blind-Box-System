@@ -9,6 +9,7 @@ function formatToBeijingTime(isoString) {
   return beijing.toISOString().slice(0, 19).replace('T', ' ');
 }
 import api, { userAPI } from '../services/api';
+import { deleteShowcase } from '../services/playerShowcaseAPI';
 
 
 /**
@@ -183,6 +184,21 @@ function PlayerShowcase({ user, userPrizes = [] }) {
 
 
   // 我的展示渲染函数（与全部展示一致，显示用户名和奖品名，按时间倒序）
+  const handleDeleteShowcase = async (id) => {
+    if (!window.confirm('确定要删除该展示吗？')) return;
+    try {
+      const res = await deleteShowcase(id);
+      if (res.success) {
+        window.alert('删除成功');
+        fetchMyShowcases();
+      } else {
+        window.alert(res.message || '删除失败');
+      }
+    } catch (e) {
+      window.alert('网络错误，删除失败');
+    }
+  };
+
   const renderMyShowcase = () => {
     const sorted = [...myShowcases].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     return (
@@ -210,6 +226,12 @@ function PlayerShowcase({ user, userPrizes = [] }) {
               </div>
               <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                 <span className="text-xs text-gray-400">{formatToBeijingTime(showcase.createdAt)}</span>
+                <button
+                  className="ml-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs"
+                  onClick={() => handleDeleteShowcase(showcase.id)}
+                >
+                  删除
+                </button>
               </div>
             </div>
           ))

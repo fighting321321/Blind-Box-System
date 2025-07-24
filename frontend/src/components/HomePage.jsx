@@ -46,6 +46,7 @@ function HomePage({ user, onLogout, onRefreshBalance, showToast }) {
   const [viewMode, setViewMode] = useState('grid') // 'grid' 或 'list'
   const [userLibrary, setUserLibrary] = useState([]) // 用户盲盒库
   const [allBlindBoxes, setAllBlindBoxes] = useState([]) // 所有可用盲盒
+  const [searchBox, setSearchBox] = useState(''); // 盲盒搜索关键词
   const [userOrders, setUserOrders] = useState([]) // 用户订单
   const [loading, setLoading] = useState(false)
   // const [toast, setToast] = useState(null)
@@ -387,7 +388,21 @@ function HomePage({ user, onLogout, onRefreshBalance, showToast }) {
   const renderBlindBoxList = (blindBoxes, showAddButton = true) => {
     return (
       <div className="space-y-4">
-        {blindBoxes.map(blindBox => {
+        {/* 搜索框，仅主页盲盒列表顶部显示 */}
+        {showAddButton && (
+          <div className="mb-4 flex justify-end">
+            <input
+              type="text"
+              className="w-full md:w-72 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              placeholder="搜索盲盒名称..."
+              value={searchBox}
+              onChange={e => setSearchBox(e.target.value)}
+            />
+          </div>
+        )}
+        {blindBoxes
+          .filter(box => box.name.includes(searchBox))
+          .map(blindBox => {
           const isInLibrary = userLibrary.some(item => item.id === blindBox.id)
           return (
             <div key={blindBox.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4">
@@ -713,7 +728,9 @@ function HomePage({ user, onLogout, onRefreshBalance, showToast }) {
               </div>
               {viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {allBlindBoxes.map(blindBox => renderBlindBoxCard(blindBox))}
+                  {allBlindBoxes
+                    .filter(box => box.name.includes(searchBox))
+                    .map(blindBox => renderBlindBoxCard(blindBox))}
                 </div>
               ) : (
                 renderBlindBoxList(allBlindBoxes)

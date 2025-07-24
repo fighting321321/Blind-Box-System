@@ -1,9 +1,27 @@
-import { Inject, Controller, Post, Body, Get } from '@midwayjs/core';
+import { Inject, Controller, Post, Body, Get, Del, Param } from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
-import { addShowcase, getShowcases } from '../service/player-showcase.service';
+import { addShowcase, getShowcases, deleteShowcase } from '../service/player-showcase.service';
+
 
 @Controller('/api/player-showcase')
 export class PlayerShowcaseController {
+    /**
+     * 删除玩家秀展示
+     * DELETE /api/player-showcase/:id
+     */
+    @Del('/:id')
+    async removeShowcase(@Param('id') id: string) {
+        try {
+            const ok = deleteShowcase(Number(id));
+            if (ok) {
+                return { success: true };
+            } else {
+                return { success: false, message: '展示不存在或删除失败' };
+            }
+        } catch (e) {
+            return { success: false, message: e.message || '删除异常' };
+        }
+    }
     @Inject()
     ctx: Context;
 

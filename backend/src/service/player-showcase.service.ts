@@ -1,3 +1,16 @@
+// 删除展示
+export function deleteShowcase(id: number): boolean {
+    const dataPath = getDataPath();
+    if (!fs.existsSync(dataPath)) return false;
+    const raw = fs.readFileSync(dataPath, 'utf-8');
+    const json: PlayerShowcaseData = JSON.parse(raw);
+    const before = json.showcases.length;
+    json.showcases = json.showcases.filter(item => item.id !== id);
+    const after = json.showcases.length;
+    if (after === before) return false; // 没有删除
+    fs.writeFileSync(dataPath, JSON.stringify({ ...json, lastUpdated: new Date().toISOString() }, null, 2), 'utf-8');
+    return true;
+}
 // 玩家秀服务：基于 JSON 文件的简单读写（TypeScript 版）
 
 import * as fs from 'fs';

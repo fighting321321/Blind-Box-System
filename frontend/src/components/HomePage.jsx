@@ -403,69 +403,69 @@ function HomePage({ user, onLogout, onRefreshBalance, showToast }) {
         {blindBoxes
           .filter(box => box.name.includes(searchBox))
           .map(blindBox => {
-          const isInLibrary = userLibrary.some(item => item.id === blindBox.id)
-          return (
-            <div key={blindBox.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4">
-              <div className="flex items-start space-x-4">
-                <div className="relative">
-                  <BlindBoxImage
-                    blindBoxId={blindBox.id}
-                    name={blindBox.name}
-                    width={80}
-                    height={80}
-                    className="rounded-lg cursor-pointer"
-                    onClick={() => handleBlindBoxClick(blindBox)}
-                  />
-                  {blindBox.isNew && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 py-0.5 rounded">新</span>
-                  )}
-                  {blindBox.isHot && (
-                    <span className="absolute -top-1 -left-1 bg-orange-500 text-white text-xs px-1 py-0.5 rounded">热</span>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-medium text-gray-800 text-lg">{blindBox.name}</h3>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-2">{blindBox.description}</p>
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    {blindBox.tags.map(tag => (
-                      <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-lg font-bold text-purple-600">¥{blindBox.price.toFixed(2)}</span>
-                        {blindBox.originalPrice > blindBox.price && (
-                          <span className="text-sm text-gray-400 line-through">¥{blindBox.originalPrice.toFixed(2)}</span>
-                        )}
-                      </div>
-                      <span className="text-sm text-gray-500">剩余: {blindBox.stock}个</span>
-                    </div>
-                    {showAddButton && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          addToLibrary(blindBox)
-                        }}
-                        disabled={isInLibrary}
-                        className={`py-2.5 px-6 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm ${isInLibrary
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
-                          : 'bg-purple-600 text-white hover:bg-purple-700 hover:shadow-md transform hover:scale-105 border border-purple-600 hover:border-purple-700'
-                          }`}
-                      >
-                        {isInLibrary ? '✓ 已添加到库' : '+ 添加到库'}
-                      </button>
+            const isInLibrary = userLibrary.some(item => item.id === blindBox.id)
+            return (
+              <div key={blindBox.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4">
+                <div className="flex items-start space-x-4">
+                  <div className="relative">
+                    <BlindBoxImage
+                      blindBoxId={blindBox.id}
+                      name={blindBox.name}
+                      width={80}
+                      height={80}
+                      className="rounded-lg cursor-pointer"
+                      onClick={() => handleBlindBoxClick(blindBox)}
+                    />
+                    {blindBox.isNew && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 py-0.5 rounded">新</span>
                     )}
+                    {blindBox.isHot && (
+                      <span className="absolute -top-1 -left-1 bg-orange-500 text-white text-xs px-1 py-0.5 rounded">热</span>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-medium text-gray-800 text-lg">{blindBox.name}</h3>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-2">{blindBox.description}</p>
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {blindBox.tags.map(tag => (
+                        <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-lg font-bold text-purple-600">¥{blindBox.price.toFixed(2)}</span>
+                          {blindBox.originalPrice > blindBox.price && (
+                            <span className="text-sm text-gray-400 line-through">¥{blindBox.originalPrice.toFixed(2)}</span>
+                          )}
+                        </div>
+                        <span className="text-sm text-gray-500">剩余: {blindBox.stock}个</span>
+                      </div>
+                      {showAddButton && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            addToLibrary(blindBox)
+                          }}
+                          disabled={isInLibrary}
+                          className={`py-2.5 px-6 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm ${isInLibrary
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                            : 'bg-purple-600 text-white hover:bg-purple-700 hover:shadow-md transform hover:scale-105 border border-purple-600 hover:border-purple-700'
+                            }`}
+                        >
+                          {isInLibrary ? '✓ 已添加到库' : '+ 添加到库'}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )
-        })}
+            )
+          })}
       </div>
     )
   }
@@ -727,11 +727,22 @@ function HomePage({ user, onLogout, onRefreshBalance, showToast }) {
                 </div>
               </div>
               {viewMode === 'grid' ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {allBlindBoxes
-                    .filter(box => box.name.includes(searchBox))
-                    .map(blindBox => renderBlindBoxCard(blindBox))}
-                </div>
+                <>
+                  <div className="mb-4 flex justify-end">
+                    <input
+                      type="text"
+                      className="w-full md:w-72 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      placeholder="搜索盲盒名称..."
+                      value={searchBox}
+                      onChange={e => setSearchBox(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {allBlindBoxes
+                      .filter(box => box.name.includes(searchBox))
+                      .map(blindBox => renderBlindBoxCard(blindBox))}
+                  </div>
+                </>
               ) : (
                 renderBlindBoxList(allBlindBoxes)
               )}

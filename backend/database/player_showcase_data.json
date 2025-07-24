@@ -1,5 +1,15 @@
 {
-  "showcases": [],
-  "nextId": 3,
-  "lastUpdated": "2025-07-24T15:12:01.008Z"
+  "showcases": [
+    {
+      "id": 3,
+      "userId": 1,
+      "prizeId": 1,
+      "title": "测试",
+      "description": "测试内容",
+      "createdAt": "2025-07-24T16:22:13.946Z",
+      "updatedAt": "2025-07-24T16:22:13.946Z"
+    }
+  ],
+  "nextId": 4,
+  "lastUpdated": "2025-07-24T16:22:13.946Z"
 }

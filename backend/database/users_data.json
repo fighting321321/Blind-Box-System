@@ -20,20 +20,20 @@
       "status": 1,
       "role": "user",
       "createdAt": "2025-07-13T12:26:48.374Z",
-      "updatedAt": "2025-07-23T16:40:03.596Z"
+      "updatedAt": "2025-07-24T08:56:06.539Z"
     },
     {
       "id": 2,
       "username": "empty",
       "email": "qwerty@qq.com",
       "password": "$2a$10$r1nYTh0.6HFMOzYdneB7AOej17TeRcnpqKRLsR/ueMFmgA6h0uLZ2",
-      "balance": 0,
+      "balance": 950.1,
       "status": 1,
       "role": "user",
       "createdAt": "2025-07-19T06:55:33.349Z",
-      "updatedAt": "2025-07-19T06:55:42.167Z"
+      "updatedAt": "2025-07-24T08:55:59.273Z"
     }
   ],
   "nextId": 3,
-  "lastUpdate": "2025-07-23T16:40:03.596Z"
+  "lastUpdate": "2025-07-24T08:56:06.539Z"
 }

@@ -1,6 +1,18 @@
 {
   "orders": [
     {
+      "id": "ORDER_1753346941553_0qvxx45dn",
+      "userId": 2,
+      "username": "empty",
+      "blindBoxId": 2,
+      "blindBoxName": "潮流玩具盲盒",
+      "quantity": 1,
+      "totalAmount": 49.9,
+      "status": "completed",
+      "createdAt": "2025-07-24T08:49:01.555Z",
+      "updatedAt": "2025-07-24T08:49:01.555Z"
+    },
+    {
       "id": "ORDER_1753288803596_o0jb92qgc",
       "userId": 1,
       "username": "demo",
@@ -14,5 +26,5 @@
     }
   ],
   "nextOrderId": 1,
-  "lastUpdate": "2025-07-23T16:40:03.598Z"
+  "lastUpdate": "2025-07-24T08:49:01.555Z"
 }

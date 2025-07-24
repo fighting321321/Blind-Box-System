@@ -404,11 +404,25 @@ export class APIController {
         pageSize: pageSize || 20,
         rarity
       };
-
       const result = await this.sqliteUserPrizeService.queryUserPrizes(query);
       return { success: true, message: 'OK', data: result };
     } catch (error) {
       return { success: false, message: error.message || '获取SQLite用户奖品失败', data: null };
+    }
+  }
+
+  /**
+   * 获取所有奖品列表
+   * GET /api/prizes
+   */
+  @Get('/prizes')
+  async getAllPrizes() {
+    try {
+      // 直接从 blindBoxService 获取所有奖品
+      const prizes = await this.blindBoxService.getAllPrizes();
+      return { success: true, message: 'OK', data: prizes };
+    } catch (error) {
+      return { success: false, message: error.message || '获取奖品列表失败', data: null };
     }
   }
 

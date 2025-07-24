@@ -13,8 +13,22 @@
       "orderId": "ORDER_1753288803596_o0jb92qgc",
       "obtainedAt": "2025-07-23T16:40:03.600Z",
       "createdAt": "2025-07-23T16:40:03.600Z"
+    },
+    {
+      "id": "2",
+      "userId": 2,
+      "prizeId": 6,
+      "prizeName": "隐藏款玩偶",
+      "prizeDescription": "神秘隐藏款，价值连城",
+      "prizeImageUrl": "",
+      "rarity": "LEGENDARY",
+      "blindBoxId": 2,
+      "blindBoxName": "潮流玩具盲盒",
+      "orderId": "ORDER_1753346941553_0qvxx45dn",
+      "obtainedAt": "2025-07-24T08:49:01.557Z",
+      "createdAt": "2025-07-24T08:49:01.557Z"
     }
   ],
-  "nextId": 2,
-  "lastUpdate": "2025-07-23T16:40:03.600Z"
+  "nextId": 3,
+  "lastUpdate": "2025-07-24T08:49:01.557Z"
 }

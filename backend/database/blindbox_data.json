@@ -19,12 +19,12 @@
       "description": "时尚潮流系列，收藏价值极高",
       "price": 49.9,
       "imageUrl": "",
-      "stock": 48,
-      "sales": 2,
+      "stock": 47,
+      "sales": 3,
       "status": 1,
       "prizes": [],
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-22T06:32:30.584Z"
+      "updatedAt": "2025-07-24T08:49:01.554Z"
     },
     {
       "id": 3,
@@ -188,5 +188,5 @@
   ],
   "nextBlindBoxId": 12,
   "nextPrizeId": 18,
-  "lastUpdate": "2025-07-23T16:40:03.601Z"
+  "lastUpdate": "2025-07-24T08:49:01.558Z"
 }

@@ -1,6 +1,18 @@
 {
   "orders": [
     {
+      "id": "ORDER_1753357001628_bcjtqfemt",
+      "userId": 1,
+      "username": "demo",
+      "blindBoxId": 1,
+      "blindBoxName": "可爱动物盲盒",
+      "quantity": 1,
+      "totalAmount": 29.9,
+      "status": "completed",
+      "createdAt": "2025-07-24T11:36:41.630Z",
+      "updatedAt": "2025-07-24T11:36:41.630Z"
+    },
+    {
       "id": "ORDER_1753346941553_0qvxx45dn",
       "userId": 2,
       "username": "empty",
@@ -26,5 +38,5 @@
     }
   ],
   "nextOrderId": 1,
-  "lastUpdate": "2025-07-24T08:49:01.555Z"
+  "lastUpdate": "2025-07-24T11:36:41.631Z"
 }

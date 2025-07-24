@@ -1,24 +1,5 @@
 {
-    "showcases": [
-        {
-            "id": 1,
-            "userId": 1,
-            "prizeId": 3,
-            "title": "该用户没有填写标题",
-            "description": "该用户没有填写描述",
-            "createdAt": "2025-07-24T12:00:00.000Z",
-            "updatedAt": "2025-07-24T12:00:00.000Z"
-        },
-        {
-            "id": 2,
-            "userId": 1,
-            "prizeId": 1,
-            "title": "1",
-            "description": "1",
-            "createdAt": "2025-07-24T08:10:41.126Z",
-            "updatedAt": "2025-07-24T08:10:41.126Z"
-        }
-    ],
-    "nextId": 3,
-    "lastUpdated": "2025-07-24T08:10:41.126Z"
+    "showcases": [],
+    "nextId": 1,
+    "lastUpdated": "2025-07-24T12:26:32.099Z"
 }

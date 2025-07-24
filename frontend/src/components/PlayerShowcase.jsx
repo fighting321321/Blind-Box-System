@@ -1,5 +1,13 @@
 
 import { useState, useEffect } from 'react';
+// 格式化为北京时间（东八区）
+function formatToBeijingTime(isoString) {
+  if (!isoString) return '';
+  const date = new Date(isoString);
+  // 转为北京时间
+  const beijing = new Date(date.getTime() + 8 * 60 * 60 * 1000);
+  return beijing.toISOString().slice(0, 19).replace('T', ' ');
+}
 import api, { userAPI } from '../services/api';
 
 
@@ -122,12 +130,15 @@ function PlayerShowcase({ user, userPrizes = [] }) {
   const openCreateForm = () => {
     setUserCollection(
       Array.isArray(userPrizes)
-        ? userPrizes.map(prize => ({
-          id: prize.id,
-          name: prize.name,
-          color: prize.color || 'bg-gray-300',
-          selected: false
-        }))
+        ? userPrizes
+          .filter(prize => prize.prizeId !== undefined || prize.id !== undefined)
+          .map(prize => ({
+            id: prize.id,
+            prizeId: prize.prizeId !== undefined ? prize.prizeId : prize.id,
+            name: prize.name,
+            color: prize.color || 'bg-gray-300',
+            selected: false
+          }))
         : []
     );
     setShowCreateForm(true);
@@ -144,7 +155,12 @@ function PlayerShowcase({ user, userPrizes = [] }) {
       window.alert('请至少选择一个奖品进行展示！');
       return;
     }
-    const prizeId = selectedItems[0].id;
+    // prizeId 只允许取prizeId属性，未定义则报错
+    const prizeId = selectedItems[0].prizeId;
+    if (prizeId === undefined) {
+      window.alert('奖品数据异常，无法获取prizeId');
+      return;
+    }
     try {
       const res = await api.post('/player-showcase', {
         userId: user.id,
@@ -165,53 +181,70 @@ function PlayerShowcase({ user, userPrizes = [] }) {
     }
   };
 
-  // 我的展示渲染函数
-  const renderMyShowcase = () => (
-    <div className="space-y-6">
-      {myShowcases.length === 0 ? (
-        <div className="text-center text-gray-400 py-12">暂无展示</div>
-      ) : (
-        myShowcases.map((showcase) => (
-          <div key={showcase.id} className="bg-white rounded-lg p-6 shadow-sm">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">{showcase.title}</h3>
-              <p className="text-gray-600 mb-4">{showcase.description}</p>
-            </div>
-            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-              <span className="text-xs text-gray-400">展示ID: {showcase.id}</span>
-              <span className="text-xs text-gray-400">用户ID: {showcase.userId}</span>
-              <span className="text-xs text-gray-400">{showcase.createdAt?.slice(0, 19).replace('T', ' ')}</span>
-            </div>
-          </div>
-        ))
-      )}
-    </div>
-  );
 
-  // 全部展示渲染函数（顶部用户名，右上奖品名）
-  const renderAllShowcase = () => (
-    <div className="space-y-6">
-      {allShowcases.length === 0 ? (
-        <div className="text-center text-gray-400 py-12">暂无展示</div>
-      ) : (
-        allShowcases.map((showcase) => (
-          <div key={showcase.id} className="bg-white rounded-lg p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-semibold text-purple-700">{userMap[showcase.userId] || `用户${showcase.userId}`}</span>
-              <span className="text-sm text-gray-500">{'奖品：' + (prizeMap[showcase.prizeId] || `奖品${showcase.prizeId}`)}</span>
+  // 我的展示渲染函数（与全部展示一致，显示用户名和奖品名，按时间倒序）
+  const renderMyShowcase = () => {
+    const sorted = [...myShowcases].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-end mb-2">
+          <button
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow"
+            onClick={openCreateForm}
+          >
+            添加展示
+          </button>
+        </div>
+        {sorted.length === 0 ? (
+          <div className="text-center text-gray-400 py-12">暂无展示</div>
+        ) : (
+          sorted.map((showcase) => (
+            <div key={showcase.id} className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-semibold text-purple-700">{userMap[showcase.userId] || `用户${showcase.userId}`}</span>
+                <span className="text-base text-pink-600 font-bold">{'奖品：' + (prizeMap[showcase.prizeId] || `奖品${showcase.prizeId}`)}</span>
+              </div>
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">{showcase.title}</h3>
+                <p className="text-gray-600 mb-4">{showcase.description}</p>
+              </div>
+              <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                <span className="text-xs text-gray-400">{formatToBeijingTime(showcase.createdAt)}</span>
+              </div>
             </div>
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">{showcase.title}</h3>
-              <p className="text-gray-600 mb-4">{showcase.description}</p>
+          ))
+        )}
+      </div>
+    );
+  };
+
+  // 全部展示渲染函数（顶部用户名，右上奖品名，按时间倒序）
+  const renderAllShowcase = () => {
+    const sorted = [...allShowcases].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    return (
+      <div className="space-y-6">
+        {sorted.length === 0 ? (
+          <div className="text-center text-gray-400 py-12">暂无展示</div>
+        ) : (
+          sorted.map((showcase) => (
+            <div key={showcase.id} className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-semibold text-purple-700">{userMap[showcase.userId] || `用户${showcase.userId}`}</span>
+                <span className="text-base text-pink-600 font-bold">{'奖品：' + (prizeMap[showcase.prizeId] || `奖品${showcase.prizeId}`)}</span>
+              </div>
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">{showcase.title}</h3>
+                <p className="text-gray-600 mb-4">{showcase.description}</p>
+              </div>
+              <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                <span className="text-xs text-gray-400">{formatToBeijingTime(showcase.createdAt)}</span>
+              </div>
             </div>
-            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-              <span className="text-xs text-gray-400">{showcase.createdAt?.slice(0, 19).replace('T', ' ')}</span>
-            </div>
-          </div>
-        ))
-      )}
-    </div>
-  );
+          ))
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -303,8 +336,11 @@ function PlayerShowcase({ user, userPrizes = [] }) {
                           : 'border-gray-200 hover:border-purple-300'
                           }`}
                         onClick={() => {
-                          const updated = [...userCollection];
-                          updated[idx].selected = !updated[idx].selected;
+                          // 单选逻辑：只允许一个被选中
+                          const updated = userCollection.map((item, i) => ({
+                            ...item,
+                            selected: i === idx ? !item.selected : false
+                          }));
                           setUserCollection(updated);
                         }}
                       >

@@ -27,8 +27,22 @@
       "orderId": "ORDER_1753346941553_0qvxx45dn",
       "obtainedAt": "2025-07-24T08:49:01.557Z",
       "createdAt": "2025-07-24T08:49:01.557Z"
+    },
+    {
+      "id": "3",
+      "userId": 1,
+      "prizeId": 1,
+      "prizeName": "小熊公仔",
+      "prizeDescription": "可爱的小熊玩偶",
+      "prizeImageUrl": "",
+      "rarity": "COMMON",
+      "blindBoxId": 1,
+      "blindBoxName": "可爱动物盲盒",
+      "orderId": "ORDER_1753357001628_bcjtqfemt",
+      "obtainedAt": "2025-07-24T11:36:41.633Z",
+      "createdAt": "2025-07-24T11:36:41.633Z"
     }
   ],
-  "nextId": 3,
-  "lastUpdate": "2025-07-24T08:49:01.557Z"
+  "nextId": 4,
+  "lastUpdate": "2025-07-24T11:36:41.633Z"
 }

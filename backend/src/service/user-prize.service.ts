@@ -85,7 +85,13 @@ export class UserPrizeService {
    * 获取用户的所有奖品
    */
   async getUserPrizes(userId: number): Promise<UserPrize[]> {
-    return this.userPrizes.filter(prize => prize.userId === userId);
+    // 保证每个奖品对象都带有 prizeId 字段
+    return this.userPrizes
+      .filter(prize => prize.userId === userId)
+      .map(prize => ({
+        ...prize,
+        prizeId: prize.prizeId !== undefined ? prize.prizeId : (prize.id ? Number(prize.id.replace(/\D/g, '')) : undefined)
+      }));
   }
 
   /**

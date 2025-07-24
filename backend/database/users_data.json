@@ -16,11 +16,11 @@
       "username": "demo",
       "email": "demo@example.com",
       "password": "$2a$10$ard/T34zd6suutg7fDZhOuDQEgx3B4LgUe9WPHzlsSqAwI/I62g8W",
-      "balance": 671.1,
+      "balance": 641.2,
       "status": 1,
       "role": "user",
       "createdAt": "2025-07-13T12:26:48.374Z",
-      "updatedAt": "2025-07-24T08:56:06.539Z"
+      "updatedAt": "2025-07-24T11:36:41.628Z"
     },
     {
       "id": 2,
@@ -35,5 +35,5 @@
     }
   ],
   "nextId": 3,
-  "lastUpdate": "2025-07-24T08:56:06.539Z"
+  "lastUpdate": "2025-07-24T11:36:41.628Z"
 }

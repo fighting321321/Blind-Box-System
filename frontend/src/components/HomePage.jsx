@@ -25,9 +25,10 @@ function HomePage({ user, onLogout, onRefreshBalance, showToast }) {
       const response = await fetch(`http://localhost:7001/api/sqlite/user-prizes?userId=${user.id}&pageSize=1000`);
       const data = await response.json();
       if (data.success) {
-        // 只保留必要字段，兼容 PlayerShowcase
+        // 保留 prizeId 字段，确保 PlayerShowcase 选中 prizeId 正确
         const formatted = data.data.prizes.map(prize => ({
           id: prize.id,
+          prizeId: prize.prizeId, // 关键字段
           name: prize.prizeName,
           color: prize.color || 'bg-gray-300',
         }));

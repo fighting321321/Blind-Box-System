@@ -6,12 +6,12 @@
       "description": "超萌动物系列，每个都是惊喜",
       "price": 29.9,
       "imageUrl": "",
-      "stock": 99,
-      "sales": 39,
+      "stock": 98,
+      "sales": 40,
       "status": 1,
       "prizes": [],
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-23T16:40:03.596Z"
+      "updatedAt": "2025-07-24T11:36:41.628Z"
     },
     {
       "id": 2,
@@ -188,5 +188,5 @@
   ],
   "nextBlindBoxId": 12,
   "nextPrizeId": 18,
-  "lastUpdate": "2025-07-24T08:49:01.558Z"
+  "lastUpdate": "2025-07-24T11:36:41.635Z"
 }

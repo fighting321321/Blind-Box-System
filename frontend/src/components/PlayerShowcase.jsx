@@ -184,10 +184,21 @@ function PlayerShowcase({ user, userPrizes = [] }) {
 
 
   // 我的展示渲染函数（与全部展示一致，显示用户名和奖品名，按时间倒序）
-  const handleDeleteShowcase = async (id) => {
-    if (!window.confirm('确定要删除该展示吗？')) return;
+  // 自定义删除确认弹窗相关状态
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteShowcase = (id) => {
+    setPendingDeleteId(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteShowcase = async () => {
+    if (!pendingDeleteId) return;
+    setDeleting(true);
     try {
-      const res = await deleteShowcase(id);
+      const res = await deleteShowcase(pendingDeleteId);
       if (res.success) {
         window.alert('删除成功');
         fetchMyShowcases();
@@ -196,6 +207,10 @@ function PlayerShowcase({ user, userPrizes = [] }) {
       }
     } catch (e) {
       window.alert('网络错误，删除失败');
+    } finally {
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+      setPendingDeleteId(null);
     }
   };
 
@@ -232,6 +247,39 @@ function PlayerShowcase({ user, userPrizes = [] }) {
                 >
                   删除
                 </button>
+                {/* 自定义删除确认弹窗 */}
+                {showDeleteConfirm && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                    <div className="bg-white rounded-2xl shadow-2xl p-8 w-80 max-w-full relative animate-fade-in">
+                      <h3 className="text-lg font-bold mb-4 text-gray-800">确认删除</h3>
+                      <div className="mb-4 text-gray-700">确定要删除该展示吗？此操作不可撤销。</div>
+                      <div className="flex justify-end space-x-3">
+                        <button
+                          className="px-5 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition"
+                          onClick={() => { setShowDeleteConfirm(false); setPendingDeleteId(null); }}
+                          disabled={deleting}
+                        >
+                          取消
+                        </button>
+                        <button
+                          className="px-6 py-2 rounded-lg bg-red-600 text-white font-bold hover:bg-red-700 transition shadow"
+                          onClick={confirmDeleteShowcase}
+                          disabled={deleting}
+                        >
+                          {deleting ? '正在删除...' : '确认删除'}
+                        </button>
+                      </div>
+                      <button
+                        className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl font-bold"
+                        onClick={() => { setShowDeleteConfirm(false); setPendingDeleteId(null); }}
+                        aria-label="关闭"
+                        disabled={deleting}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ))

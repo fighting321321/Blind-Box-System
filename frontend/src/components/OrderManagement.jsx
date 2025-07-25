@@ -109,8 +109,8 @@ function OrderManagement({ user }) {
         <div className="flex space-x-1">
           <button
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'all'
-                ? 'bg-purple-600 text-white'
-                : 'text-gray-600 hover:text-purple-600'
+              ? 'bg-purple-600 text-white'
+              : 'text-gray-600 hover:text-purple-600'
               }`}
             onClick={() => setActiveTab('all')}
           >
@@ -118,8 +118,8 @@ function OrderManagement({ user }) {
           </button>
           <button
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'draw'
-                ? 'bg-purple-600 text-white'
-                : 'text-gray-600 hover:text-purple-600'
+              ? 'bg-purple-600 text-white'
+              : 'text-gray-600 hover:text-purple-600'
               }`}
             onClick={() => setActiveTab('draw')}
           >
@@ -127,8 +127,8 @@ function OrderManagement({ user }) {
           </button>
           <button
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'recharge'
-                ? 'bg-purple-600 text-white'
-                : 'text-gray-600 hover:text-purple-600'
+              ? 'bg-purple-600 text-white'
+              : 'text-gray-600 hover:text-purple-600'
               }`}
             onClick={() => setActiveTab('recharge')}
           >
@@ -136,8 +136,8 @@ function OrderManagement({ user }) {
           </button>
           <button
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeTab === 'pending'
-                ? 'bg-purple-600 text-white'
-                : 'text-gray-600 hover:text-purple-600'
+              ? 'bg-purple-600 text-white'
+              : 'text-gray-600 hover:text-purple-600'
               }`}
             onClick={() => setActiveTab('pending')}
           >
@@ -209,9 +209,6 @@ function OrderManagement({ user }) {
                     <p className="text-lg font-bold text-purple-600">¥{order.totalAmount.toFixed(2)}</p>
                   </div>
                   <div className="flex space-x-2">
-                    <button className="px-4 py-2 text-sm text-purple-600 border border-purple-600 rounded-lg hover:bg-purple-50 transition-colors">
-                      查看详情
-                    </button>
                     {order.status === 'pending' && (
                       <button className="px-4 py-2 text-sm text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors">
                         取消订单

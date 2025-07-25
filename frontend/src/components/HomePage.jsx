@@ -239,22 +239,38 @@ function HomePage({ user, onLogout, onRefreshBalance, showToast }) {
     }
   }
 
-  // 从用户库移除盲盒
-  const removeFromLibrary = async (libraryItemId) => {
+  // 自定义移除确认弹窗相关状态
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
+  const [pendingRemoveId, setPendingRemoveId] = useState(null);
+  const [removing, setRemoving] = useState(false);
+
+  // 触发自定义移除弹窗
+  const handleRemoveClick = (libraryItemId) => {
+    setPendingRemoveId(libraryItemId);
+    setShowRemoveConfirm(true);
+  };
+
+  // 真正执行移除
+  const confirmRemoveFromLibrary = async () => {
+    if (!pendingRemoveId) return;
+    setRemoving(true);
     try {
-      const response = await userLibraryAPI.removeFromLibrary(libraryItemId, user.id)
+      const response = await userLibraryAPI.removeFromLibrary(pendingRemoveId, user.id);
       if (response.success) {
-        showToast('已从库中移除', 'success')
-        // 重新加载用户库
-        loadUserLibrary()
+        showToast('已从库中移除', 'success');
+        loadUserLibrary();
       } else {
-        showToast(response.message || '移除失败', 'error')
+        showToast(response.message || '移除失败', 'error');
       }
     } catch (error) {
-      console.error('从库中移除失败:', error)
-      showToast('移除失败', 'error')
+      console.error('从库中移除失败:', error);
+      showToast('移除失败', 'error');
+    } finally {
+      setRemoving(false);
+      setShowRemoveConfirm(false);
+      setPendingRemoveId(null);
     }
-  }
+  };
 
   // 抽取盲盒
   const drawBlindBox = async (blindBoxId) => {
@@ -606,7 +622,7 @@ function HomePage({ user, onLogout, onRefreshBalance, showToast }) {
                             <h3 className="font-medium text-gray-800">{blindBox.name}</h3>
                             {viewMode === 'list' && (
                               <button
-                                onClick={() => removeFromLibrary(blindBox.libraryItemId)}
+                                onClick={() => handleRemoveClick(blindBox.libraryItemId)}
                                 className="text-red-500 hover:text-red-700 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-red-50 transition-all duration-200 border border-transparent hover:border-red-200"
                               >
                                 移除
@@ -632,11 +648,44 @@ function HomePage({ user, onLogout, onRefreshBalance, showToast }) {
                             </button>
                             {viewMode === 'grid' && (
                               <button
-                                onClick={() => removeFromLibrary(blindBox.libraryItemId)}
+                                onClick={() => handleRemoveClick(blindBox.libraryItemId)}
                                 className="text-red-500 hover:text-red-700 text-sm py-2 font-medium hover:bg-red-50 rounded-lg transition-all duration-200 border border-transparent hover:border-red-200"
                               >
                                 移除
                               </button>
+                            )}
+                            {/* 自定义移除确认弹窗 */}
+                            {showRemoveConfirm && (
+                              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                                <div className="bg-white rounded-2xl shadow-2xl p-8 w-80 max-w-full relative animate-fade-in">
+                                  <h3 className="text-lg font-bold mb-4 text-gray-800">确认移除</h3>
+                                  <div className="mb-4 text-gray-700">确定要将该盲盒从我的库中移除吗？此操作不可撤销。</div>
+                                  <div className="flex justify-end space-x-3">
+                                    <button
+                                      className="px-5 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition"
+                                      onClick={() => { setShowRemoveConfirm(false); setPendingRemoveId(null); }}
+                                      disabled={removing}
+                                    >
+                                      取消
+                                    </button>
+                                    <button
+                                      className="px-6 py-2 rounded-lg bg-red-600 text-white font-bold hover:bg-red-700 transition shadow"
+                                      onClick={confirmRemoveFromLibrary}
+                                      disabled={removing}
+                                    >
+                                      {removing ? '正在移除...' : '确认移除'}
+                                    </button>
+                                  </div>
+                                  <button
+                                    className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl font-bold"
+                                    onClick={() => { setShowRemoveConfirm(false); setPendingRemoveId(null); }}
+                                    aria-label="关闭"
+                                    disabled={removing}
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              </div>
                             )}
                           </div>
                         </div>

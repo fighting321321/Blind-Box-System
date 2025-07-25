@@ -1,3 +1,4 @@
+
 import { Inject, Controller, Get, Query, Post, Body, Put, Del, Param } from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
 import { SqliteUserService } from '../service/sqlite-user.service';
@@ -6,10 +7,7 @@ import { UserLibraryService } from '../service/user-library.service';
 import { UserPrizeService } from '../service/user-prize.service';
 import { SqliteUserPrizeService } from '../service/sqlite-user-prize.service';
 
-/**
- * API控制器
- * 提供通用的API接口
- */
+
 @Controller('/api')
 export class APIController {
   @Inject()
@@ -29,6 +27,26 @@ export class APIController {
 
   @Inject()
   sqliteUserPrizeService: SqliteUserPrizeService;
+
+  /**
+   * 用户余额充值
+   * POST /api/user/:id/recharge
+   * body: { amount: number }
+   */
+  @Post('/user/:id/recharge')
+  async rechargeUserBalance(@Param('id') userId: number, @Body() body: { amount: number }) {
+    try {
+      const amount = Number(body.amount);
+      if (!userId || isNaN(amount) || amount <= 0) {
+        return { success: false, message: '充值金额无效' };
+      }
+      // 充值，直接增加余额
+      const updatedUser = await this.userService.updateUserBalance(userId, amount);
+      return { success: true, message: '充值成功', data: { balance: updatedUser.balance } };
+    } catch (error) {
+      return { success: false, message: error.message || '充值失败' };
+    }
+  }
 
   /**
    * 获取用户信息接口（向后兼容）

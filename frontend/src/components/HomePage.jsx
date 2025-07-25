@@ -1,3 +1,5 @@
+
+
 import { useState, useEffect } from 'react'
 import BlindBoxManagement from './BlindBoxManagement'
 import BlindBoxDraw from './BlindBoxDraw'
@@ -16,6 +18,9 @@ import { blindBoxAPI, userLibraryAPI } from '../services/api'
  * 普通用户主页：展示所有盲盒，支持添加到库，库管理，订单管理
  */
 function HomePage({ user, onLogout, onRefreshBalance, showToast }) {
+  // 充值弹窗相关状态
+  const [showRechargeModal, setShowRechargeModal] = useState(false);
+  const [rechargeAmount, setRechargeAmount] = useState('100');
   // 用户奖品数据
   const [userPrizes, setUserPrizes] = useState([]);
   // 拉取用户奖品数据
@@ -653,9 +658,82 @@ function HomePage({ user, onLogout, onRefreshBalance, showToast }) {
                   <h2 className="text-2xl font-bold mb-2">欢迎回来，{user.username}！</h2>
                   <p className="text-purple-100">发现更多精彩盲盒，开始你的收藏之旅</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-purple-100">当前余额</p>
-                  <p className="text-2xl font-bold">¥{userBalance.toFixed(2)}</p>
+                <div className="flex items-center space-x-4">
+                  {/* 绿色充值按钮 */}
+                  <button
+                    className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl font-bold text-base shadow-lg mr-4 transition-all duration-200 transform hover:scale-105"
+                    onClick={() => setShowRechargeModal(true)}
+                  >
+                    充值
+                  </button>
+                  {/* 充值弹窗 */}
+                  {showRechargeModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                      <div className="bg-white rounded-2xl shadow-2xl p-8 w-80 max-w-full relative animate-fade-in">
+                        <h3 className="text-lg font-bold mb-4 text-gray-800">余额充值</h3>
+                        <div className="mb-4">
+                          <input
+                            type="number"
+                            min="1"
+                            step="1"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800 text-lg text-black"
+                            placeholder="请输入充值金额"
+                            value={rechargeAmount}
+                            onChange={e => setRechargeAmount(e.target.value.replace(/[^\d.]/g, ''))}
+                            autoFocus
+                          />
+                        </div>
+                        <div className="flex justify-end space-x-3">
+                          <button
+                            className="px-5 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 transition"
+                            onClick={() => setShowRechargeModal(false)}
+                          >
+                            取消
+                          </button>
+                          <button
+                            className="px-6 py-2 rounded-lg bg-blue-800 text-white font-bold hover:bg-blue-900 transition shadow"
+                            onClick={async () => {
+                              const amount = parseFloat(rechargeAmount);
+                              if (isNaN(amount) || amount <= 0) {
+                                showToast('请输入有效的充值金额', 'error');
+                                return;
+                              }
+                              try {
+                                const response = await fetch(`http://localhost:7001/api/user/${user.id}/recharge`, {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ amount })
+                                });
+                                const data = await response.json();
+                                if (data.success) {
+                                  setUserBalance(prev => prev + amount);
+                                  showToast('充值成功', 'success');
+                                  setShowRechargeModal(false);
+                                } else {
+                                  showToast(data.message || '充值失败', 'error');
+                                }
+                              } catch (e) {
+                                showToast('充值请求失败', 'error');
+                              }
+                            }}
+                          >
+                            确认充值
+                          </button>
+                        </div>
+                        <button
+                          className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl font-bold"
+                          onClick={() => setShowRechargeModal(false)}
+                          aria-label="关闭"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  <div className="text-right">
+                    <p className="text-sm text-purple-100">当前余额</p>
+                    <p className="text-2xl font-bold">¥{userBalance.toFixed(2)}</p>
+                  </div>
                 </div>
               </div>
             </div>

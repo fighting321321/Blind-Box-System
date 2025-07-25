@@ -45,14 +45,14 @@ api.interceptors.response.use(
 export const blindBoxAPI = {
   // 获取所有盲盒
   getAllBlindBoxes: () => api.get('/blind-boxes'),
-  
+
   // 获取盲盒详情
   getBlindBoxById: (id) => api.get(`/blind-boxes/${id}`),
-  
+
   // 抽取盲盒
-  drawBlindBox: (userId, blindBoxId) => 
+  drawBlindBox: (userId, blindBoxId) =>
     api.post('/draw-blind-box', { userId, blindBoxId }),
-  
+
   // 获取用户订单
   getUserOrders: (userId) => api.get(`/orders?userId=${userId}`),
 }
@@ -62,18 +62,18 @@ export const userLibraryAPI = {
   // 添加盲盒到用户库
   addToLibrary: (userId, blindBoxId, quantity = 1, note = '') =>
     api.post('/library', { userId, blindBoxId, quantity, note }),
-  
+
   // 获取用户的盲盒库
   getUserLibrary: (userId) => api.get(`/library?userId=${userId}`),
-  
+
   // 更新库项目
   updateLibraryItem: (itemId, updateData) =>
     api.put(`/library/${itemId}`, updateData),
-  
+
   // 从用户库中移除盲盒
   removeFromLibrary: (itemId, userId) =>
     api.delete(`/library/${itemId}?userId=${userId}`),
-  
+
   // 获取用户库统计信息
   getUserLibraryStats: (userId) => api.get(`/library/stats?userId=${userId}`),
 }
@@ -82,17 +82,17 @@ export const userLibraryAPI = {
 export const userAPI = {
   // 获取用户信息
   getUserInfo: (uid) => api.get(`/get_user?uid=${uid}`),
-  
+
   // 用户登录
-  login: (username, password) => 
+  login: (username, password) =>
     api.post('/auth/login', { username, password }),
-  
+
   // 用户注册
-  register: (userData) => 
+  register: (userData) =>
     api.post('/auth/register', userData),
-  
+
   // 验证token
-  validateToken: (token) => 
+  validateToken: (token) =>
     api.post('/auth/validate', { token }),
 }
 

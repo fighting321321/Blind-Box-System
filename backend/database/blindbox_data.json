@@ -6,12 +6,12 @@
       "description": "超萌动物系列，每个都是惊喜",
       "price": 29.9,
       "imageUrl": "",
-      "stock": 98,
-      "sales": 40,
+      "stock": 115,
+      "sales": 45,
       "status": 1,
       "prizes": [],
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-24T11:36:41.628Z"
+      "updatedAt": "2025-07-26T10:32:18.036Z"
     },
     {
       "id": 2,
@@ -38,6 +38,19 @@
       "prizes": [],
       "createdAt": "2025-07-15T16:43:43.394Z",
       "updatedAt": "2025-07-21T08:00:00.000Z"
+    },
+    {
+      "id": 16,
+      "name": "测试盲盒",
+      "description": "没有描述",
+      "price": 20,
+      "imageUrl": "",
+      "stock": 50,
+      "sales": 0,
+      "status": 1,
+      "prizes": [],
+      "createdAt": "2025-07-26T10:45:53.466Z",
+      "updatedAt": "2025-07-26T10:46:04.449Z"
     }
   ],
   "prizes": [
@@ -62,7 +75,7 @@
         "updatedAt": "2025-07-15T16:43:43.394Z"
       },
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-22T07:14:51.009Z",
+      "updatedAt": "2025-07-26T10:27:40.565Z",
       "rarity": "COMMON"
     },
     {
@@ -86,7 +99,7 @@
         "updatedAt": "2025-07-15T16:43:43.394Z"
       },
       "createdAt": "2025-07-15T16:43:43.394Z",
-      "updatedAt": "2025-07-22T07:15:03.327Z",
+      "updatedAt": "2025-07-26T10:27:47.284Z",
       "rarity": "RARE"
     },
     {
@@ -186,7 +199,7 @@
       "rarity": "LEGENDARY"
     }
   ],
-  "nextBlindBoxId": 12,
-  "nextPrizeId": 18,
-  "lastUpdate": "2025-07-24T11:36:41.635Z"
+  "nextBlindBoxId": 17,
+  "nextPrizeId": 7,
+  "lastUpdate": "2025-07-26T10:46:51.218Z"
 }

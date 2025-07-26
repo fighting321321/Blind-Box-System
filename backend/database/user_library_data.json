@@ -1,28 +1,5 @@
 {
-  "libraryItems": [
-    {
-      "id": 3,
-      "userId": 2,
-      "blindBoxId": 2,
-      "quantity": 1,
-      "priceAtAdd": 49.9,
-      "isPurchased": false,
-      "note": "",
-      "createdAt": "2025-07-24T08:48:59.121Z",
-      "updatedAt": "2025-07-24T08:48:59.121Z"
-    },
-    {
-      "id": 4,
-      "userId": 1,
-      "blindBoxId": 1,
-      "quantity": 1,
-      "priceAtAdd": 29.9,
-      "isPurchased": false,
-      "note": "",
-      "createdAt": "2025-07-25T08:29:33.033Z",
-      "updatedAt": "2025-07-25T08:29:33.033Z"
-    }
-  ],
-  "nextId": 6,
-  "lastUpdated": "2025-07-25T08:45:32.106Z"
+  "libraryItems": [],
+  "nextId": 1,
+  "lastUpdated": "2025-07-26T10:50:08.731Z"
 }

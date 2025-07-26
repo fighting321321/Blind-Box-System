@@ -340,6 +340,9 @@ export class BlindBoxService {
       return false;
     }
 
+    // 删除该盲盒下的所有奖品
+    this.prizes = this.prizes.filter(prize => prize.blindBoxId !== id);
+
     this.blindBoxes.splice(index, 1);
     await this.saveBlindBoxData();
     return true;

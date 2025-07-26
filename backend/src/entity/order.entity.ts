@@ -12,6 +12,7 @@ export interface Order {
   status: 'pending' | 'completed' | 'cancelled';
   createdAt: string;
   updatedAt: string;
+  Type: string; // 新增订单类型字段
 }
 
 /**

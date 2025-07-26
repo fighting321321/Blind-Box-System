@@ -81,7 +81,8 @@ export class OrderService {
                 totalAmount: 29.99,
                 status: 'completed',
                 createdAt: '2024-01-15T10:30:00Z',
-                updatedAt: '2024-01-15T10:30:00Z'
+                updatedAt: '2024-01-15T10:30:00Z',
+                Type: 'Purchase'
             },
             {
                 id: '2',
@@ -93,7 +94,8 @@ export class OrderService {
                 totalAmount: 119.98,
                 status: 'pending',
                 createdAt: '2024-01-16T14:20:00Z',
-                updatedAt: '2024-01-16T14:20:00Z'
+                updatedAt: '2024-01-16T14:20:00Z',
+                Type: 'Purchase'
             },
             {
                 id: '3',
@@ -105,7 +107,8 @@ export class OrderService {
                 totalAmount: 29.99,
                 status: 'completed',
                 createdAt: '2024-01-17T09:15:00Z',
-                updatedAt: '2024-01-17T09:15:00Z'
+                updatedAt: '2024-01-17T09:15:00Z',
+                Type: 'Purchase'
             }
         ];
 
@@ -182,7 +185,8 @@ export class OrderService {
             ...order,
             id: orderId,
             createdAt: order.createdAt || new Date().toISOString(),
-            updatedAt: order.updatedAt || new Date().toISOString()
+            updatedAt: order.updatedAt || new Date().toISOString(),
+            Type: order.Type || 'Purchase'
         };
 
         // 将新订单添加到数组开头，让最新的订单显示在前面

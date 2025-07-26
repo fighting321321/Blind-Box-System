@@ -42,6 +42,27 @@ export class APIController {
       }
       // 充值，直接增加余额
       const updatedUser = await this.userService.updateUserBalance(userId, amount);
+
+      // 创建充值订单
+      const orderService = this.blindBoxService.orderService;
+      const orderId = `RECHARGE_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const rechargeOrder = {
+        id: orderId,
+        userId: userId,
+        username: updatedUser.username,
+        blindBoxId: 0,
+        blindBoxName: '余额充值',
+        quantity: 1,
+        totalAmount: amount,
+        status: 'completed' as 'completed',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        Type: 'Recharge'
+      };
+      if (orderService && typeof orderService.createOrder === 'function') {
+        await orderService.createOrder(rechargeOrder);
+      }
+
       return { success: true, message: '充值成功', data: { balance: updatedUser.balance } };
     } catch (error) {
       return { success: false, message: error.message || '充值失败' };

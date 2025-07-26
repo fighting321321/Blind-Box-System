@@ -544,7 +544,8 @@ export class BlindBoxService {
         totalAmount: totalAmount,
         status: 'completed', // 立即完成订单
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        Type: 'Purchase'
       };
 
       // 使用OrderService创建订单

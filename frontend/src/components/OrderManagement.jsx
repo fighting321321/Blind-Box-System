@@ -54,8 +54,8 @@ function OrderManagement({ user }) {
 
   const filteredOrders = orders.filter(order => {
     if (activeTab === 'all') return true
-    if (activeTab === 'draw') return true // 所有订单都是盲盒购买
-    if (activeTab === 'recharge') return false // 暂时没有充值订单
+    if (activeTab === 'draw') return order.Type === 'Purchase'
+    if (activeTab === 'recharge') return order.Type === 'Recharge'
     if (activeTab === 'pending') return order.status === 'pending'
     return true
   })
@@ -181,7 +181,9 @@ function OrderManagement({ user }) {
                 <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-purple-300 rounded-lg flex items-center justify-center">
-                      <span className="text-white text-xl">📦</span>
+                      <span className="text-white text-xl">
+                        {order.Type === 'Recharge' ? '💰' : '📦'}
+                      </span>
                     </div>
                     <div>
                       <p className="font-medium text-gray-800">{order.blindBoxName}</p>

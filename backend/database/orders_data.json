@@ -1,6 +1,58 @@
 {
   "orders": [
     {
+      "id": "RECHARGE_1753508617932_8ngyedtup",
+      "userId": 1,
+      "username": "demo",
+      "blindBoxId": 0,
+      "blindBoxName": "余额充值",
+      "quantity": 1,
+      "totalAmount": 100,
+      "status": "completed",
+      "createdAt": "2025-07-26T05:43:37.932Z",
+      "updatedAt": "2025-07-26T05:43:37.932Z",
+      "Type": "Recharge"
+    },
+    {
+      "id": "RECHARGE_1753508023736_poeqgjltz",
+      "userId": 1,
+      "username": "demo",
+      "blindBoxId": 0,
+      "blindBoxName": "余额充值",
+      "quantity": 1,
+      "totalAmount": 100,
+      "status": "completed",
+      "createdAt": "2025-07-26T05:33:43.736Z",
+      "updatedAt": "2025-07-26T05:33:43.736Z",
+      "Type": "Recharge"
+    },
+    {
+      "id": "RECHARGE_1753506467216_x5b2bxzbc",
+      "userId": 1,
+      "username": "demo",
+      "blindBoxId": 0,
+      "blindBoxName": "余额充值",
+      "quantity": 1,
+      "totalAmount": 100,
+      "status": "completed",
+      "createdAt": "2025-07-26T05:07:47.216Z",
+      "updatedAt": "2025-07-26T05:07:47.216Z",
+      "Type": "Recharge"
+    },
+    {
+      "id": "RECHARGE_1753506273765_weu37f6c7",
+      "userId": 1,
+      "username": "demo",
+      "blindBoxId": 0,
+      "blindBoxName": "余额充值",
+      "quantity": 1,
+      "totalAmount": 100,
+      "status": "completed",
+      "createdAt": "2025-07-26T05:04:33.765Z",
+      "updatedAt": "2025-07-26T05:04:33.766Z",
+      "Type": "Recharge"
+    },
+    {
       "id": "ORDER_1753357001628_bcjtqfemt",
       "userId": 1,
       "username": "demo",
@@ -10,7 +62,8 @@
       "totalAmount": 29.9,
       "status": "completed",
       "createdAt": "2025-07-24T11:36:41.630Z",
-      "updatedAt": "2025-07-24T11:36:41.630Z"
+      "updatedAt": "2025-07-24T11:36:41.630Z",
+      "Type": "Purchase"
     },
     {
       "id": "ORDER_1753346941553_0qvxx45dn",
@@ -22,7 +75,8 @@
       "totalAmount": 49.9,
       "status": "completed",
       "createdAt": "2025-07-24T08:49:01.555Z",
-      "updatedAt": "2025-07-24T08:49:01.555Z"
+      "updatedAt": "2025-07-24T08:49:01.555Z",
+      "Type": "Purchase"
     },
     {
       "id": "ORDER_1753288803596_o0jb92qgc",
@@ -34,9 +88,10 @@
       "totalAmount": 29.9,
       "status": "completed",
       "createdAt": "2025-07-23T16:40:03.598Z",
-      "updatedAt": "2025-07-23T16:40:03.598Z"
+      "updatedAt": "2025-07-23T16:40:03.598Z",
+      "Type": "Purchase"
     }
   ],
   "nextOrderId": 1,
-  "lastUpdate": "2025-07-24T11:36:41.631Z"
+  "lastUpdate": "2025-07-26T05:43:37.932Z"
 }

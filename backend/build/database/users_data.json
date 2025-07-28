@@ -9,31 +9,31 @@
       "status": 1,
       "role": "admin",
       "createdAt": "2025-07-15T00:00:00.000Z",
-      "updatedAt": "2025-07-28T07:59:38.400Z"
+      "updatedAt": "2025-07-28T15:14:05.313Z"
     },
     {
       "id": 1,
       "username": "demo",
       "email": "demo@example.com",
       "password": "$2a$10$ard/T34zd6suutg7fDZhOuDQEgx3B4LgUe9WPHzlsSqAwI/I62g8W",
-      "balance": 1764.3,
+      "balance": 1734.4,
       "status": 1,
       "role": "user",
       "createdAt": "2025-07-13T12:26:48.374Z",
-      "updatedAt": "2025-07-28T07:56:51.346Z"
+      "updatedAt": "2025-07-28T15:13:26.042Z"
     },
     {
       "id": 2,
       "username": "empty",
       "email": "empty@qq.com",
       "password": "$2a$10$r1nYTh0.6HFMOzYdneB7AOej17TeRcnpqKRLsR/ueMFmgA6h0uLZ2",
-      "balance": 950.1,
+      "balance": 920.2,
       "status": 1,
       "role": "user",
       "createdAt": "2025-07-19T06:55:33.349Z",
-      "updatedAt": "2025-07-28T07:31:34.179Z"
+      "updatedAt": "2025-07-28T15:13:58.650Z"
     }
   ],
   "nextId": 3,
-  "lastUpdate": "2025-07-28T07:59:38.400Z"
+  "lastUpdate": "2025-07-28T15:14:05.313Z"
 }

@@ -900,7 +900,8 @@ const AdminDashboard = ({ user, onLogout }) => {
     document.body.removeChild(link)
   }
   const [orderFilter, setOrderFilter] = useState('all') // 'all', 'completed', 'pending', 'cancelled'
-  const [orderSearch, setOrderSearch] = useState('')
+  const [orderUserFilter, setOrderUserFilter] = useState('all') // 用户筛选
+  // const [orderSearch, setOrderSearch] = useState('')
   const [orderPage, setOrderPage] = useState(1)
   const [ordersPerPage] = useState(10)
 
@@ -913,14 +914,9 @@ const AdminDashboard = ({ user, onLogout }) => {
       filtered = filtered.filter(order => order.status === orderFilter)
     }
 
-    // 搜索筛选
-    if (orderSearch.trim()) {
-      const search = orderSearch.toLowerCase()
-      filtered = filtered.filter(order =>
-        order.id.toLowerCase().includes(search) ||
-        order.username?.toLowerCase().includes(search) ||
-        order.blindBoxName?.toLowerCase().includes(search)
-      )
+    // 用户筛选
+    if (orderUserFilter !== 'all') {
+      filtered = filtered.filter(order => order.username === orderUserFilter)
     }
 
     return filtered
@@ -999,21 +995,9 @@ const AdminDashboard = ({ user, onLogout }) => {
         </div>
       </div>
 
-      {/* 搜索和筛选区域 */}
+      {/* 筛选区域（订单状态+用户名） */}
       <div className="bg-white rounded-lg shadow-md p-4">
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="搜索订单号、用户名或盲盒名称..."
-              value={orderSearch}
-              onChange={(e) => {
-                setOrderSearch(e.target.value)
-                setOrderPage(1) // 重置到第一页
-              }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
           <div className="flex gap-2">
             <select
               value={orderFilter}
@@ -1027,6 +1011,23 @@ const AdminDashboard = ({ user, onLogout }) => {
               <option value="completed">已完成</option>
               <option value="pending">进行中</option>
               <option value="cancelled">已取消</option>
+            </select>
+            <select
+              value={orderUserFilter}
+              onChange={e => {
+                setOrderUserFilter(e.target.value)
+                setOrderPage(1)
+              }}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="all">全部用户</option>
+              {Array.from(new Set(
+                orders
+                  .map(o => o.username)
+                  .filter(username => username && users.find(u => u.username === username && u.role !== 'admin'))
+              )).map(username => (
+                <option key={username} value={username}>{username}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -1069,7 +1070,7 @@ const AdminDashboard = ({ user, onLogout }) => {
             ) : paginatedOrders.length === 0 ? (
               <tr>
                 <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
-                  {orderSearch.trim() || orderFilter !== 'all' ? '没有找到匹配的订单' : '暂无订单数据'}
+                  {orderFilter !== 'all' ? '没有找到匹配的订单' : '暂无订单数据'}
                 </td>
               </tr>
             ) : (
@@ -1158,8 +1159,8 @@ const AdminDashboard = ({ user, onLogout }) => {
                       key={pageNum}
                       onClick={() => setOrderPage(pageNum)}
                       className={`px-3 py-1 text-sm rounded ${orderPage === pageNum
-                          ? 'bg-blue-600 text-white'
-                          : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                        ? 'bg-blue-600 text-white'
+                        : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
                         }`}
                     >
                       {pageNum}

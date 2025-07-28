@@ -176,7 +176,19 @@ function App() {
 
             {/* 内容区域 */}
             {currentView === 'login' && (
-              <LoginForm onSuccess={handleLoginSuccess} />
+              <LoginForm
+                onSuccess={handleLoginSuccess}
+                onError={(error) => {
+                  // 根据后端返回的错误信息区分原因
+                  if (error?.code === 'USER_NOT_FOUND') {
+                    toast.error('账号不存在，请检查用户名或注册新账号', 5000)
+                  } else if (error?.code === 'USER_BANNED') {
+                    toast.error('账号已被封禁，请联系管理员', 5000)
+                  } else {
+                    toast.error(error?.message || '登录失败，请重试', 5000)
+                  }
+                }}
+              />
             )}
 
             {currentView === 'register' && (

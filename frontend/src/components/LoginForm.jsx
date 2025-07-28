@@ -6,7 +6,7 @@ import { useToast } from './Toast'
  * 登录表单组件
  * 提供用户登录功能
  */
-function LoginForm({ onSuccess }) {
+function LoginForm({ onSuccess, onError }) {
   const { toast } = useToast()
   // 表单状态
   const [formData, setFormData] = useState({
@@ -36,7 +36,7 @@ function LoginForm({ onSuccess }) {
    */
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     // 基本验证
     if (!formData.usernameOrEmail || !formData.password) {
       toast.error('请填写所有字段')
@@ -49,19 +49,31 @@ function LoginForm({ onSuccess }) {
     try {
       // 发送登录请求到后端API
       const response = await axios.post('http://localhost:7001/api/auth/login', formData)
-      
+
       if (response.data.success) {
         // 登录成功
         toast.success('登录成功！')
         onSuccess(response.data.data.user, response.data.data.token)
       } else {
-        // 登录失败
+        // 登录失败，区分原因
+        if (onError) {
+          onError({
+            code: response.data.code,
+            message: response.data.message
+          })
+        }
         toast.error(response.data.message || '登录失败')
       }
     } catch (error) {
       // 网络错误或服务器错误
       console.error('登录错误:', error)
       if (error.response) {
+        if (onError) {
+          onError({
+            code: error.response.data?.code,
+            message: error.response.data?.message
+          })
+        }
         toast.error(error.response.data?.message || '登录失败')
       } else if (error.request) {
         toast.error('无法连接到服务器，请检查网络')
@@ -120,11 +132,10 @@ function LoginForm({ onSuccess }) {
       <button
         type="submit"
         disabled={loading}
-        className={`w-full py-2 px-4 rounded-md text-white font-medium ${
-          loading
+        className={`w-full py-2 px-4 rounded-md text-white font-medium ${loading
             ? 'bg-gray-400 cursor-not-allowed'
             : 'bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2'
-        } transition-colors`}
+          } transition-colors`}
       >
         {loading ? '登录中...' : '登录'}
       </button>

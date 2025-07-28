@@ -210,7 +210,11 @@ export class APIController {
       const orders = await this.blindBoxService.getAllOrders();
       // 过滤出该用户的订单
       const userOrders = orders.filter(order => order.userId === userId);
-      return { success: true, message: 'OK', data: userOrders };
+      // 统计充值订单总金额（Type === 'recharge' 或 blindBoxName === '余额充值'）
+      const totalRechargeAmount = userOrders
+        .filter(order => order.Type === 'recharge' || order.blindBoxName === '余额充值')
+        .reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+      return { success: true, message: 'OK', data: userOrders, totalRechargeAmount };
     } catch (error) {
       return { success: false, message: error.message || '获取订单失败', data: null };
     }

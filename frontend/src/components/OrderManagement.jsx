@@ -8,6 +8,7 @@ function OrderManagement({ user }) {
   const [activeTab, setActiveTab] = useState('all')
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(false)
+  const [totalRecharge, setTotalRecharge] = useState(0)
 
   // 获取用户订单
   useEffect(() => {
@@ -24,6 +25,7 @@ function OrderManagement({ user }) {
       const response = await axios.get(`http://localhost:7001/api/orders?userId=${user.id}`)
       if (response.data.success) {
         setOrders(response.data.data || [])
+        setTotalRecharge(response.data.totalRechargeAmount || 0)
       }
     } catch (error) {
       console.error('获取订单失败:', error)
@@ -65,7 +67,7 @@ function OrderManagement({ user }) {
     const completed = orders.filter(o => o.status === 'completed').length
     const pending = orders.filter(o => o.status === 'pending').length
     const totalAmount = orders
-      .filter(o => o.status === 'completed')
+      .filter(o => o.status === 'completed' && o.Type === 'Purchase')
       .reduce((sum, o) => sum + o.totalAmount, 0)
 
     return { total, completed, pending, totalAmount }
@@ -85,7 +87,7 @@ function OrderManagement({ user }) {
       </div>
 
       {/* 订单统计 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className="bg-white rounded-lg p-4 shadow-sm text-center">
           <div className="text-2xl font-bold text-purple-600">{stats.total}</div>
           <div className="text-sm text-gray-600">总订单</div>
@@ -101,6 +103,10 @@ function OrderManagement({ user }) {
         <div className="bg-white rounded-lg p-4 shadow-sm text-center">
           <div className="text-2xl font-bold text-blue-600">¥{stats.totalAmount.toFixed(2)}</div>
           <div className="text-sm text-gray-600">总消费</div>
+        </div>
+        <div className="bg-white rounded-lg p-4 shadow-sm text-center">
+          <div className="text-2xl font-bold text-pink-600">¥{totalRecharge.toFixed(2)}</div>
+          <div className="text-sm text-gray-600">总充值</div>
         </div>
       </div>
 

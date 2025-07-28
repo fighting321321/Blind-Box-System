@@ -62,7 +62,7 @@ export class BlindBoxService {
   @Inject()
   sqliteUserPrizeService: SqliteUserPrizeService;
 
-  private dataPath = join(__dirname, '../../database/blindbox_data.json');
+  private dataPath = join(__dirname, '../build/database/blindbox_data.json');
   private blindBoxes: BlindBox[] = [];
   private prizes: Prize[] = [];
   private nextBlindBoxId = 1;
@@ -75,7 +75,7 @@ export class BlindBoxService {
   async init() {
     try {
       // 确保数据库目录存在
-      const dbDir = join(__dirname, '../../database');
+      const dbDir = join(__dirname, '../build/database');
       await fs.mkdir(dbDir, { recursive: true });
 
       // 加载或创建盲盒数据

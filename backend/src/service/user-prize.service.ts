@@ -11,7 +11,7 @@ import * as path from 'path';
 export class UserPrizeService {
   private userPrizes: UserPrize[] = [];
   private nextId: number = 1;
-  private dataFilePath = path.join(__dirname, '../../database/user_prizes_data.json');
+  private dataFilePath = path.join(__dirname, './build/database/user_prizes_data.json');
 
   async onReady() {
     await this.loadUserPrizesData();

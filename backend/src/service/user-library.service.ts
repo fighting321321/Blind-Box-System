@@ -42,9 +42,9 @@ export interface UpdateLibraryItemDto {
  */
 @Provide()
 export class UserLibraryService {
-  
-  private dbPath = join(__dirname, '../../database/user_library.db');
-  private dataPath = join(__dirname, '../../database/user_library_data.json');
+
+  private dbPath = join(__dirname, '../build/database/user_library.db');
+  private dataPath = join(__dirname, '../build/database/user_library_data.json');
   private libraryItems: UserLibraryItem[] = [];
   private nextId = 1;
 
@@ -68,7 +68,7 @@ export class UserLibraryService {
   private async loadData() {
     try {
       // 确保目录存在
-      const databaseDir = join(__dirname, '../../database');
+      const databaseDir = join(__dirname, '../build/database');
       await fs.mkdir(databaseDir, { recursive: true });
 
       // 尝试读取现有数据
@@ -168,7 +168,7 @@ export class UserLibraryService {
     if (dto.isPurchased !== undefined) {
       item.isPurchased = dto.isPurchased;
     }
-    
+
     item.updatedAt = new Date().toISOString();
     await this.saveData();
     return item;
@@ -181,7 +181,7 @@ export class UserLibraryService {
     const index = this.libraryItems.findIndex(
       item => item.id === itemId && item.userId === userId
     );
-    
+
     if (index === -1) {
       return false;
     }
@@ -210,7 +210,7 @@ export class UserLibraryService {
     purchasedItems: number;
   }> {
     const userItems = this.libraryItems.filter(item => item.userId === userId);
-    
+
     return {
       totalItems: userItems.length,
       totalQuantity: userItems.reduce((sum, item) => sum + item.quantity, 0),
@@ -225,7 +225,7 @@ export class UserLibraryService {
   async clearUserLibrary(userId: number): Promise<boolean> {
     const initialLength = this.libraryItems.length;
     this.libraryItems = this.libraryItems.filter(item => item.userId !== userId);
-    
+
     if (this.libraryItems.length < initialLength) {
       await this.saveData();
       return true;

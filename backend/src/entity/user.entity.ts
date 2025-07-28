@@ -6,7 +6,7 @@ import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
  * 对应数据库中的 users 表
  */
 @Entity('users')
-export class User {
+export class UserEntity {
   /**
    * 主键ID - 自动递增
    */

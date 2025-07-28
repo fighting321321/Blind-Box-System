@@ -1,0 +1,192 @@
+{
+  "blindBoxes": [
+    {
+      "id": 1,
+      "name": "可爱动物盲盒",
+      "description": "超萌动物系列，每个都是惊喜",
+      "price": 29.9,
+      "imageUrl": "",
+      "stock": 114,
+      "sales": 46,
+      "status": 1,
+      "prizes": [],
+      "createdAt": "2025-07-15T16:43:43.394Z",
+      "updatedAt": "2025-07-28T04:32:12.047Z"
+    },
+    {
+      "id": 2,
+      "name": "潮流玩具盲盒",
+      "description": "时尚潮流系列，收藏价值极高",
+      "price": 49.9,
+      "imageUrl": "",
+      "stock": 47,
+      "sales": 3,
+      "status": 1,
+      "prizes": [],
+      "createdAt": "2025-07-15T16:43:43.394Z",
+      "updatedAt": "2025-07-24T08:49:01.554Z"
+    },
+    {
+      "id": 3,
+      "name": "经典卡通盲盒",
+      "description": "经典卡通角色，童年回忆",
+      "price": 39.9,
+      "imageUrl": "",
+      "stock": 75,
+      "sales": 0,
+      "status": 1,
+      "prizes": [],
+      "createdAt": "2025-07-15T16:43:43.394Z",
+      "updatedAt": "2025-07-21T08:00:00.000Z"
+    }
+  ],
+  "prizes": [
+    {
+      "id": 1,
+      "name": "小熊公仔",
+      "description": "可爱的小熊玩偶",
+      "probability": 0.6,
+      "imageUrl": "",
+      "status": 1,
+      "blindBoxId": 1,
+      "blindBox": {
+        "id": 1,
+        "name": "可爱动物盲盒",
+        "description": "超萌动物系列，每个都是惊喜",
+        "price": 29.9,
+        "imageUrl": "",
+        "stock": 100,
+        "status": 1,
+        "prizes": [],
+        "createdAt": "2025-07-15T16:43:43.394Z",
+        "updatedAt": "2025-07-15T16:43:43.394Z"
+      },
+      "createdAt": "2025-07-15T16:43:43.394Z",
+      "updatedAt": "2025-07-26T10:27:40.565Z",
+      "rarity": "COMMON"
+    },
+    {
+      "id": 2,
+      "name": "小兔玩偶",
+      "description": "萌萌的小兔子",
+      "probability": 0.3,
+      "imageUrl": "",
+      "status": 1,
+      "blindBoxId": 1,
+      "blindBox": {
+        "id": 1,
+        "name": "可爱动物盲盒",
+        "description": "超萌动物系列，每个都是惊喜",
+        "price": 29.9,
+        "imageUrl": "",
+        "stock": 100,
+        "status": 1,
+        "prizes": [],
+        "createdAt": "2025-07-15T16:43:43.394Z",
+        "updatedAt": "2025-07-15T16:43:43.394Z"
+      },
+      "createdAt": "2025-07-15T16:43:43.394Z",
+      "updatedAt": "2025-07-26T10:27:47.284Z",
+      "rarity": "RARE"
+    },
+    {
+      "id": 3,
+      "name": "稀有金卡",
+      "description": "超稀有收藏卡片",
+      "probability": 0.1,
+      "imageUrl": "",
+      "status": 1,
+      "blindBoxId": 1,
+      "blindBox": {
+        "id": 1,
+        "name": "可爱动物盲盒",
+        "description": "超萌动物系列，每个都是惊喜",
+        "price": 29.9,
+        "imageUrl": "",
+        "stock": 100,
+        "status": 1,
+        "prizes": [],
+        "createdAt": "2025-07-15T16:43:43.394Z",
+        "updatedAt": "2025-07-15T16:43:43.394Z"
+      },
+      "createdAt": "2025-07-15T16:43:43.394Z",
+      "updatedAt": "2025-07-22T07:15:07.542Z",
+      "rarity": "LEGENDARY"
+    },
+    {
+      "id": 4,
+      "name": "潮流手办",
+      "description": "限量版潮流手办",
+      "probability": 0.8,
+      "imageUrl": "",
+      "status": 1,
+      "blindBoxId": 2,
+      "blindBox": {
+        "id": 2,
+        "name": "潮流玩具盲盒",
+        "description": "时尚潮流系列，收藏价值极高",
+        "price": 49.9,
+        "imageUrl": "",
+        "stock": 50,
+        "status": 1,
+        "prizes": [],
+        "createdAt": "2025-07-15T16:43:43.394Z",
+        "updatedAt": "2025-07-15T16:43:43.394Z"
+      },
+      "createdAt": "2025-07-15T16:43:43.394Z",
+      "updatedAt": "2025-07-22T07:15:30.803Z",
+      "rarity": "COMMON"
+    },
+    {
+      "id": 5,
+      "name": "炫彩徽章",
+      "description": "个性化炫彩徽章",
+      "probability": 0.15,
+      "imageUrl": "",
+      "status": 1,
+      "blindBoxId": 2,
+      "blindBox": {
+        "id": 2,
+        "name": "潮流玩具盲盒",
+        "description": "时尚潮流系列，收藏价值极高",
+        "price": 49.9,
+        "imageUrl": "",
+        "stock": 50,
+        "status": 1,
+        "prizes": [],
+        "createdAt": "2025-07-15T16:43:43.394Z",
+        "updatedAt": "2025-07-15T16:43:43.394Z"
+      },
+      "createdAt": "2025-07-15T16:43:43.394Z",
+      "updatedAt": "2025-07-22T07:15:45.405Z",
+      "rarity": "EPIC"
+    },
+    {
+      "id": 6,
+      "name": "隐藏款玩偶",
+      "description": "神秘隐藏款，价值连城",
+      "probability": 0.05,
+      "imageUrl": "",
+      "status": 1,
+      "blindBoxId": 2,
+      "blindBox": {
+        "id": 2,
+        "name": "潮流玩具盲盒",
+        "description": "时尚潮流系列，收藏价值极高",
+        "price": 49.9,
+        "imageUrl": "",
+        "stock": 50,
+        "status": 1,
+        "prizes": [],
+        "createdAt": "2025-07-15T16:43:43.394Z",
+        "updatedAt": "2025-07-15T16:43:43.394Z"
+      },
+      "createdAt": "2025-07-15T16:43:43.394Z",
+      "updatedAt": "2025-07-22T07:15:40.712Z",
+      "rarity": "LEGENDARY"
+    }
+  ],
+  "nextBlindBoxId": 4,
+  "nextPrizeId": 7,
+  "lastUpdate": "2025-07-28T04:32:12.053Z"
+}

@@ -33,7 +33,7 @@ interface PlayerShowcaseData {
     lastUpdated: string;
 }
 
-const DATA_PATH = path.join(__dirname, '../../database/player_showcase_data.json');
+const DATA_PATH = path.join(__dirname, '../build/database/player_showcase_data.json');
 // 兼容开发和生产环境，若路径不存在则尝试 src/database
 if (!fs.existsSync(DATA_PATH)) {
     const altPath = path.join(process.cwd(), 'src/database/player_showcase_data.json');

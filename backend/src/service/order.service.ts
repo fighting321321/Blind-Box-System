@@ -23,7 +23,7 @@ export class OrderService {
     @Inject()
     userService: SqliteUserService;
 
-    private dataPath = join(__dirname, '../../database/orders_data.json');
+    private dataPath = join(__dirname, '../build/database/orders_data.json');
     private orders: Order[] = [];
     private nextOrderId = 1;
 
@@ -34,7 +34,7 @@ export class OrderService {
     async init() {
         try {
             // 确保数据库目录存在
-            const dbDir = join(__dirname, '../../database');
+            const dbDir = join(__dirname, '../build/database');
             await fs.mkdir(dbDir, { recursive: true });
 
             // 加载或创建订单数据

@@ -44,8 +44,8 @@ export interface UserPrizeStats {
 @Provide()
 export class SqliteUserPrizeService {
 
-    private dbPath = join(__dirname, '../../database/user_prizes.db');
-    private dataPath = join(__dirname, '../../database/user_prizes_data.json');
+    private dbPath = join(__dirname, '../build/database/user_prizes.db');
+    private dataPath = join(__dirname, '../build/database/user_prizes_data.json');
     private userPrizes: UserPrize[] = [];
     private nextId = 1;
 
@@ -56,7 +56,7 @@ export class SqliteUserPrizeService {
     async init() {
         try {
             // 确保数据库目录存在
-            const dbDir = join(__dirname, '../../database');
+            const dbDir = join(__dirname, '../build/database');
             await fs.mkdir(dbDir, { recursive: true });
 
             // 创建SQLite数据库文件（空文件，标识数据库存在）

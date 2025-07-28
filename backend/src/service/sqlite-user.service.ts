@@ -44,8 +44,8 @@ export interface User {
 @Provide()
 export class SqliteUserService {
 
-  private dbPath = join(__dirname, '../../database/blind_box_users.db');
-  private dataPath = join(__dirname, '../../database/users_data.json');
+  private dbPath = join(__dirname, '../build/database/blind_box_users.db');
+  private dataPath = join(__dirname, '../build/database/users_data.json');
   private users: User[] = [];
   private nextId = 1;
   private jwtSecret = 'blind-box-jwt-secret-key-2025';
@@ -57,7 +57,7 @@ export class SqliteUserService {
   async init() {
     try {
       // 确保数据库目录存在
-      const dbDir = join(__dirname, '../../database');
+      const dbDir = join(__dirname, '../build/database');
       await fs.mkdir(dbDir, { recursive: true });
 
       // 创建SQLite数据库文件（空文件，标识数据库存在）
@@ -103,7 +103,7 @@ export class SqliteUserService {
       const parsedData = JSON.parse(data);
       this.users = parsedData.users || [];
       this.nextId = parsedData.nextId || 1;
-      
+
       // 修复现有用户的余额精度问题
       let needsSave = false;
       this.users.forEach(user => {
@@ -114,7 +114,7 @@ export class SqliteUserService {
           needsSave = true;
         }
       });
-      
+
       if (needsSave) {
         await this.saveUsersData();
         console.log('✅ 余额精度修复完成');

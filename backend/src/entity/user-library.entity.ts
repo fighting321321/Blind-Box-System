@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { User } from './user.entity';
+import { UserEntity } from './user.entity';
 import { BlindBox } from './blind-box.entity';
 
 /**
@@ -65,9 +65,9 @@ export class UserLibrary {
   /**
    * 关联用户实体
    */
-  @ManyToOne(() => User, { eager: false })
+  @ManyToOne(() => UserEntity, { eager: false })
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user: UserEntity;
 
   /**
    * 关联盲盒实体

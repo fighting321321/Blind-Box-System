@@ -321,7 +321,7 @@ const AdminDashboard = ({ user, onLogout }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">总收入</p>
-              <p className="text-2xl font-bold text-orange-600">¥{(stats.totalRevenue || 0).toFixed(2)}</p>
+              <p className="text-2xl font-bold text-orange-600">¥{orders.filter(o => o.Type === 'Purchase').reduce((sum, o) => sum + (o.totalAmount || 0), 0).toFixed(2)}</p>
             </div>
             <BarChart3 className="w-8 h-8 text-orange-500" />
           </div>
